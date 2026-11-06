@@ -1,0 +1,42 @@
+\chapter{Discussion, Limitations and Plan for Thesis II}
+\label{ch:conclusion}
+
+\section{Discussion}
+Replacing the camera model of Gaussian splatting with a physics operator works: the same representation, optimiser and
+density control recover cells from scattered fields and moving vorticity from sparse samples. The representation acts
+as a prior that is helpful when the object matches it (smooth nuclei, scarce data) and neutral or harmful when it does
+not (fine texture, abundant data). The most instructive finding is the ghost failure mode: adaptivity, the main
+strength of Gaussian splatting with cameras, becomes a liability when the measurements are blind to part of the
+domain, and must be balanced by an explicit prior. For dynamics, the deformation model matters far more than the
+choice of network, and a sequence model must be regularised to turn its capacity into better interpolation in time.
+
+\section{Limitations}
+\begin{itemize}
+  \item The 3D physics is slice-wise 2D scattering, not a true 3D Born model with sensors around the volume.
+  \item Results use three to five samples per setting; differences of a few tenths of a dB are not yet significant.
+  \item The 4D problem reconstructs a field from observations of itself; InverseBench's harder task of recovering the
+  initial condition through the solver is not addressed.
+  \item No learned prior is used, and no comparison with InverseBench's diffusion methods is made (by design for
+  Thesis I).
+  \item Hyper-parameters (sparsity weight, Gaussian budget, window size) were tuned on few samples.
+\end{itemize}
+
+\section{Plan for Thesis II}
+\begin{enumerate}
+  \item A true 3D scattering operator (3D Green's function, transmitters and receivers on a sphere) and, if time
+  allows, multiple scattering.
+  \item Systematic evaluation on the full InverseBench test sets with confidence intervals, and comparison with the
+  benchmark's diffusion-prior methods.
+  \item Physics-aware density control (densify only within the support indicated by the data; null-space-aware
+  regularisers) instead of a global sparsity term.
+  \item Motion models: temporal regularisation, bidirectional and hardware-efficient Mamba, and advection-informed
+  deformation that uses the velocity field implied by the vorticity.
+  \item The Navier--Stokes initial-value inverse problem through a differentiable solver.
+  \item Connection to the original direction of this work: attaching semantic features to physical Gaussians, in the
+  spirit of LangSplat~\citep{qin2024langsplat} and 4D LangSplat~\citep{li2025langsplat4d}.
+\end{enumerate}
+
+\section{Conclusion}
+This Thesis I establishes a working, reproducible proof of concept for 3D and 4D Gaussian representations in two
+scientific inverse problems, identifies when they help and how they fail, and defines the experiments that Thesis II
+will scale up.

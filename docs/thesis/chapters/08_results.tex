@@ -1,0 +1,130 @@
+\chapter{Initial Baseline Results}
+\label{ch:results}
+
+All numbers are means over three samples (PSNR in dB / SSIM) unless stated otherwise. The Gaussian and grid methods
+use identical measurements and data terms.
+
+\section{Representation check}
+Fitting Gaussians directly to the ground truth (no physics) confirms that the representation can express the
+fields: 48.2\,dB / 0.998 on the 2D cells with about 680 Gaussians, and 65.2\,dB / 0.999 on the synthetic 3D volumes
+with 5500 Gaussians.
+
+\section{2D inverse scattering on InverseBench cells}
+\label{sec:ghost}
+Table~\ref{tab:s2d} lists the reconstructions from measurements only. Without regularisation, Gaussians are 6--7\,dB
+below the pixel grid with 360 or 180 receivers and 2.7\,dB below with 60. Increasing the Gaussian budget did
+\emph{not} help: with aggressive densification (about 2000 Gaussians) PSNR fell to 22.9 / 22.6 / 19.6\,dB. The
+reconstructions show why (Figure~\ref{fig:ghost}): a faint copy of the cell appears outside the object. These
+``ghosts'' sit where the back-projected residual is large but the measurements carry almost no information, so the
+data term cannot remove them (Chapter~\ref{ch:formulation}). Adding the sparsity term removes the ghosts. With
+$\lambda=0.3$, Gaussians improve at every receiver count, and at 60 receivers they exceed the pixel grid in SSIM
+(0.940 vs.\ 0.878) while staying 1\,dB lower in PSNR. Larger weights ($\lambda=1,3$) shrink the cells and lower both
+metrics, so the weight must be tuned.
+
+\begin{table}[h]
+  \centering
+  \caption{2D inverse scattering, InverseBench cells (PSNR dB / SSIM, mean of 3).}
+  \label{tab:s2d}
+  \resizebox{\linewidth}{!}{%
+\begin{tabular}{lccc}
+    \toprule
+    Method & 360 receivers & 180 receivers & 60 receivers \\
+    \midrule
+    Gaussians & 30.7 / 0.959 & 30.4 / 0.957 & 26.5 / 0.814 \\
+    Gaussians, $\sim$2000 (aggressive densification) & 22.9 / -- & 22.6 / -- & 19.6 / -- \\
+    Gaussians + sparsity, $\lambda=0.3$ & 31.4 / 0.983 & 31.0 / \textbf{0.982} & 28.2 / \textbf{0.940} \\
+    Gaussians + sparsity, $\lambda=1$ & 27.6 / 0.958 & 27.6 / 0.958 & 25.2 / 0.908 \\
+    Gaussians + sparsity, $\lambda=3$ & 21.6 / 0.875 & 21.6 / 0.876 & 20.5 / 0.826 \\
+    Pixel grid & \textbf{36.7 / 0.985} & \textbf{35.3} / 0.976 & \textbf{29.2} / 0.878 \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{scatter2d_ghost.png}\\[2pt]
+  \includegraphics[width=\linewidth]{scatter2d_sparsity.png}
+  \caption{Cell 0. Top: aggressive densification without regularisation produces a ghost copy beside the cell.
+  Bottom: with the sparsity term ($\lambda=0.3$) the ghost is gone. Columns: ground truth, then Gaussian and pixel
+  reconstructions at 360, 180 and 60 receivers.}
+  \label{fig:ghost}
+\end{figure}
+
+\section{3D inverse scattering}
+On synthetic 3D nuclei (Table~\ref{tab:s3d}, Figure~\ref{fig:s3d}) Gaussians are almost unaffected by the number of
+receivers (40.6--40.9\,dB), while the voxel grid degrades from 44.1 to 37.3\,dB and becomes speckled. With 60
+receivers Gaussians are better on all three volumes (+3.6\,dB on average) and have higher SSIM at every receiver
+count. Because these volumes consist of smooth ellipsoids, which favour Gaussians, the experiment is being repeated
+on real CytoPacq nuclei from BBBC024 with and without sparsity (final runs, Table~\ref{tab:s3d}).
+
+\begin{table}[h]
+  \centering
+  \caption{3D inverse scattering, $32\times128\times128$ volumes (PSNR dB / SSIM, mean of 3).}
+  \label{tab:s3d}
+  \resizebox{\linewidth}{!}{%
+\begin{tabular}{llccc}
+    \toprule
+    Volumes & Method & 360 receivers & 180 receivers & 60 receivers \\
+    \midrule
+    \multirow{2}{*}{Synthetic nuclei} & Gaussians & 40.8 / \textbf{0.994} & 40.6 / \textbf{0.994} & \textbf{40.9 / 0.988} \\
+                                      & Voxel grid & \textbf{44.1} / 0.987 & \textbf{41.5} / 0.977 & 37.3 / 0.932 \\
+    \midrule
+    \multirow{2}{*}{BBBC024 (CytoPacq)} & Gaussians (+ sparsity) & \todo{final run} & \todo{final run} & \todo{final run} \\
+                                         & Voxel grid & \todo{final run} & \todo{final run} & \todo{final run} \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{scatter3d_first.png}
+  \caption{Middle slice of synthetic volume 0: ground truth, direct fit, then Gaussian and voxel reconstructions at
+  360, 180 and 60 receivers.}
+  \label{fig:s3d}
+\end{figure}
+
+\section{4D Gaussians for Navier--Stokes}
+Table~\ref{tab:ns} reports PSNR on observed (training) and held-out frames. Static Gaussians reach only about 17\,dB:
+the flow changes too much over 21 frames for one fixed field. A deformation network adds about 10\,dB on held-out
+frames. Mamba fits the observed frames much better than the MLP (36.1 vs.\ 30.3\,dB with full observations), but on
+held-out frames the two are within 0.3\,dB, i.e.\ Mamba's extra capacity is spent memorising observed times rather
+than modelling the motion between them. With 10\% observations the deformation models lose about 4.5\,dB, and the MLP shows
+streak artefacts in early frames (Figure~\ref{fig:ns}). Mamba is about five times slower because of its sequential scan.
+The final runs add temporal smoothness and a bidirectional Mamba to target the generalisation gap.
+
+\begin{table}[h]
+  \centering
+  \caption{4D Navier--Stokes, PSNR (dB) on held-out frames; observed-frame PSNR in brackets (mean of 3 sequences).}
+  \label{tab:ns}
+  \resizebox{\linewidth}{!}{%
+\begin{tabular}{lccc}
+    \toprule
+    Observed pixels & Static & MLP (4DGS-style) & Mamba \\
+    \midrule
+    100\% & 17.0 (16.8) & 27.6 (30.3) & \textbf{27.9} (\textbf{36.1}) \\
+    10\%  & 16.0 (15.9) & \textbf{23.2} (24.0) & 23.1 (\textbf{27.7}) \\
+    \midrule
+    Training time per sequence & 3\,min & 3\,min & 15\,min \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.85\linewidth]{ns4d_first.png}
+  \caption{Vorticity of sequence 0 at five times (held-out frames marked). Rows: ground truth, then MLP, Mamba and
+  static models with 100\% and 10\% of pixels observed.}
+  \label{fig:ns}
+\end{figure}
+
+\section{Answers to the research questions so far}
+\begin{description}
+  \item[RQ1] Yes on smooth 3D volumes, where Gaussians are more robust than voxels to scarce measurements; on textured
+  2D cells the pixel grid keeps higher PSNR, while regularised Gaussians win in SSIM with 60 receivers.
+  \item[RQ2] Adaptive densification can populate the operator's null space with ghost structures; a sparsity term on
+  total intensity prevents them.
+  \item[RQ3] Yes: canonical Gaussians plus a deformation network reconstruct the flow at held-out times, about 10\,dB
+  better than static Gaussians, from full or 10\% observations.
+  \item[RQ4] Not yet: causal Mamba matches the MLP on held-out frames and overfits observed ones; regularised and
+  bidirectional variants are under evaluation.
+\end{description}

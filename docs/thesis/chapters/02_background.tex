@@ -1,0 +1,69 @@
+\chapter{Background}
+\label{ch:background}
+
+\section{Inverse problems}
+An inverse problem asks for an unknown $f$ from measurements
+\begin{equation}
+  \vect{y} = \mathcal{A}(f) + \vect{n},
+\end{equation}
+where $\mathcal{A}$ is a known forward model (here, a physics simulator) and $\vect{n}$ is noise. The problem is
+\emph{ill-posed} when a solution does not exist, is not unique, or does not depend continuously on the data. In the
+problems studied here there are far fewer measurements than unknowns, so $\mathcal{A}$ has a large null space: many
+fields produce exactly the same measurements. A solution is therefore chosen by a prior, either explicit, as a
+regularisation term such as total variation~\citep{rudin1992tv} or sparsity, or implicit, through the
+\emph{parametrisation} of the unknown. A convolutional network trained on a single image acts as such an implicit
+prior~\citep{ulyanov2018dip}; diffusion models trained on many examples act as a learned prior and are the subject of
+InverseBench~\citep{zheng2025inversebench,chung2023dps}. In this thesis the prior is the Gaussian representation
+itself, optionally combined with a sparsity term.
+
+\section{Linear inverse scattering}
+In optical diffraction tomography an object is illuminated by a known incident field and the scattered field is
+recorded by receivers around it~\citep{bornwolf1999}. For a weakly scattering object the total field inside the object
+can be approximated by the incident field (the first Born approximation), and the scattered field becomes a
+\emph{linear} function of the object's permittivity contrast $f(\vect{x})$:
+\begin{equation}
+  u^{\mathrm{sc}}_t(\vect{r}) = k_b^2 \int_\Omega G(\vect{r},\vect{x})\, f(\vect{x})\, u^{\mathrm{in}}_t(\vect{x})\, d\vect{x},
+  \qquad G(\vect{r},\vect{x}) = \tfrac{i}{4} H_0^{(1)}\!\left(k_b \lVert \vect{r}-\vect{x}\rVert\right),
+\end{equation}
+where $t$ indexes the transmitter, $\vect{r}$ a receiver position, $k_b$ the background wavenumber and $H_0^{(1)}$
+the Hankel function of the first kind (the 2D Green's function). Multiple-scattering models drop the Born
+approximation at a higher cost~\citep{sun2018multiplescattering}. InverseBench uses the linear model with 20
+transmitters on a circle and 360, 180 or 60 receivers on the same circle, a $128\times128$ grid of a
+$0.18\times0.18$\,m domain, and cell images simulated with CytoPacq~\citep{wiesner2019cytopacq}.
+
+\section{Incompressible Navier--Stokes flow}
+The 2D incompressible Navier--Stokes equations in vorticity form on the periodic domain $[0,2\pi]^2$ are
+\begin{equation}
+  \partial_t \omega + \vect{u}\cdot\nabla\omega = \frac{1}{Re}\,\Delta\omega + g, \qquad
+  \vect{u} = (\partial_y\psi,\,-\partial_x\psi), \qquad -\Delta\psi = \omega,
+\end{equation}
+with vorticity $\omega$, velocity $\vect{u}$, stream function $\psi$, Reynolds number $Re$ and forcing $g$. Vorticity
+is transported by the flow and diffused by viscosity, so its structures move and deform smoothly over time. InverseBench
+uses $Re=200$, forcing $g=-4\cos(4y)$ and a pseudo-spectral solver; this problem is also a standard benchmark for
+neural PDE solvers~\citep{li2021fno}.
+
+\section{Neural fields and Gaussian splatting}
+\paragraph{Neural radiance fields.} NeRF~\citep{mildenhall2020nerf} represents a scene by an MLP that maps a 3D
+position and viewing direction to colour and density and renders images by volume rendering along camera rays. Fourier
+features of the input coordinates allow MLPs to represent high frequencies~\citep{tancik2020fourier}. Grid- and
+hash-based encodings make such fields much faster~\citep{mueller2022instantngp}.
+
+\paragraph{3D Gaussian Splatting.} 3DGS~\citep{kerbl20233dgs} replaces the MLP by an explicit set of anisotropic 3D
+Gaussians, each with a mean, a covariance factorised into a rotation and scales, an opacity and a colour. Gaussians are
+projected (``splatted'') onto the image plane and alpha-blended; all parameters are optimised by gradient descent.
+\emph{Adaptive density control} clones or splits Gaussians where reconstruction gradients are large and prunes
+transparent ones, so the representation spends its capacity where the scene needs it.
+
+\paragraph{Dynamic scenes.} D-NeRF~\citep{pumarola2021dnerf} introduced a canonical space plus a deformation network
+for dynamic NeRFs. 4D Gaussian Splatting~\citep{wu20244dgs} applies the same idea to Gaussians, predicting per-time
+offsets of position, scale and rotation from a spatio-temporal feature encoding (HexPlane~\citep{cao2023hexplane}).
+Alternatives include per-frame Gaussians tracked over time~\citep{luiten2024dynamic} and native 4D
+Gaussians~\citep{yang2024realtime4dgs}.
+
+\section{State-space sequence models and Mamba}
+Structured state-space models (S4)~\citep{gu2022s4} model sequences with a linear recurrence
+$\vect{h}_t = \bar{\mat{A}}\vect{h}_{t-1} + \bar{\mat{B}}x_t$, $y_t = \mat{C}\vect{h}_t$, obtained by discretising a
+continuous-time system. Mamba~\citep{gu2023mamba} makes the step size $\Delta$ and the matrices $\mat{B}$, $\mat{C}$
+functions of the input (\emph{selection}), so the model can decide what to keep in its state, and computes the
+recurrence with a hardware-efficient scan in time linear in the sequence length. Mamba has been applied to vision
+backbones~\citep{zhu2024visionmamba}. Here it is used to model how each Gaussian moves through time.

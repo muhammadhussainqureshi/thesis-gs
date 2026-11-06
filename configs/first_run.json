@@ -1,0 +1,6 @@
+{
+ "description": "First full run (Oct 29): all tasks with default settings. 3D uses synthetic nuclei.",
+ "runs": [
+  {"name": "all_defaults", "args": ["--task", "all", "--deform", "mlp", "mamba", "static"]}
+ ]
+}

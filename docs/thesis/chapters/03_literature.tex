@@ -1,0 +1,86 @@
+\chapter{Literature Review}
+\label{ch:literature}
+
+This chapter reviews four lines of work that meet in this thesis: (1) learned priors for scientific inverse problems,
+(2) explicit Gaussian representations, (3) Gaussian and neural-field methods for scientific and medical imaging, and
+(4) dynamic representations and sequence models. It closes with the gap this thesis addresses.
+
+\section{Priors for scientific inverse problems}
+Classical solvers combine a data-fidelity term with hand-crafted regularisers such as total
+variation~\citep{rudin1992tv}. Deep learning added two families of priors. \emph{Untrained} priors use the structure
+of a network as the regulariser: Deep Image Prior~\citep{ulyanov2018dip} fits a randomly initialised convolutional
+network to a single corrupted image and stops early. \emph{Learned} priors are trained on many examples; diffusion
+models are currently the most general, and Diffusion Posterior Sampling~\citep{chung2023dps} guides the reverse
+diffusion with the gradient of the data likelihood, so the same prior can serve many forward models.
+
+InverseBench~\citep{zheng2025inversebench} evaluates 14 such plug-and-play diffusion-prior algorithms on five
+scientific problems: linear inverse scattering, compressed-sensing MRI on fastMRI~\citep{zbontar2018fastmri}, black
+hole imaging, full waveform inversion on OpenFWI~\citep{deng2022openfwi}, and the 2D Navier--Stokes equations. Its
+findings that motivate this thesis are that (i) scientific forward models differ strongly from image-restoration
+operators (complex-valued, non-linear, expensive, or without gradients), (ii) diffusion priors help most when
+measurements are sparse, and (iii) they can fail when outputs violate physical constraints. All its methods represent
+the unknown on a pixel grid. Physics-informed neural networks~\citep{raissi2019pinn} and neural operators such as
+FNO~\citep{li2021fno} are complementary: they learn solution operators of PDEs rather than priors over unknowns.
+
+\section{Explicit Gaussian representations}
+3DGS~\citep{kerbl20233dgs} showed that an explicit, adaptive set of anisotropic Gaussians can match or exceed neural
+fields~\citep{mildenhall2020nerf,mueller2022instantngp} in quality while rendering in real time. Its key ingredients
+are a differentiable rasteriser, a covariance parametrisation by rotation and scale that stays positive
+semi-definite, and adaptive density control. GaussianImage~\citep{zhang2024gaussianimage} transfers the idea to 2D:
+an image is represented by 2D Gaussians and rendered by accumulated summation, achieving fast decoding and
+compression. Our 2D and 3D representations follow the same principle, but are evaluated on a regular grid and
+supervised through a physics operator instead of pixels.
+
+\section{Gaussians and neural fields in scientific imaging}
+\paragraph{Tomography.} X-Gaussian~\citep{cai2024xgaussian} adapts Gaussian splatting to X-ray projection imaging
+with a radiative Gaussian model, and R$^2$-Gaussian~\citep{zha2024r2gaussian} rectifies the integration bias of
+splatting for tomographic volume reconstruction, showing that Gaussians can serve as a voxel-free representation of
+attenuation volumes. Both rely on ray-based projection, the natural analogue of camera rendering; scattering
+measurements are instead a wave-based integral over the whole object.
+\paragraph{Astronomy.} BH-NeRF~\citep{levis2022bhnerf} reconstructs 3D emission around a black hole over time with a
+neural field constrained by gravitational lensing and orbital dynamics, an example of physics replacing multi-view
+geometry.
+\paragraph{Microscopy data.} Simulated cell images with exact ground truth are produced by CytoPacq and related
+generators~\citep{wiesner2019cytopacq}; the Broad Bioimage Benchmark Collection~\citep{ljosa2012bbbc} distributes such
+synthetic 3D nucleus datasets (BBBC024), which we use as real 3D cell shapes.
+
+\section{Dynamic representations and sequence models}
+D-NeRF~\citep{pumarola2021dnerf} and 4D Gaussian Splatting~\citep{wu20244dgs} model motion with a canonical
+representation and a deformation field queried independently at each time; HexPlane~\citep{cao2023hexplane} and
+K-Planes~\citep{fridovich2023kplanes} factorise space--time features into planes. Dynamic 3D
+Gaussians~\citep{luiten2024dynamic} track persistent Gaussians frame by frame, and native 4D
+Gaussians~\citep{yang2024realtime4dgs} slice 4D primitives in time. Language-embedded variants
+(LangSplat~\citep{qin2024langsplat}, 4D LangSplat~\citep{li2025langsplat4d}) attach semantic features to such
+Gaussians, the starting point of this thesis' original direction. None of these treats a Gaussian's trajectory as a
+sequence. State-space models~\citep{gu2022s4,gu2023mamba} are efficient sequence models that could do exactly that,
+and have been adopted in vision~\citep{zhu2024visionmamba}; their use as a motion model for 4D Gaussians is, to our
+knowledge, unexplored.
+
+\section{Synthesis and research gap}
+Table~\ref{tab:lit} summarises the landscape. Diffusion-prior methods are general but represent the unknown on a
+grid and need large training sets; Gaussian methods are compact and adaptive but have been demonstrated mainly with
+camera- or ray-based measurements. The gap addressed here is the use of 3D/4D Gaussian representations as the unknown
+in \emph{wave-based and PDE-based scientific inverse problems}, the analysis of their failure modes under severe
+ill-posedness, and sequence-model motion priors for their dynamics.
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Representative related work. ``Meas.'' is the kind of measurement used for supervision.}
+  \label{tab:lit}
+  \begin{tabular}{p{3.6cm}p{2.6cm}p{2.7cm}p{4.6cm}}
+    \toprule
+    Work & Representation & Meas. & Relation to this thesis \\
+    \midrule
+    NeRF~\citep{mildenhall2020nerf} & MLP field & RGB images & implicit field; rendering by rays \\
+    3DGS~\citep{kerbl20233dgs} & 3D Gaussians & RGB images & our representation, without cameras \\
+    4DGS~\citep{wu20244dgs} & Gaussians + deformation & video & our 4D design (MLP deformation) \\
+    GaussianImage~\citep{zhang2024gaussianimage} & 2D Gaussians & pixels & 2D Gaussian rendering on a grid \\
+    X-Gaussian~\citep{cai2024xgaussian}, R$^2$-Gaussian~\citep{zha2024r2gaussian} & 3D Gaussians & X-ray projections & Gaussians for physics, ray-based \\
+    BH-NeRF~\citep{levis2022bhnerf} & neural field & radio interferometry & physics replaces multi-view geometry \\
+    DPS~\citep{chung2023dps}, InverseBench~\citep{zheng2025inversebench} & pixel grid + diffusion prior & physics operators & same problems, learned prior \\
+    Mamba~\citep{gu2023mamba} & selective SSM & sequences & our motion model over time \\
+    \textbf{This thesis} & 2D/3D/4D Gaussians & scattering; sparse flow samples & Gaussians + physics; Mamba motion \\
+    \bottomrule
+  \end{tabular}
+\end{table}

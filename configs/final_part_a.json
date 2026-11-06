@@ -1,0 +1,10 @@
+{
+ "description": "Final experiments, part A (inverse scattering). ~2.5 h on a T4. 3D on real BBBC024 cells needs --volumes; the Kaggle notebook downloads them.",
+ "runs": [
+  {"name": "scatter2d_l1_0.3_fair", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "5", "--l1", "0.3", "--grid_l1", "0.3"]},
+  {"name": "scatter2d_l1_0.3", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "5", "--l1", "0.3"]},
+  {"name": "scatter2d_l1_0.1", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "5", "--l1", "0.1"]},
+  {"name": "scatter3d_bbbc024_l1_0", "args": ["--task", "scatter3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0"]},
+  {"name": "scatter3d_bbbc024_l1_0.3", "args": ["--task", "scatter3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3"]}
+ ]
+}

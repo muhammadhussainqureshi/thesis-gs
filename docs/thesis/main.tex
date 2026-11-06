@@ -1,0 +1,111 @@
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,bm,mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[hidelinks]{hyperref}
+
+\onehalfspacing
+\graphicspath{{figures/}}
+
+% ---- notation
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\todo}[1]{\textcolor{red}{[#1]}}
+
+% ---- fill in
+\newcommand{\thesistitle}{Gaussian Splatting for Physical Inverse Problems:\\[0.3em]
+  3D Gaussians for Inverse Scattering and 4D Gaussians for Fluid Dynamics}
+\newcommand{\authorname}{Muhammad Hussain Qureshi}
+\newcommand{\rollno}{\todo{Roll number, e.g.\ MSxx26xxx}}
+\newcommand{\advisorname}{\todo{Advisor name}}
+\newcommand{\department}{Faculty of Sciences}
+\newcommand{\university}{Information Technology University (ITU), Lahore}
+\newcommand{\submissiondate}{December 2026}
+
+\begin{document}
+
+% ================================================================ title page
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+  {\LARGE\bfseries \thesistitle\par}
+  \vspace{1.5cm}
+  {\large Thesis I Report\par}
+  \vspace{1.5cm}
+  {\large \authorname\par}
+  {\large \rollno\par}
+  \vspace{1.0cm}
+  {\large Advisor: \advisorname\par}
+  \vfill
+  {\large \department\\ \university\par}
+  \vspace{0.5cm}
+  {\large \submissiondate\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+3D Gaussian Splatting represents a scene as a set of anisotropic Gaussians and has become a leading
+representation for photographic novel-view synthesis; its dynamic extension, 4D Gaussian Splatting, adds a
+deformation network over time. Both are designed for posed RGB images. This thesis asks whether the same
+representation is useful for \emph{scientific inverse problems}, where an unknown physical field must be recovered
+from indirect, incomplete and noisy measurements produced by a known physics model. Using datasets and forward
+models from the InverseBench benchmark, we study two problems: (i) linear inverse scattering, where the permittivity
+of cells is recovered from scattered electromagnetic fields measured by 360, 180 or 60 receivers, in 2D and on 3D
+cell volumes; and (ii) the 2D incompressible Navier--Stokes equations, where an evolving vorticity field is
+reconstructed from dense or sparse observations over time with a 4D (space--time) Gaussian representation whose
+deformation is modelled either by a multilayer perceptron, as in 4D Gaussian Splatting, or by a Mamba selective
+state-space model. We replace the camera rasteriser with the physics operator, render Gaussians on a grid with a
+local-window evaluation, and train end-to-end by gradient descent with 3DGS-style densification and pruning.
+
+The proof of concept shows that (1) on smooth 3D cell volumes, Gaussians are markedly more robust than a voxel
+grid when measurements are scarce (40.9 vs.\ 37.3\,dB PSNR at 60 receivers); (2) on textured 2D cells, extra
+Gaussians can grow ``ghost'' copies of the object in regions the measurements cannot see (the operator's null
+space), which a simple sparsity term removes, after which Gaussians exceed the pixel baseline in structural
+similarity at 60 receivers (SSIM 0.940 vs.\ 0.878) while the pixel grid keeps higher PSNR; and (3) for fluid flow,
+a deformation model is essential (+10\,dB over static Gaussians), while Mamba fits observed frames better than the
+MLP but does not yet generalise better to unobserved time steps. These results establish feasibility and point to
+the open problems addressed in Thesis II.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{chapters/01_introduction}
+\input{chapters/02_background}
+\input{chapters/03_literature}
+\input{chapters/04_problem}
+\input{chapters/05_methodology}
+\input{chapters/06_formulation}
+\input{chapters/07_setup}
+\input{chapters/08_results}
+\input{chapters/09_conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\input{chapters/appendix_reproducibility}
+
+\end{document}

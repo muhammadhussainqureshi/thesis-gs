@@ -1,0 +1,51 @@
+\chapter{Problem Definition and Research Scope}
+\label{ch:problem}
+
+\section{Problem definition}
+Let $f:\Omega\to\R$ be an unknown physical field on a domain $\Omega\subset\R^d$ (permittivity contrast of a cell,
+$d\in\{2,3\}$), or a time-dependent field $\omega:\Omega\times[0,T]\to\R$ (vorticity of a flow, $d=2$). A known forward
+model $\mathcal{A}$ produces measurements $\vect{y}=\mathcal{A}(f)+\vect{n}$ with
+$\dim\vect{y}\ll\dim f$. We represent the unknown by a set of $N$ Gaussians with parameters
+$\Theta=\{\theta_i\}_{i=1}^N$ (and, for dynamic fields, a deformation network with weights $\phi$) and solve
+\begin{equation}
+  \hat\Theta = \arg\min_{\Theta}\; \mathcal{D}\big(\mathcal{A}(f_\Theta),\vect{y}\big) + \mathcal{R}(\Theta),
+\end{equation}
+where $\mathcal{D}$ measures data misfit and $\mathcal{R}$ is an optional regulariser. The ground truth is never used
+for fitting; it is used only to evaluate the reconstruction.
+
+\section{Research questions}
+\begin{description}
+  \item[RQ1] Can 2D/3D Gaussian representations recover physical fields from scattering measurements, and how do they
+  compare with a pixel/voxel grid optimised with the same physics as the number of measurements decreases?
+  \item[RQ2] What failure modes arise when an adaptive Gaussian representation meets an operator with a large null
+  space, and how can they be prevented?
+  \item[RQ3] Can a 4D Gaussian representation (canonical Gaussians plus deformation) reconstruct an evolving fluid
+  field from dense and sparse observations, including at time steps that were never observed?
+  \item[RQ4] Does a selective state-space model (Mamba) over each Gaussian's trajectory model the dynamics better than
+  the per-time MLP deformation of 4D Gaussian Splatting?
+\end{description}
+
+\section{Scope}
+\paragraph{In scope (Thesis I).}
+\begin{itemize}
+  \item Linear inverse scattering with the InverseBench forward model: 2D cells (InverseBench test set) and 3D cell
+  volumes (synthetic HL60-like nuclei and CytoPacq/BBBC024 nuclei), with 360, 180 and 60 receivers and the benchmark
+  noise level.
+  \item 3D physics approximated by applying the 2D operator to every $z$-slice (\emph{slice-wise Born model}).
+  \item 2D Navier--Stokes ($Re=200$) as a 2D + time (``4D'') problem: sequences of 21 frames, observations of all or
+  10\% of the pixels per frame, every fourth frame held out.
+  \item Baselines: direct optimisation of a pixel/voxel grid with the same data term (and the same sparsity term).
+  \item Metrics: PSNR, SSIM, relative $\ell_2$ error, number of Gaussians, run time.
+\end{itemize}
+\paragraph{Out of scope (deferred to Thesis II).}
+\begin{itemize}
+  \item A full 3D scattering model with sensors on a sphere, and non-linear (multiple-scattering) physics.
+  \item Recovering the Navier--Stokes \emph{initial condition} through the solver, as posed in InverseBench.
+  \item Exhaustive benchmarking against the diffusion-prior methods of InverseBench; training learned priors.
+  \item Real (non-simulated) measurement data, and the remaining InverseBench problems.
+\end{itemize}
+
+\section{Assumptions}
+The forward models are known exactly and are differentiable; measurement noise is additive Gaussian at the benchmark
+level ($\sigma=10^{-4}$ for scattering); permittivity contrast is non-negative and bounded in $[0,1]$; vorticity is
+periodic in space.

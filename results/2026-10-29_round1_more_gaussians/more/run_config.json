@@ -1,0 +1,40 @@
+{
+ "task": "scatter2d",
+ "out": "/kaggle/working/improved/more",
+ "data_dir": "/kaggle/working/data",
+ "local_dir": "/tmp/thesis_data",
+ "ib_dir": "/tmp/InverseBench",
+ "device": "cuda",
+ "samples": 3,
+ "iters": 3000,
+ "n_gauss": 4000,
+ "window": null,
+ "receivers": [
+  360,
+  180,
+  60
+ ],
+ "noise": 0.0001,
+ "volumes": null,
+ "depth": 32,
+ "skip_direct": true,
+ "crop": 0.5,
+ "n_init": 500,
+ "densify_add": 300,
+ "densify_until": 0.8,
+ "frames": 21,
+ "frame_dt": 0.05,
+ "obs_ratios": [
+  1.0,
+  0.1
+ ],
+ "ns_noise": 0.0,
+ "deform": [
+  "mlp",
+  "mamba"
+ ],
+ "batch_frames": 4,
+ "lr_gauss": 0.01,
+ "lr_net": 0.001,
+ "quick": false
+}

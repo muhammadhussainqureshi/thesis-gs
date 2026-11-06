@@ -1,0 +1,23 @@
+\chapter{Reproducibility}
+\label{app:repro}
+
+The code, configurations and results are in the thesis repository (\texttt{src/thesis\_gs} package, \texttt{bin/}
+scripts, \texttt{configs/}, \texttt{notebooks/}, \texttt{results/}, \texttt{tests/}). InverseBench and its test data are
+downloaded automatically; BBBC024 is downloaded by the Kaggle notebook.
+
+{\small
+\begin{verbatim}
+# install, smoke test, 2D run, final runs, unit tests
+pip install -r requirements.txt
+python bin/thesis-gs --task all --quick --out outputs/smoke
+python bin/thesis-gs --task scatter2d --l1 0.3 --out outputs/s2d
+python bin/run_experiments.py configs/final_part_a.json \
+       --out outputs/final_a --volumes /path/to/BBBC024
+python bin/run_experiments.py configs/final_part_b.json \
+       --out outputs/final_b
+pytest -q
+\end{verbatim}
+}
+
+Every run writes \texttt{run\_config.json} with its exact settings, \texttt{results.csv} with per-sample metrics,
+\texttt{summary.csv} with means, and \texttt{reconstructions.png}.

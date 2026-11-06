@@ -1,0 +1,97 @@
+\chapter{Mathematical Formulation}
+\label{ch:formulation}
+
+\section{Gaussian field}
+\label{sec:field}
+A field on a grid with points $\vect{x}\in\Omega\subset\R^d$ is represented by $N$ Gaussians,
+\begin{equation}
+  f_\Theta(\vect{x}) = \sum_{i=1}^{N} a_i \exp\!\Big(-\tfrac12(\vect{x}-\vect{\mu}_i)^\top \mat{\Sigma}_i^{-1}(\vect{x}-\vect{\mu}_i)\Big),
+  \qquad \mat{\Sigma}_i = \mat{R}_i\,\mathrm{diag}(\vect{s}_i)^2\,\mat{R}_i^\top ,
+  \label{eq:field}
+\end{equation}
+with centre $\vect{\mu}_i\in\R^d$, scales $\vect{s}_i=\exp(\vect{\ell}_i)$ clamped to $[s_{\min},h/3]$, and rotation
+$\mat{R}_i$: in 2D $\mat{R}(\vartheta_i)=\begin{psmallmatrix}\cos\vartheta_i & -\sin\vartheta_i\\ \sin\vartheta_i & \cos\vartheta_i\end{psmallmatrix}$,
+in 3D the rotation matrix of the normalised quaternion $\vect{q}_i/\lVert\vect{q}_i\rVert$. The factorisation keeps
+$\mat{\Sigma}_i$ symmetric positive definite for any parameter values~\citep{kerbl20233dgs}. The amplitude is
+$a_i=\mathrm{softplus}(\alpha_i)\ge0$ for permittivity and $a_i=\alpha_i\in\R$ for vorticity. The parameters per
+Gaussian are $\theta_i=(\vect{\mu}_i,\vect{\ell}_i,\vartheta_i\text{ or }\vect{q}_i,\alpha_i)$. In practice the sum in
+\eqref{eq:field} runs only over Gaussians whose window $\lVert\vect{x}-\mathrm{round}(\vect{\mu}_i)\rVert_\infty\le h$
+contains $\vect{x}$.
+
+\section{Scattering forward model}
+On a grid of $P$ points with spacing $\Delta x\,\Delta y$, the linear (Born) scattering operator of the benchmark maps
+a contrast image $\vect{f}\in\R^P$ to measurements for $T$ transmitters and $M$ receivers,
+\begin{equation}
+  y_{t,r} = \Delta x\,\Delta y \sum_{p=1}^{P} f_p\,\overline{u^{\mathrm{in}}_t(\vect{x}_p)}\,g_r(\vect{x}_p),
+  \qquad g_r(\vect{x}) = k_b^2\,\tfrac{i}{4}H_0^{(1)}\!\big(k_b\lVert\vect{r}_r-\vect{x}\rVert\big),
+  \label{eq:born}
+\end{equation}
+written compactly as $\vect{y}=\mat{A}\vect{f}+\vect{n}$ with $\mat{A}\in\C^{TM\times P}$ and complex Gaussian noise of
+standard deviation $\sigma=10^{-4}$. Here $T=20$, $M\in\{360,180,60\}$ and $P=128^2$, so $TM\le7200$ complex
+measurements describe $16384$ unknowns and $\mat{A}$ has a non-trivial null space. For a volume with slices
+$\vect{f}^{(z)}$, $z=1,\dots,Z$, the slice-wise model is $\vect{y}^{(z)}=\mat{A}\vect{f}^{(z)}+\vect{n}^{(z)}$.
+
+\section{Objective for scattering}
+With $\vect{f}_\Theta$ the field \eqref{eq:field} sampled on the grid,
+\begin{equation}
+  \mathcal{L}(\Theta) = \frac{\sum_z \norm{\mat{A}\vect{f}^{(z)}_\Theta-\vect{y}^{(z)}}_2^2}{\sum_z\norm{\vect{y}^{(z)}}_2^2}
+  \;+\; \lambda\,\frac{1}{|\Omega|}\sum_{\vect{x}\in\Omega} f_\Theta(\vect{x}),
+  \label{eq:loss}
+\end{equation}
+where the second term equals $\lambda\norm{\vect{f}_\Theta}_1/|\Omega|$ because $f_\Theta\ge0$. The baseline solves
+the same problem over the grid values directly,
+$\min_{\vect{f}\in[0,1]^{|\Omega|}} \norm{\mat{A}\vect{f}-\vect{y}}_2^2/\norm{\vect{y}}_2^2+\lambda\,\overline{\vect{f}}$,
+by projected Adam from $\vect{f}=\vect{0}$.
+
+\paragraph{Why grids do not grow ghosts.} The gradient of the data term with respect to $\vect{f}$ is
+$2\,\mathrm{Re}\,\mat{A}^{\mathsf H}(\mat{A}\vect{f}-\vect{y})/\norm{\vect{y}}^2$, which lies in the range of
+$\mat{A}^{\mathsf H}$, the orthogonal complement of the null space. Gradient steps from zero therefore never add
+null-space components (up to the effect of the projection onto $[0,1]$). Gaussians break this property: a Gaussian
+inserted anywhere carries mass that may lie largely in the null space, where the data term exerts no force to remove it.
+The sparsity term in \eqref{eq:loss} supplies that force.
+
+\section{Adaptive density control}
+Every $K=250$ iterations while $k\le0.6\,K_{\max}$ the back-projected residual
+\begin{equation}
+  \vect{\rho} = \mathrm{Re}\big(\mat{A}^{\mathsf H}(\vect{y}-\mat{A}\vect{f}_\Theta)\big)
+\end{equation}
+is computed, $n_{\mathrm{add}}$ new Gaussians are created at the grid points with the largest $|\rho|$ (scale 1.5
+cells, amplitude proportional to $|\rho|$), and Gaussians with $a_i<10^{-3}$ are removed.
+
+\section{4D representation}
+For a sequence $\omega_0,\dots,\omega_{T-1}$ observed through masks $\mat{M}_t$, canonical parameters $\theta_i$ are
+deformed by a network $D_\phi$:
+\begin{equation}
+  \theta_i(t) = \theta_i + \mat{S}\,D_\phi\big(\gamma(\vect{\mu}_i/L),\,\gamma(t/T)\big),
+  \qquad \gamma(p) = \big[\sin(2^k\pi p),\cos(2^k\pi p)\big]_{k=0}^{K-1},
+\end{equation}
+where $\mat{S}$ scales position offsets to pixels and $\gamma$ are Fourier features~\citep{tancik2020fourier}. The
+training loss over a random batch $\mathcal{B}$ of observed frames is
+\begin{equation}
+  \mathcal{L}(\Theta,\phi) = \sum_{t\in\mathcal{B}}
+    \frac{\norm{\mat{M}_t\odot(f_{\Theta(t)}-\tilde\omega_t)}_2^2}{\norm{\mat{M}_t}_1}
+  \;+\; \lambda_T \sum_{t\in\mathcal{B}}\frac{1}{N}\sum_i \norm{D_\phi(\cdot,t+1)-D_\phi(\cdot,t)}_2^2 ,
+\end{equation}
+with $\tilde\omega_t$ the (normalised) observations and $\lambda_T\ge0$ the temporal smoothness weight.
+
+\section{Mamba deformation}
+For Gaussian $i$, the inputs $\vect{x}_t$ ($t=0,\dots,T-1$) are linear embeddings of $[\gamma(\vect{\mu}_i),\gamma(t)]$.
+A Mamba block~\citep{gu2023mamba} computes, after a gated input projection and a short causal convolution,
+\begin{align}
+  \Delta_t &= \mathrm{softplus}(\mat{W}_\Delta \vect{x}_t), \qquad \mat{B}_t = \mat{W}_B\vect{x}_t, \qquad \mat{C}_t = \mat{W}_C\vect{x}_t,\\
+  \vect{h}_t &= \exp(\Delta_t\mat{A})\odot\vect{h}_{t-1} + \Delta_t\,\mat{B}_t\,\vect{x}_t, \qquad
+  \vect{y}_t = \mat{C}_t\vect{h}_t + \mat{D}\vect{x}_t,
+\end{align}
+with a diagonal state matrix $\mat{A}=-\exp(\mat{A}_{\log})$, followed by multiplicative gating with
+$\mathrm{SiLU}(\vect{z}_t)$ and a residual connection. Because $\Delta_t,\mat{B}_t,\mat{C}_t$ depend on the input, the
+model selects what to remember along the trajectory. The bidirectional variant adds a second stack applied to the
+time-reversed sequence and sums the two outputs.
+
+\section{Evaluation metrics}
+For a reconstruction $\hat f$ and ground truth $f$ with data range $R$,
+\begin{equation}
+  \mathrm{PSNR} = 10\log_{10}\frac{R^2}{\frac{1}{|\Omega|}\norm{\hat f-f}_2^2}, \qquad
+  \mathrm{relL2} = \frac{\norm{\hat f-f}_2}{\norm{f}_2},
+\end{equation}
+and SSIM~\citep{wang2004ssim} computed with the default $7\times7$ uniform window of scikit-image ($R=1$ for permittivity,
+$R=2$ for normalised vorticity). For 4D, metrics are averaged separately over observed (training) and held-out frames.

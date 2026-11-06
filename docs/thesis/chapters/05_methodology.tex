@@ -1,0 +1,87 @@
+\chapter{Proposed Methodology and Pipeline Architecture}
+\label{ch:method}
+
+\section{Overview}
+The same training loop serves every task (Figure~\ref{fig:pipeline}). A set of Gaussians is rendered on the grid of
+the unknown; a physics operator turns the rendered field into simulated measurements; the misfit to the real
+measurements, plus an optional sparsity term, is back-propagated to all Gaussian parameters; and an adaptive density
+control step periodically adds and removes Gaussians. For dynamic fields a deformation network maps the canonical
+Gaussians to their state at each time step before rendering.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, align=center, minimum height=1.25cm, text width=2.55cm, font=\small, fill=blue!4},
+  dark/.style={box, fill=blue!15},
+  arr/.style={-{Stealth[length=2.5mm]}, thick},
+  node distance=0.55cm]
+  \node[box] (g) {Gaussians\\$\Theta=\{\mu_i,s_i,R_i,a_i\}$};
+  \node[box, right=of g] (d) {Deformation\\$D_\phi(\mu_i,t)$\\{\footnotesize (4D only)}};
+  \node[box, right=of d] (r) {Render on grid\\$f_\Theta(\vect{x})$\\{\footnotesize local window}};
+  \node[box, right=of r] (a) {Physics\\$\mathcal{A}$\\{\footnotesize scattering / mask}};
+  \node[dark, below=1.1cm of a] (l) {Loss\\$\mathcal{D}(\mathcal{A}f,\vect{y})+\lambda\,\mathcal{S}(f)$};
+  \node[box, left=of l, text width=3.0cm] (y) {Measurements $\vect{y}$};
+  \node[box, below=1.1cm of d, text width=3.4cm] (dc) {Densify / prune\\{\footnotesize at back-projected residual}};
+  \draw[arr] (g) -- (d); \draw[arr] (d) -- (r); \draw[arr] (r) -- (a); \draw[arr] (a) -- (l); \draw[arr] (y) -- (l);
+  \draw[arr, dashed] (l.south) -- ++(0,-0.5) -| node[pos=0.25, below, font=\footnotesize]{gradients (Adam)} (g.south);
+  \draw[arr, dotted] (dc.north) -- ++(0,0.35) -| (g.south east);
+\end{tikzpicture}
+\caption{Pipeline. The camera rasteriser of 3DGS is replaced by rendering on a grid followed by the physics operator.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Gaussian field representation}
+Each Gaussian has a centre, per-axis scales, an orientation and an amplitude; the field at a grid point is the sum of
+all Gaussians evaluated there (Section~\ref{sec:field}). Because a Gaussian is negligible beyond about three standard
+deviations, each Gaussian is evaluated only in a window of $\pm h$ cells around its centre and accumulated into the
+grid with a scatter-add, so the cost is $O(N(2h+1)^d)$ and independent of the grid size; scales are clamped to
+$h/3$ so that the window always covers $\pm3\sigma$. For permittivity the amplitude is kept non-negative with a
+softplus; for vorticity it is signed and the window wraps around the periodic domain. All parameters of one scene form
+a single $N\times P$ tensor ($P=6$ in 2D, $P=11$ in 3D), which is convenient for sequence models.
+
+\section{Physics operators}
+\paragraph{Scattering.} We re-implement the InverseBench linear scattering operator as two complex matrix products
+in single precision on the GPU and verify at start-up that it matches the benchmark implementation to within a relative
+error of $3\times10^{-7}$. For 3D volumes, the operator is applied to every $z$-slice and the losses are summed.
+\paragraph{Fluid observations.} For Navier--Stokes the measurement operator selects the observed pixels of each frame
+(a random mask with 100\% or 10\% coverage); frames that are held out for evaluation are never observed.
+
+\section{Training and adaptive density control}
+All parameters are optimised with Adam~\citep{kingma2015adam} and a cosine learning-rate schedule. For scattering,
+Gaussians are initialised uniformly at random, with no knowledge of the object. Every 250 iterations, during the
+first 60\% of training, new Gaussians are inserted at the grid points with the largest magnitude of the
+\emph{back-projected residual} $\mathrm{Re}\,\mathcal{A}^{\mathsf H}(\vect{y}-\mathcal{A}f)$, i.e.\ where the
+measurements indicate missing structure, and Gaussians whose amplitude has fallen below $10^{-3}$ are pruned. This
+replaces the image-space gradient criterion of 3DGS, which is unavailable without pixel supervision.
+
+\section{Sparsity regulariser}
+Early experiments showed that aggressive densification can place mass in regions to which the measurements are blind
+(Section~\ref{sec:ghost}). A sparsity term on the total intensity of the rendered field penalises mass the data does
+not require. Because the field is non-negative, the mean of the field equals its $\ell_1$ norm divided by the grid size.
+
+\section{4D representation of fluid flow}
+A canonical set of 2D Gaussians is initialised from the observed pixels of the first frame. A deformation network maps
+each Gaussian's canonical centre and the time $t$ to offsets of all its parameters; positions move in pixel units.
+Three deformation models are compared:
+\begin{itemize}
+  \item \textbf{MLP} (as in 4D Gaussian Splatting): Fourier features of $(\mu_i,t)$ fed to a three-layer MLP,
+  evaluated independently for every Gaussian and time.
+  \item \textbf{Mamba}: for each Gaussian the inputs at all $T$ time steps form a sequence processed by two Mamba
+  blocks, so the offset at time $t$ depends on the Gaussian's earlier states (causal).
+  \item \textbf{Bidirectional Mamba}: a second Mamba stack reads the sequence backwards and the two are summed, so
+  every time step sees both past and future.
+\end{itemize}
+The output layer is initialised to zero so training starts from the canonical configuration. An optional temporal
+smoothness term penalises differences between offsets at consecutive times, including unobserved times. A
+\emph{static} model without deformation serves as an ablation.
+
+\section{Baselines}
+The baseline for scattering optimises every pixel (2D) or voxel (3D) directly with the same data term, starting from
+zero and projected to $[0,1]$ after each step; optionally it uses the same sparsity term. Only the representation
+differs between the two methods. For fluids, the static-Gaussian model is the baseline.
+
+\section{Implementation}
+The pipeline is a Python/PyTorch package (\texttt{thesis\_gs}) with modules for the Gaussian field, physics,
+volume loading, scattering experiments, Navier--Stokes data, deformation networks and 4D training, a command-line
+interface, experiment configurations and unit tests (Appendix~\ref{app:repro}). Mamba is implemented in pure PyTorch
+with an explicit selective scan, which is sufficient for sequences of 21 steps and runs on any GPU.

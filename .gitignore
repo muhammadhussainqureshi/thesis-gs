@@ -1,0 +1,25 @@
+# data, runs and caches
+data/
+outputs/
+cache/
+*.mdb
+*.zip
+*.pt
+!results/**
+__pycache__/
+*.egg-info/
+.ipynb_checkpoints/
+.venv/
+.DS_Store
+# LaTeX build files
+docs/thesis/*.aux
+docs/thesis/*.bbl
+docs/thesis/*.blg
+docs/thesis/*.log
+docs/thesis/*.out
+docs/thesis/*.toc
+docs/thesis/*.lof
+docs/thesis/*.lot
+docs/thesis/*.fls
+docs/thesis/*.fdb_latexmk
+docs/thesis/*.synctex.gz

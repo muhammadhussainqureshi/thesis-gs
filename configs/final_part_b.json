@@ -1,0 +1,6 @@
+{
+ "description": "Final experiments, part B (4D Navier-Stokes): temporal smoothness and bidirectional Mamba. ~4-5 h on a T4.",
+ "runs": [
+  {"name": "ns4d_smooth", "args": ["--task", "ns4d", "--deform", "mlp", "mamba", "mamba_bi", "--temporal_reg", "1"]}
+ ]
+}

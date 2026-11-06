@@ -1,0 +1,57 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Motivation}
+Many measurements in science do not show the quantity of interest directly. An optical tomography system records how
+light is scattered by a cell, not the cell's refractive index; a fluid experiment samples the flow at a few points and
+times, not the full velocity or vorticity field. Recovering the hidden quantity from such indirect, incomplete and
+noisy data is an \emph{inverse problem}. Inverse problems are typically ill-posed: many different unknowns explain
+the measurements equally well, so the representation of the unknown and the prior knowledge built into it decide
+which solution is found.
+
+In computer vision, 3D Gaussian Splatting (3DGS)~\citep{kerbl20233dgs} has recently changed how scenes are
+represented. Instead of a pixel or voxel grid, or a neural network evaluated at every point~\citep{mildenhall2020nerf},
+a scene is a set of anisotropic Gaussians with learnable positions, shapes and amplitudes. The representation is
+compact, adapts its resolution to the content through densification and pruning, and is differentiable, so it can be
+fitted to measurements by gradient descent. Its dynamic extension, 4D Gaussian Splatting~\citep{wu20244dgs}, keeps
+one canonical set of Gaussians and learns a deformation network that moves them over time.
+
+Gaussians are also a natural basis for many physical fields: cell nuclei are smooth blobs, and vortices in a fluid are
+localised, smooth structures that are carried along by the flow. This suggests that a Gaussian representation could
+act as a useful structural prior for scientific inverse problems. Whether it does, and under which conditions, has not
+been studied systematically: existing Gaussian methods for scientific imaging target specific modalities such as
+X-ray computed tomography~\citep{cai2024xgaussian,zha2024r2gaussian}, while the recent InverseBench
+benchmark~\citep{zheng2025inversebench} evaluates diffusion-model priors, not explicit Gaussian representations.
+
+\section{Problem statement (summary)}
+This thesis studies 3D and 4D Gaussian representations as the unknown in physics-based inverse problems. Given a
+known forward model $\mathcal{A}$ that maps a physical field to measurements, and measurements
+$\vect{y}=\mathcal{A}(f)+\vect{n}$, we represent $f$ by Gaussians and fit their parameters so that the simulated
+measurements match $\vect{y}$. We ask when this representation helps compared with a plain grid of unknowns, how it
+fails, and how its motion over time should be modelled. The full problem definition and scope are given in
+Chapter~\ref{ch:problem}.
+
+\section{Contributions of Thesis I}
+\begin{enumerate}
+  \item \textbf{Dataset analysis.} A study of the five InverseBench problems with respect to their suitability for
+  3D and 4D Gaussian representations, leading to the choice of linear inverse scattering (3D) and Navier--Stokes (4D).
+  \item \textbf{A physics-driven Gaussian pipeline.} A single implementation that renders 2D/3D Gaussians on a grid
+  with a local-window evaluation, couples them to the InverseBench scattering operator (verified to match the
+  benchmark implementation to within $3\times10^{-7}$ relative error) and to observations of the Navier--Stokes
+  solution, and trains them with densification, pruning and an optional sparsity term.
+  \item \textbf{4D Gaussians with a state-space motion model.} A 4D (2D + time) Gaussian representation whose
+  deformation is modelled either by an MLP, as in 4D Gaussian Splatting, or by a Mamba selective state-space
+  model~\citep{gu2023mamba} that treats each Gaussian's trajectory as a sequence.
+  \item \textbf{Initial results and a failure analysis.} Baseline comparisons against pixel/voxel optimisation with
+  identical physics, and the identification of a ``ghost'' failure mode caused by the operator's null space, with a
+  sparsity-based remedy.
+  \item \textbf{Open, reproducible code.} A public repository with a Python package, experiment configurations,
+  notebooks, unit tests and all results so far (Appendix~\ref{app:repro}).
+\end{enumerate}
+
+\section{Outline}
+Chapter~\ref{ch:background} introduces inverse problems, the two physical models and Gaussian splatting.
+Chapter~\ref{ch:literature} reviews related work. Chapter~\ref{ch:problem} defines the problem, research questions
+and scope. Chapter~\ref{ch:method} describes the pipeline and Chapter~\ref{ch:formulation} its mathematical
+formulation. Chapter~\ref{ch:setup} gives the experimental setup and Chapter~\ref{ch:results} the initial results.
+Chapter~\ref{ch:conclusion} discusses limitations and the plan for Thesis II.
