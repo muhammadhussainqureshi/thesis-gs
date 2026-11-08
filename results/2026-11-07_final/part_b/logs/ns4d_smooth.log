@@ -1,0 +1,128 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --deform mlp mamba mamba_bi --temporal_reg 1 --data_dir /kaggle/working/data --out /kaggle/working/final/part_b/ns4d_smooth
+
+[14:54:54] device=cuda  task=ns4d  out=/kaggle/working/final/part_b/ns4d_smooth
+[14:54:55] Downloading navier-stokes-test.zip from CaltechDATA ...
+[14:54:59] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.6s
+[14:55:00] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.3s
+[14:55:01] [ns4d] rolled out sample 2: 21 frames x dt=0.05 in 1.5s
+[14:55:01] [ns4d] 3 sequences x 21 frames; train frames 16, held-out 5; observed pixel ratios [1.0, 0.1]; deformations ['mlp', 'mamba', 'mamba_bi']
+[14:55:03] [ns4d] ratio 1.0, sample 0, deform=mlp
+[14:55:49]     iter   750  loss 1.071e-02
+[14:56:34]     iter  1500  loss 4.935e-03
+[14:57:20]     iter  2250  loss 3.963e-03
+[14:58:05]     iter  3000  loss 4.168e-03
+[14:58:06]     -> rel L2 train 0.1205 | held-out 0.1784   PSNR held-out 27.75 dB  (183s)
+[14:58:06] [ns4d] ratio 1.0, sample 0, deform=mamba
+[15:05:04]     iter   750  loss 2.822e-03
+[15:12:01]     iter  1500  loss 3.659e-03
+[15:18:58]     iter  2250  loss 1.702e-03
+[15:25:55]     iter  3000  loss 1.735e-03
+[15:25:55]     -> rel L2 train 0.0689 | held-out 0.1832   PSNR held-out 27.74 dB  (1670s)
+[15:25:55] [ns4d] ratio 1.0, sample 0, deform=mamba_bi
+[15:38:59]     iter   750  loss 2.376e-03
+[15:52:03]     iter  1500  loss 1.444e-03
+[16:05:07]     iter  2250  loss 1.410e-03
+[16:18:11]     iter  3000  loss 1.297e-03
+[16:18:11]     -> rel L2 train 0.0595 | held-out 0.1959   PSNR held-out 27.01 dB  (3135s)
+[16:18:11] [ns4d] ratio 1.0, sample 1, deform=mlp
+[16:18:57]     iter   750  loss 1.642e-02
+[16:19:42]     iter  1500  loss 6.068e-03
+[16:20:28]     iter  2250  loss 4.204e-03
+[16:21:13]     iter  3000  loss 4.364e-03
+[16:21:13]     -> rel L2 train 0.1118 | held-out 0.1687   PSNR held-out 27.80 dB  (182s)
+[16:21:13] [ns4d] ratio 1.0, sample 1, deform=mamba
+[16:28:11]     iter   750  loss 6.046e-03
+[16:35:09]     iter  1500  loss 2.515e-03
+[16:42:06]     iter  2250  loss 1.761e-03
+[16:49:04]     iter  3000  loss 1.947e-03
+[16:49:05]     -> rel L2 train 0.0695 | held-out 0.1680   PSNR held-out 28.09 dB  (1671s)
+[16:49:05] [ns4d] ratio 1.0, sample 1, deform=mamba_bi
+[17:02:08]     iter   750  loss 4.692e-03
+[17:15:12]     iter  1500  loss 1.979e-03
+[17:28:15]     iter  2250  loss 1.369e-03
+[17:41:18]     iter  3000  loss 1.526e-03
+[17:41:19]     -> rel L2 train 0.0597 | held-out 0.1909   PSNR held-out 26.75 dB  (3134s)
+[17:41:19] [ns4d] ratio 1.0, sample 2, deform=mlp
+[17:42:04]     iter   750  loss 2.033e-02
+[17:42:50]     iter  1500  loss 7.971e-03
+[17:43:35]     iter  2250  loss 6.954e-03
+[17:44:21]     iter  3000  loss 5.358e-03
+[17:44:21]     -> rel L2 train 0.1288 | held-out 0.1744   PSNR held-out 26.77 dB  (182s)
+[17:44:21] [ns4d] ratio 1.0, sample 2, deform=mamba
+[17:51:18]     iter   750  loss 9.574e-03
+[17:58:15]     iter  1500  loss 2.994e-03
+[18:05:12]     iter  2250  loss 3.419e-03
+[18:12:09]     iter  3000  loss 2.075e-03
+[18:12:10]     -> rel L2 train 0.0753 | held-out 0.1952   PSNR held-out 25.86 dB  (1668s)
+[18:12:10] [ns4d] ratio 1.0, sample 2, deform=mamba_bi
+[18:25:14]     iter   750  loss 6.397e-03
+[18:38:18]     iter  1500  loss 2.441e-03
+[18:51:22]     iter  2250  loss 2.795e-03
+[19:04:26]     iter  3000  loss 1.677e-03
+[19:04:26]     -> rel L2 train 0.0650 | held-out 0.2067   PSNR held-out 25.32 dB  (3137s)
+[19:04:26] [ns4d] ratio 0.1, sample 0, deform=mlp
+[19:05:12]     iter   750  loss 1.400e-02
+[19:05:57]     iter  1500  loss 6.977e-03
+[19:06:43]     iter  2250  loss 6.182e-03
+[19:07:28]     iter  3000  loss 5.860e-03
+[19:07:28]     -> rel L2 train 0.2520 | held-out 0.2916   PSNR held-out 23.58 dB  (182s)
+[19:07:28] [ns4d] ratio 0.1, sample 0, deform=mamba
+[19:14:26]     iter   750  loss 3.261e-03
+[19:21:23]     iter  1500  loss 3.292e-03
+[19:28:21]     iter  2250  loss 1.682e-03
+[19:35:18]     iter  3000  loss 1.529e-03
+[19:35:18]     -> rel L2 train 0.1497 | held-out 0.2238   PSNR held-out 25.82 dB  (1669s)
+[19:35:18] [ns4d] ratio 0.1, sample 0, deform=mamba_bi
+[19:48:22]     iter   750  loss 2.454e-03
+[20:01:26]     iter  1500  loss 1.341e-03
+[20:14:30]     iter  2250  loss 1.159e-03
+[20:27:34]     iter  3000  loss 8.816e-04
+[20:27:34]     -> rel L2 train 0.1341 | held-out 0.2278   PSNR held-out 25.63 dB  (3136s)
+[20:27:34] [ns4d] ratio 0.1, sample 1, deform=mlp
+[20:28:20]     iter   750  loss 3.142e-02
+[20:29:05]     iter  1500  loss 9.951e-03
+[20:29:50]     iter  2250  loss 6.679e-03
+[20:30:36]     iter  3000  loss 6.429e-03
+[20:30:36]     -> rel L2 train 0.2382 | held-out 0.2535   PSNR held-out 24.22 dB  (182s)
+[20:30:36] [ns4d] ratio 0.1, sample 1, deform=mamba
+[20:37:33]     iter   750  loss 6.870e-03
+[20:44:30]     iter  1500  loss 2.282e-03
+[20:51:28]     iter  2250  loss 1.624e-03
+[20:58:25]     iter  3000  loss 1.661e-03
+[20:58:25]     -> rel L2 train 0.1447 | held-out 0.2061   PSNR held-out 26.20 dB  (1669s)
+[20:58:25] [ns4d] ratio 0.1, sample 1, deform=mamba_bi
+[21:11:29]     iter   750  loss 4.044e-03
+[21:24:33]     iter  1500  loss 1.682e-03
+[21:37:36]     iter  2250  loss 1.199e-03
+[21:50:40]     iter  3000  loss 1.198e-03
+[21:50:41]     -> rel L2 train 0.1331 | held-out 0.2090   PSNR held-out 25.92 dB  (3135s)
+[21:50:41] [ns4d] ratio 0.1, sample 2, deform=mlp
+[21:51:27]     iter   750  loss 3.254e-02
+[21:52:13]     iter  1500  loss 1.372e-02
+[21:52:59]     iter  2250  loss 1.083e-02
+[21:53:45]     iter  3000  loss 8.713e-03
+[21:53:45]     -> rel L2 train 0.2797 | held-out 0.3275   PSNR held-out 21.29 dB  (184s)
+[21:53:45] [ns4d] ratio 0.1, sample 2, deform=mamba
+[22:00:42]     iter   750  loss 8.161e-03
+[22:07:40]     iter  1500  loss 2.839e-03
+[22:14:38]     iter  2250  loss 2.700e-03
+[22:21:35]     iter  3000  loss 1.846e-03
+[22:21:35]     -> rel L2 train 0.1508 | held-out 0.2367   PSNR held-out 24.14 dB  (1670s)
+[22:21:35] [ns4d] ratio 0.1, sample 2, deform=mamba_bi
+[22:34:38]     iter   750  loss 5.902e-03
+[22:47:42]     iter  1500  loss 2.216e-03
+[23:00:45]     iter  2250  loss 1.995e-03
+[23:13:48]     iter  3000  loss 1.351e-03
+[23:13:48]     -> rel L2 train 0.1438 | held-out 0.2478   PSNR held-out 23.69 dB  (3133s)
+[23:13:48] [ns4d] summary
+                    train_frames_rel_l2  train_frames_psnr  train_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim     time_s
+obs_ratio deform                                                                                                                                         
+0.1       mamba                  0.1484            28.8919             0.8918                 0.2222              25.3880               0.7917  1669.4667
+          mamba_bi               0.1370            29.5501             0.9049                 0.2282              25.0828               0.7849  3134.5667
+          mlp                    0.2566            24.1401             0.7408                 0.2909              23.0299               0.6896   182.6333
+1.0       mamba                  0.0712            35.2048             0.9687                 0.1821              27.2297               0.8436  1669.7667
+          mamba_bi               0.0614            36.4818             0.9768                 0.1978              26.3622               0.8253  3135.2333
+          mlp                    0.1204            30.6195             0.9145                 0.1739              27.4407               0.8457   182.2000
+[23:13:51] ===== ns4d finished in 498.9 min. Results in /kaggle/working/final/part_b/ns4d_smooth/ns4d
+
+EXIT CODE 0

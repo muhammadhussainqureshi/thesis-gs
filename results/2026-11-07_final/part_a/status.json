@@ -1,0 +1,22 @@
+{
+ "scatter2d_l1_0.3_fair": {
+  "ok": true,
+  "minutes": 4.8
+ },
+ "scatter2d_l1_0.3": {
+  "ok": true,
+  "minutes": 4.5
+ },
+ "scatter2d_l1_0.1": {
+  "ok": true,
+  "minutes": 4.7
+ },
+ "scatter3d_bbbc024_l1_0": {
+  "ok": true,
+  "minutes": 71.6
+ },
+ "scatter3d_bbbc024_l1_0.3": {
+  "ok": true,
+  "minutes": 68.4
+ }
+}

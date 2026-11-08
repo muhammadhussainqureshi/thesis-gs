@@ -42,22 +42,28 @@ pytest -q                                                                      #
 InverseBench and its test data are downloaded automatically. On Kaggle use
 [`notebooks/kaggle_final_experiments.ipynb`](notebooks/kaggle_final_experiments.ipynb) (GPU, Internet on, *Save & Run All*).
 
-## Main results so far (mean of 3 samples, PSNR dB / SSIM)
-| Inverse scattering, 2D real cells | 360 receivers | 180 | 60 |
+## Main results (PSNR dB / SSIM; final runs Nov 7, 2026)
+| Inverse scattering, 2D real cells (5 samples) | 360 receivers | 180 | 60 |
 |---|---|---|---|
-| Gaussians | 30.7 / 0.959 | 30.4 / 0.957 | 26.5 / 0.814 |
-| Gaussians + sparsity (0.3) | 31.4 / 0.983 | 31.0 / 0.982 | 28.2 / **0.940** |
-| Pixel grid | **36.7 / 0.985** | **35.3 / 0.976** | **29.2** / 0.878 |
+| Gaussians + sparsity (0.3) | 30.8 / 0.980 | 30.6 / 0.979 | 27.1 / 0.924 |
+| Pixel grid | **36.1 / 0.984** | **34.7** / 0.974 | **28.6** / 0.886 |
+| Pixel grid + same sparsity | 33.2 / **0.985** | 32.5 / **0.983** | 27.7 / **0.933** |
 
-| Inverse scattering, 3D synthetic nuclei | 360 | 180 | 60 |
+| Inverse scattering, 3D (3 volumes) | 360 | 180 | 60 |
 |---|---|---|---|
-| Gaussians | 40.8 / 0.994 | 40.6 / 0.994 | **40.9 / 0.988** |
-| Voxel grid | **44.1** / 0.987 | **41.5** / 0.977 | 37.3 / 0.932 |
+| Synthetic nuclei: Gaussians | 40.8 / **0.994** | 40.6 / **0.994** | **40.9 / 0.988** |
+| Synthetic nuclei: voxel grid | **44.1** / 0.987 | **41.5** / 0.977 | 37.3 / 0.932 |
+| BBBC024 nuclei: Gaussians | 27.9 / 0.967 | 27.6 / 0.965 | 27.0 / 0.943 |
+| BBBC024 nuclei: voxel grid | **41.8** / 0.989 | **40.3** / 0.980 | **35.3** / 0.936 |
+| BBBC024 nuclei: Gaussians + sparsity (0.3) | 28.4 / 0.974 | 28.4 / 0.974 | 27.4 / 0.955 |
+| BBBC024 nuclei: voxel grid + same sparsity | 38.5 / **0.996** | 38.0 / **0.995** | 34.4 / **0.971** |
 
-| Navier-Stokes 4D, held-out frames (PSNR) | static | MLP | Mamba |
-|---|---|---|---|
-| 100% observed | 17.0 | 27.6 | 27.9 |
-| 10% observed | 16.0 | 23.2 | 23.1 |
+| Navier-Stokes 4D, held-out frames (PSNR, 3 sequences) | static | MLP | Mamba | bidir. Mamba |
+|---|---|---|---|---|
+| 100% observed | 17.0 | 27.6 | 27.9 | – |
+| 100% observed + temporal smoothness | – | **27.4** | 27.2 | 26.4 |
+| 10% observed | 16.0 | 23.2 | 23.1 | – |
+| 10% observed + temporal smoothness | – | 23.0 | **25.4** | 25.1 |
 
 Details, per-sample numbers and figures: [`results/README.md`](results/README.md).
 

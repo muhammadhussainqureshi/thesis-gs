@@ -77,13 +77,13 @@ state-space model. We replace the camera rasteriser with the physics operator, r
 local-window evaluation, and train end-to-end by gradient descent with 3DGS-style densification and pruning.
 
 The proof of concept shows that (1) on smooth 3D cell volumes, Gaussians are markedly more robust than a voxel
-grid when measurements are scarce (40.9 vs.\ 37.3\,dB PSNR at 60 receivers); (2) on textured 2D cells, extra
-Gaussians can grow ``ghost'' copies of the object in regions the measurements cannot see (the operator's null
-space), which a simple sparsity term removes, after which Gaussians exceed the pixel baseline in structural
-similarity at 60 receivers (SSIM 0.940 vs.\ 0.878) while the pixel grid keeps higher PSNR; and (3) for fluid flow,
-a deformation model is essential (+10\,dB over static Gaussians), while Mamba fits observed frames better than the
-MLP but does not yet generalise better to unobserved time steps. These results establish feasibility and point to
-the open problems addressed in Thesis II.
+grid when measurements are scarce (40.9 vs.\ 37.3\,dB PSNR at 60 receivers), whereas on real sharp-edged nuclei
+(BBBC024) and textured 2D cells the grid is better, so the benefit depends on the object matching the smooth Gaussian
+prior; (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
+(the operator's null space), which a simple sparsity term removes; and (3) for fluid flow, a deformation model is
+essential (+10\,dB over static Gaussians), and a Mamba deformation model with temporal smoothness generalises to
+unobserved time steps better than the MLP of 4D Gaussian Splatting when only 10\% of pixels are observed
+(25.4 vs.\ 23.0\,dB). These results establish feasibility and point to the open problems addressed in Thesis II.
 
 \tableofcontents
 \listoffigures
