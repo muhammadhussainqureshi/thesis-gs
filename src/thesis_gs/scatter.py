@@ -13,18 +13,33 @@ from .utils import cosine_lr, ensure_inversebench, ensure_lmdb_dataset, log, rea
 from .volumes import load_volumes, synthetic_nuclei_volume
 
 
+def saturate(s):
+    """Bounded density f = 1 - exp(-s) in [0, 1): overlapping Gaussians cannot overshoot (like opacity in 3DGS)."""
+    return 1.0 - torch.exp(-s)
+
+
 def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=3000, lr=0.05,
-                densify_every=250, n_add=None, densify_until=0.6, l1=0.0, seed=0, log_every=500):
-    """mode='direct': MSE to ground truth.  mode='physics': ||A f - y||^2/||y||^2 (gt only for metrics)."""
+                densify_every=250, n_add=None, densify_until=0.6, l1=0.0, seed=0, log_every=500,
+                bounded=False, init_field=None):
+    """mode='direct': MSE to ground truth.  mode='physics': ||A f - y||^2/||y||^2 (gt only for metrics).
+    bounded: the field is 1 - exp(-sum of Gaussians), so it stays in [0, 1) like the clipped grid baseline.
+    init_field: start from Gaussians fitted to this field (e.g. the grid reconstruction) instead of uniform."""
     g = torch.Generator(device=gt.device).manual_seed(seed)
     n_add = n_add or max(50, n_init // 4)
-    p = (field.init_from_field(gt, n_init, generator=g) if mode == "direct"
-         else field.init_uniform(n_init, generator=g)).requires_grad_(True)
+    if mode == "direct":
+        p = field.init_from_field(gt, n_init, generator=g)
+    elif init_field is not None:
+        src = -torch.log1p(-init_field.clamp(0, 0.95)) if bounded else init_field
+        p = field.init_from_field(src, n_init, generator=g)
+    else:
+        p = field.init_uniform(n_init, generator=g)
+    p = p.requires_grad_(True)
+    render = (lambda q: saturate(field.render(q))) if bounded else field.render
     opt = torch.optim.Adam([p], lr=lr)
     ynorm = (y.abs() ** 2).sum() if y is not None else None
     t0 = time.time()
     for it in range(1, iters + 1):
-        img = field.render(p)
+        img = render(p)
         loss = F.mse_loss(img, gt) if mode == "direct" else ((op(img) - y).abs() ** 2).sum() / ynorm
         if l1 and mode != "direct":
             loss = loss + l1 * img.mean()          # sparsity: no mass where the measurements don't ask for it
@@ -34,7 +49,7 @@ def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=
         cosine_lr(opt, lr, it, iters)
         if densify_every and it % densify_every == 0 and it <= densify_until * iters:
             with torch.no_grad():
-                img = field.render(p)
+                img = render(p)
                 if mode == "direct":
                     res = gt - img
                 else:
@@ -53,9 +68,9 @@ def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=
                 opt.param_groups[0]["base_lr"] = lr
         if it % log_every == 0 or it == iters:
             with torch.no_grad():
-                log(f"    iter {it:5d}  loss {loss.item():.3e}  PSNR {psnr(field.render(p).clamp(0, 1), gt):6.2f} dB  #G {p.shape[0]}")
+                log(f"    iter {it:5d}  loss {loss.item():.3e}  PSNR {psnr(render(p).clamp(0, 1), gt):6.2f} dB  #G {p.shape[0]}")
     with torch.no_grad():
-        rec = field.render(p).clamp(0, 1)
+        rec = render(p).clamp(0, 1)
     return p.detach(), rec, {"psnr": psnr(rec, gt), "ssim": ssim(rec, gt), "rel_l2": rel_l2(rec, gt),
                              "n_gauss": p.shape[0], "time_s": round(time.time() - t0, 1)}
 
@@ -145,16 +160,24 @@ def run_scatter(args, dim):
             sigma = args.noise_rel * y0.abs().pow(2).mean().sqrt().item() if args.noise_rel else args.noise
             y = add_noise(y0, sigma, gen)
             log(f"[{task}]   sample {i}: Gaussians")
+            init_field, grid_done = None, None
+            if args.init_from_grid:
+                log(f"[{task}]   sample {i}: grid solution (baseline and initialisation)")
+                grid_done = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
+                init_field = grid_done[0]
             p, rec_g, rg = fit_scatter(gt, field, "physics", op=op, y=y, n_init=n_init, n_max=args.n_gauss,
-                                       iters=args.iters, seed=i, log_every=max(args.iters // 4, 1), **dens)
+                                       iters=args.iters, seed=i, log_every=max(args.iters // 4, 1),
+                                       bounded=args.bounded, init_field=init_field, **dens)
             rg["n_params"] = rg["n_gauss"] * field.P
+            if grid_done:
+                rg["time_s"] = round(rg["time_s"] + grid_done[1]["time_s"], 1)   # include the initialising grid fit
             rows.append({"experiment": "B_physics", "receivers": R, "sample": i, "method": "gaussians", **rg})
             if args.skip_grid:
                 rec_b, rb = None, None
                 log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}")
             else:
                 log(f"[{task}]   sample {i}: grid baseline")
-                rec_b, rb = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
+                rec_b, rb = grid_done or fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
                 rb["n_params"] = gt.numel()
                 log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}   "
                     f"grid {rb['psnr']:.2f} dB / SSIM {rb['ssim']:.3f}")

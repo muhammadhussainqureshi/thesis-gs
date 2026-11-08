@@ -50,6 +50,10 @@ def main():
                     help="noise std relative to rms(y); default 0.02 for born3d (~ InverseBench 2D SNR), else --noise is used")
     ap.add_argument("--gauss_beta", type=float, default=1.0,
                     help="kernel exponent: 1 = Gaussian, >1 = generalised Gaussian with sharper edges")
+    ap.add_argument("--bounded", action="store_true",
+                    help="bounded density f = 1 - exp(-sum of Gaussians), in [0, 1) like the clipped grid")
+    ap.add_argument("--init_from_grid", action="store_true",
+                    help="initialise Gaussians from the grid reconstruction (Gaussians then compress and refine it)")
     ap.add_argument("--skip_grid", action="store_true", help="skip the pixel/voxel baseline (e.g. when already run)")
     ap.add_argument("--grid_l1", type=float, default=0.0, help="same sparsity weight for the pixel/voxel baseline")
     # Navier-Stokes 4D

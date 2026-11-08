@@ -1,0 +1,11 @@
+{
+ "description": "Bounded Gaussian density (f = 1 - exp(-sum)) and grid-initialised Gaussians, ~6 h on a T4. Same sparsity for Gaussians and grid. 3D BBBC024 runs need --volumes; the Kaggle notebook downloads them.",
+ "runs": [
+  {"name": "born3d_bbbc024_bounded_gridinit", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid"]},
+  {"name": "born3d_bbbc024_bounded", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--bounded", "--skip_grid"]},
+  {"name": "scatter2d_10_bounded", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded"]},
+  {"name": "scatter2d_10_bounded_gridinit", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--skip_grid"]},
+  {"name": "slice3d_bbbc024_bounded_gridinit", "args": ["--task", "scatter3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--skip_grid"]},
+  {"name": "born3d_synthetic_bounded_gridinit", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--skip_grid"]}
+ ]
+}
