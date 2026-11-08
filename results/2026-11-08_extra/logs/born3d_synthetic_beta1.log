@@ -1,0 +1,82 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task scatter3d --physics born3d --skip_direct --l1 0.3 --grid_l1 0.3 --data_dir /kaggle/working/data --out /kaggle/working/extra/born3d_synthetic_beta1
+
+[08:45:50] device=cuda  task=scatter3d  out=/kaggle/working/extra/born3d_synthetic_beta1
+[08:45:52] [scatter3d] 3 samples, shape (32, 128, 128), source: synthetic HL60-like nuclei (no --volumes given), physics: true 3D Born, 60 transmitters, kernel beta=1.0
+[08:46:07] [scatter3d] B physics, 360 receivers, 21600 measurements for 524288 voxels (adjoint check: 3.5e-05)
+[08:46:07] [scatter3d]   sample 0: Gaussians
+[08:48:09]     iter   750  loss 8.871e-03  PSNR  26.54 dB  #G 2085
+[08:50:19]     iter  1500  loss 1.327e-02  PSNR  25.48 dB  #G 3499
+[08:53:02]     iter  2250  loss 1.430e-02  PSNR  34.84 dB  #G 3953
+[08:55:50]     iter  3000  loss 1.134e-02  PSNR  37.14 dB  #G 3953
+[08:55:50] [scatter3d]   sample 0: grid baseline
+[08:59:42] [scatter3d]   -> Gaussians 37.14 dB / SSIM 0.983   grid 37.97 dB / SSIM 0.976
+[08:59:42] [scatter3d]   sample 1: Gaussians
+[09:01:42]     iter   750  loss 4.634e-03  PSNR  24.79 dB  #G 2040
+[09:03:51]     iter  1500  loss 1.822e-02  PSNR  25.20 dB  #G 3422
+[09:06:31]     iter  2250  loss 2.166e-02  PSNR  35.17 dB  #G 3775
+[09:09:14]     iter  3000  loss 1.220e-02  PSNR  37.67 dB  #G 3775
+[09:09:14] [scatter3d]   sample 1: grid baseline
+[09:13:06] [scatter3d]   -> Gaussians 37.67 dB / SSIM 0.976   grid 44.47 dB / SSIM 0.990
+[09:13:06] [scatter3d]   sample 2: Gaussians
+[09:15:06]     iter   750  loss 5.192e-03  PSNR  25.14 dB  #G 2088
+[09:17:16]     iter  1500  loss 2.088e-02  PSNR  25.53 dB  #G 3470
+[09:19:58]     iter  2250  loss 2.275e-02  PSNR  34.98 dB  #G 3812
+[09:22:42]     iter  3000  loss 1.260e-02  PSNR  37.89 dB  #G 3812
+[09:22:43] [scatter3d]   sample 2: grid baseline
+[09:26:34] [scatter3d]   -> Gaussians 37.89 dB / SSIM 0.972   grid 43.79 dB / SSIM 0.989
+[09:26:42] [scatter3d] B physics, 180 receivers, 10800 measurements for 524288 voxels (adjoint check: 1.4e-06)
+[09:26:42] [scatter3d]   sample 0: Gaussians
+[09:28:19]     iter   750  loss 8.842e-03  PSNR  24.88 dB  #G 2118
+[09:30:04]     iter  1500  loss 1.358e-02  PSNR  25.34 dB  #G 3512
+[09:32:23]     iter  2250  loss 1.431e-02  PSNR  33.57 dB  #G 3951
+[09:34:45]     iter  3000  loss 1.135e-02  PSNR  36.16 dB  #G 3951
+[09:34:45] [scatter3d]   sample 0: grid baseline
+[09:36:47] [scatter3d]   -> Gaussians 36.16 dB / SSIM 0.964   grid 35.94 dB / SSIM 0.962
+[09:36:47] [scatter3d]   sample 1: Gaussians
+[09:38:23]     iter   750  loss 4.293e-03  PSNR  24.70 dB  #G 2137
+[09:40:08]     iter  1500  loss 1.903e-02  PSNR  25.47 dB  #G 3506
+[09:42:27]     iter  2250  loss 2.257e-02  PSNR  34.26 dB  #G 3949
+[09:44:50]     iter  3000  loss 1.251e-02  PSNR  36.84 dB  #G 3949
+[09:44:50] [scatter3d]   sample 1: grid baseline
+[09:46:51] [scatter3d]   -> Gaussians 36.84 dB / SSIM 0.953   grid 42.18 dB / SSIM 0.983
+[09:46:51] [scatter3d]   sample 2: Gaussians
+[09:48:28]     iter   750  loss 4.591e-03  PSNR  24.60 dB  #G 2177
+[09:50:14]     iter  1500  loss 2.088e-02  PSNR  25.40 dB  #G 3513
+[09:52:31]     iter  2250  loss 2.231e-02  PSNR  34.06 dB  #G 3874
+[09:54:50]     iter  3000  loss 1.245e-02  PSNR  36.81 dB  #G 3874
+[09:54:50] [scatter3d]   sample 2: grid baseline
+[09:56:51] [scatter3d]   -> Gaussians 36.81 dB / SSIM 0.949   grid 41.71 dB / SSIM 0.982
+[09:56:56] [scatter3d] B physics, 60 receivers, 3600 measurements for 524288 voxels (adjoint check: 5.0e-07)
+[09:56:56] [scatter3d]   sample 0: Gaussians
+[09:58:16]     iter   750  loss 9.340e-03  PSNR  25.58 dB  #G 2409
+[09:59:50]     iter  1500  loss 1.451e-02  PSNR  24.67 dB  #G 3595
+[10:01:51]     iter  2250  loss 1.566e-02  PSNR  28.41 dB  #G 3933
+[10:03:55]     iter  3000  loss 1.237e-02  PSNR  31.08 dB  #G 3933
+[10:03:55] [scatter3d]   sample 0: grid baseline
+[10:04:53] [scatter3d]   -> Gaussians 31.08 dB / SSIM 0.851   grid 34.69 dB / SSIM 0.958
+[10:04:53] [scatter3d]   sample 1: Gaussians
+[10:06:12]     iter   750  loss 7.133e-03  PSNR  24.45 dB  #G 2235
+[10:07:41]     iter  1500  loss 2.094e-02  PSNR  24.63 dB  #G 3358
+[10:09:32]     iter  2250  loss 2.455e-02  PSNR  30.37 dB  #G 3496
+[10:11:25]     iter  3000  loss 1.426e-02  PSNR  33.21 dB  #G 3496
+[10:11:25] [scatter3d]   sample 1: grid baseline
+[10:12:22] [scatter3d]   -> Gaussians 33.21 dB / SSIM 0.870   grid 40.19 dB / SSIM 0.970
+[10:12:22] [scatter3d]   sample 2: Gaussians
+[10:13:42]     iter   750  loss 4.630e-03  PSNR  23.88 dB  #G 2250
+[10:15:12]     iter  1500  loss 2.273e-02  PSNR  24.51 dB  #G 3363
+[10:17:07]     iter  2250  loss 2.788e-02  PSNR  29.28 dB  #G 3669
+[10:19:04]     iter  3000  loss 1.587e-02  PSNR  32.07 dB  #G 3669
+[10:19:04] [scatter3d]   sample 2: grid baseline
+[10:20:01] [scatter3d]   -> Gaussians 32.07 dB / SSIM 0.835   grid 39.69 dB / SSIM 0.970
+[10:20:01] [scatter3d] summary
+                                      psnr   ssim  rel_l2   n_gauss    n_params   time_s  psnr_std  ssim_std  n_samples
+experiment receivers method                                                                                            
+B_physics  60        gaussians      32.121  0.852   0.283  3699.333   40692.667  404.667     1.066     0.017          3
+                     grid_baseline  38.192  0.966   0.139     0.000  524288.000   57.300     3.042     0.007          3
+           180       gaussians      36.603  0.955   0.170  3924.667   43171.333  481.800     0.387     0.008          3
+                     grid_baseline  39.945  0.976   0.114     0.000  524288.000  121.200     3.472     0.012          3
+           360       gaussians      37.567  0.977   0.152  3846.667   42313.333  576.967     0.385     0.006          3
+                     grid_baseline  42.073  0.985   0.089     0.000  524288.000  231.567     3.572     0.008          3
+[10:20:02] ===== scatter3d finished in 94.2 min. Results in /kaggle/working/extra/born3d_synthetic_beta1/scatter3d
+
+EXIT CODE 0

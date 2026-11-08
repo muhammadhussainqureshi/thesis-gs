@@ -16,7 +16,9 @@ $\mat{\Sigma}_i$ symmetric positive definite for any parameter values~\citep{ker
 $a_i=\mathrm{softplus}(\alpha_i)\ge0$ for permittivity and $a_i=\alpha_i\in\R$ for vorticity. The parameters per
 Gaussian are $\theta_i=(\vect{\mu}_i,\vect{\ell}_i,\vartheta_i\text{ or }\vect{q}_i,\alpha_i)$. In practice the sum in
 \eqref{eq:field} runs only over Gaussians whose window $\lVert\vect{x}-\mathrm{round}(\vect{\mu}_i)\rVert_\infty\le h$
-contains $\vect{x}$.
+contains $\vect{x}$. A \emph{generalised} Gaussian replaces the quadratic form $q_i(\vect{x})$ in the exponent by
+$q_i(\vect{x})^{\beta}$ with $\beta\ge1$: $\beta=1$ is \eqref{eq:field}, larger $\beta$ gives a flatter top and a sharper
+edge, intended for piecewise-constant objects.
 
 \section{Scattering forward model}
 On a grid of $P$ points with spacing $\Delta x\,\Delta y$, the linear (Born) scattering operator of the benchmark maps
@@ -30,6 +32,22 @@ written compactly as $\vect{y}=\mat{A}\vect{f}+\vect{n}$ with $\mat{A}\in\C^{TM\
 standard deviation $\sigma=10^{-4}$. Here $T=20$, $M\in\{360,180,60\}$ and $P=128^2$, so $TM\le7200$ complex
 measurements describe $16384$ unknowns and $\mat{A}$ has a non-trivial null space. For a volume with slices
 $\vect{f}^{(z)}$, $z=1,\dots,Z$, the slice-wise model is $\vect{y}^{(z)}=\mat{A}\vect{f}^{(z)}+\vect{n}^{(z)}$.
+
+\paragraph{True 3D Born model.} The slice-wise model treats each slice as an independent 2D experiment. A true 3D
+first-order Born model with point transmitters at $\vect{s}_t$ and receivers at $\vect{r}_r$ on a sphere around the
+volume is
+\begin{equation}
+  y_{t,r} = k^2\,\Delta V \sum_{p=1}^{P} f_p\, G(\lVert\vect{s}_t-\vect{x}_p\rVert)\, G(\lVert\vect{r}_r-\vect{x}_p\rVert),
+  \qquad G(d)=\frac{e^{\mathrm{i}kd}}{4\pi d},
+  \label{eq:born3d}
+\end{equation}
+with the free-space Green's function of the 3D Helmholtz equation, voxel volume $\Delta V=\Delta x^3$ and the same
+voxel size, wavelength (six voxels) and sensor radius (1.6\,m) as the 2D benchmark. We use $T=60$ transmitters and
+$M\in\{360,180,60\}$ receivers spread evenly over the sphere (golden-angle spiral). A $32\times128\times128$ volume has
+$P=524{,}288$ unknowns but only $TM\le21{,}600$ complex measurements, about a tenth of the slice-wise model, so the
+problem is far more under-determined. Noise is complex Gaussian with standard deviation 2\% of the RMS measurement,
+the signal-to-noise ratio of the 2D benchmark. The implementation matches the analytic response of a point scatterer
+to $10^{-7}$ and passes an adjoint test $\langle\mat{A}\vect{f},\vect{r}\rangle=\langle\vect{f},\mat{A}^H\vect{r}\rangle$.
 
 \section{Objective for scattering}
 With $\vect{f}_\Theta$ the field \eqref{eq:field} sampled on the grid,

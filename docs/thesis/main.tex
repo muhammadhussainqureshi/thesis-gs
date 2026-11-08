@@ -76,10 +76,10 @@ deformation is modelled either by a multilayer perceptron, as in 4D Gaussian Spl
 state-space model. We replace the camera rasteriser with the physics operator, render Gaussians on a grid with a
 local-window evaluation, and train end-to-end by gradient descent with 3DGS-style densification and pruning.
 
-The proof of concept shows that (1) on smooth 3D cell volumes, Gaussians are markedly more robust than a voxel
-grid when measurements are scarce (40.9 vs.\ 37.3\,dB PSNR at 60 receivers), whereas on real sharp-edged nuclei
-(BBBC024) and textured 2D cells the grid is better, so the benefit depends on the object matching the smooth Gaussian
-prior; (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
+The proof of concept, which includes a true 3D Born scattering model with sensors on a sphere, shows that (1)
+Gaussians beat a voxel grid only on smooth volumes under a slice-wise model with scarce measurements (40.9 vs.\
+37.3\,dB at 60 receivers); on textured 2D cells, on real sharp-edged nuclei (BBBC024) and under the true 3D model, a
+grid with the same sparsity prior is more accurate, while Gaussians are 5--12 times more compact; (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
 (the operator's null space), which a simple sparsity term removes; and (3) for fluid flow, a deformation model is
 essential (+10\,dB over static Gaussians), and a Mamba deformation model with temporal smoothness generalises to
 unobserved time steps better than the MLP of 4D Gaussian Splatting when only 10\% of pixels are observed

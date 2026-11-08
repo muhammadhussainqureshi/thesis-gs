@@ -42,7 +42,9 @@ a single $N\times P$ tensor ($P=6$ in 2D, $P=11$ in 3D), which is convenient for
 \section{Physics operators}
 \paragraph{Scattering.} We re-implement the InverseBench linear scattering operator as two complex matrix products
 in single precision on the GPU and verify at start-up that it matches the benchmark implementation to within a relative
-error of $3\times10^{-7}$. For 3D volumes, the operator is applied to every $z$-slice and the losses are summed.
+error of $3\times10^{-7}$. For 3D volumes we use either the slice-wise operator (applied to every $z$-slice, losses summed) or the true 3D
+Born operator \eqref{eq:born3d}, implemented the same way with precomputed incident fields and
+receiver Green's functions ($P\times T$ and $P\times M$ complex matrices; 1.5\,GB for 360 receivers).
 \paragraph{Fluid observations.} For Navier--Stokes the measurement operator selects the observed pixels of each frame
 (a random mask with 100\% or 10\% coverage); frames that are held out for evaluation are never observed.
 

@@ -14,7 +14,8 @@ a sequence model pays off only once regularised in time, and then mainly when ob
 
 \section{Limitations}
 \begin{itemize}
-  \item The 3D physics is slice-wise 2D scattering, not a true 3D Born model with sensors around the volume.
+  \item The true 3D model is linear (first Born approximation); multiple scattering is not modelled, and 3D results
+  use three volumes.
   \item Results use three to five samples per setting; differences of a few tenths of a dB are not yet significant.
   \item The 4D problem reconstructs a field from observations of itself; InverseBench's harder task of recovering the
   initial condition through the solver is not addressed.
@@ -26,14 +27,14 @@ a sequence model pays off only once regularised in time, and then mainly when ob
 
 \section{Plan for Thesis II}
 \begin{enumerate}
-  \item A true 3D scattering operator (3D Green's function, transmitters and receivers on a sphere) and, if time
-  allows, multiple scattering.
+  \item Multiple scattering in 3D, and better optimisation of Gaussians under the true 3D model (initialisation
+  from a back-projection or grid solution, bounded densities).
   \item Systematic evaluation on the full InverseBench test sets with confidence intervals, and comparison with the
   benchmark's diffusion-prior methods.
   \item Physics-aware density control (densify only within the support indicated by the data; null-space-aware
   regularisers) instead of a global sparsity term.
-  \item Representations for sharp boundaries: sharper kernels (e.g.\ generalised or clipped Gaussians) or hybrid
-  Gaussian--grid models.
+  \item Representations for sharp boundaries: generalised Gaussians did not help under the physics loss, so bounded
+  (saturating) densities or hybrid Gaussian--grid models are the next candidates.
   \item Motion models: hardware-efficient Mamba (parallel scan), tuning of the smoothness weight, and advection-informed
   deformation that uses the velocity field implied by the vorticity.
   \item The Navier--Stokes initial-value inverse problem through a differentiable solver.

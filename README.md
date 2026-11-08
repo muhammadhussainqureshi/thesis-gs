@@ -58,6 +58,15 @@ InverseBench and its test data are downloaded automatically. On Kaggle use
 | BBBC024 nuclei: Gaussians + sparsity (0.3) | 28.4 / 0.974 | 28.4 / 0.974 | 27.4 / 0.955 |
 | BBBC024 nuclei: voxel grid + same sparsity | 38.5 / **0.996** | 38.0 / **0.995** | 34.4 / **0.971** |
 
+| True 3D scattering (3D Born, sensors on a sphere), sparsity 0.3 both | 360 | 180 | 60 |
+|---|---|---|---|
+| Synthetic: Gaussians (≈42k params) | 37.6 / 0.977 | 36.6 / 0.955 | 32.1 / 0.852 |
+| Synthetic: voxel grid (524k params) | **42.1 / 0.985** | **39.9 / 0.976** | **38.2 / 0.966** |
+| BBBC024: Gaussians (≈47k params) | 25.6 / 0.960 | 24.9 / 0.940 | 20.9 / 0.772 |
+| BBBC024: voxel grid (524k params) | **32.5 / 0.983** | **30.5 / 0.956** | **25.6 / 0.875** |
+
+2D on 10 cells (paired): the pixel grid with the same sparsity beats Gaussians on every cell (by 0.6 / 2.3 / 2.9 dB at 60 / 180 / 360 receivers). Generalised Gaussians (β = 2, 4) did not help under the physics loss.
+
 | Navier-Stokes 4D, held-out frames (PSNR, 3 sequences) | static | MLP | Mamba | bidir. Mamba |
 |---|---|---|---|---|
 | 100% observed | 17.0 | 27.6 | 27.9 | – |

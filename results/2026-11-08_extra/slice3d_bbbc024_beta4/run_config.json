@@ -1,0 +1,48 @@
+{
+ "task": "scatter3d",
+ "out": "/kaggle/working/extra/slice3d_bbbc024_beta4",
+ "data_dir": "/kaggle/working/data",
+ "local_dir": "/tmp/thesis_data",
+ "ib_dir": "/tmp/InverseBench",
+ "device": "cuda",
+ "samples": 3,
+ "iters": 3000,
+ "n_gauss": null,
+ "window": null,
+ "receivers": [
+  360,
+  180,
+  60
+ ],
+ "noise": 0.0001,
+ "volumes": "/tmp/cytopacq",
+ "depth": 32,
+ "skip_direct": true,
+ "crop": 0.5,
+ "n_init": null,
+ "densify_add": null,
+ "densify_until": 0.6,
+ "l1": 0.3,
+ "physics": "slice",
+ "transmitters": 60,
+ "noise_rel": null,
+ "gauss_beta": 4.0,
+ "skip_grid": true,
+ "grid_l1": 0.0,
+ "frames": 21,
+ "frame_dt": 0.05,
+ "obs_ratios": [
+  1.0,
+  0.1
+ ],
+ "ns_noise": 0.0,
+ "deform": [
+  "mlp",
+  "mamba"
+ ],
+ "batch_frames": 4,
+ "temporal_reg": 0.0,
+ "lr_gauss": 0.01,
+ "lr_net": 0.001,
+ "quick": false
+}

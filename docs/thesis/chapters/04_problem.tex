@@ -31,7 +31,8 @@ for fitting; it is used only to evaluate the reconstruction.
   \item Linear inverse scattering with the InverseBench forward model: 2D cells (InverseBench test set) and 3D cell
   volumes (synthetic HL60-like nuclei and CytoPacq/BBBC024 nuclei), with 360, 180 and 60 receivers and the benchmark
   noise level.
-  \item 3D physics approximated by applying the 2D operator to every $z$-slice (\emph{slice-wise Born model}).
+  \item 3D physics with two models: the 2D operator applied to every $z$-slice (\emph{slice-wise}) and a \emph{true 3D}
+  first-order Born model with transmitters and receivers on a sphere around the volume.
   \item 2D Navier--Stokes ($Re=200$) as a 2D + time (``4D'') problem: sequences of 21 frames, observations of all or
   10\% of the pixels per frame, every fourth frame held out.
   \item Baselines: direct optimisation of a pixel/voxel grid with the same data term (and the same sparsity term).

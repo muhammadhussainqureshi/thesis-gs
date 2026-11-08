@@ -37,8 +37,8 @@ forward model, using datasets and operators from InverseBench. 3D Gaussians reco
 electromagnetic fields (inverse scattering), and 4D Gaussians with an MLP or Mamba deformation network reconstruct
 2D Navier--Stokes flow over time from sparse observations. All three planned experiments run end to end, the code is
 in a structured GitHub repository, and the thesis document is drafted. This report summarises the method, the
-results so far (including negative ones), the experiments currently running (a true 3D scattering model, sharper
-kernels, more samples), and questions for the next meeting.
+results (including negative ones), the new true 3D scattering model, sharper kernels and a ten-cell evaluation, and
+questions for the next meeting.
 \end{abstract}
 
 \section{Status at a glance}
@@ -51,12 +51,12 @@ Item & Status & Note \\
 3D Gaussians on inverse scattering (2D and 3D) & done & 2D cells, synthetic and real (BBBC024) 3D nuclei \\
 4D Gaussians on Navier--Stokes & done & held-out frames, 100\% and 10\% observations \\
 Mamba as the motion model & done & MLP vs.\ Mamba vs.\ bidirectional Mamba \\
-True 3D scattering model & running & sensors on a sphere; results expected \todo{date} \\
-Sharper (generalised) Gaussian kernels & running & targets the BBBC024 edge problem \\
-More samples with spread (10 cells) & running & mean $\pm$ std reported \\
+True 3D scattering model & done & sensors on a sphere; grid wins (Section~\ref{sec:running}) \\
+Sharper (generalised) Gaussian kernels & done & did not help under the physics loss \\
+More samples with spread (10 cells) & done & paired comparison, mean $\pm$ std \\
 GitHub repository (standard structure) & done & to be transferred to the thesis account \\
-Thesis document (LaTeX, 37 pages) & draft & all required chapters \\
-Slides and Open House poster (A0) & draft & 3D panel updated after current runs \\
+Thesis document (LaTeX, 40 pages) & draft & all required chapters \\
+Slides and Open House poster (A0) & draft & updated with all results \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -210,7 +210,7 @@ bidirectional Mamba with 100\% and then 10\% of pixels observed. With 10\% the M
 \label{fig:ns}
 \end{figure}
 
-\section{Currently running}
+\section{New: true 3D model, sharper kernels, ten cells}
 \label{sec:running}
 \paragraph{True 3D scattering.} Following your request, the slice-wise operator is replaced by a first-order Born
 model in 3D,
@@ -220,12 +220,51 @@ y_{t,r} = k^2\,\Delta V \sum_p f_p\, G(\lVert\vect{x}_t-\vect{x}_p\rVert)\, G(\l
 \end{equation}
 with the same voxel size, wavelength and sensor radius as InverseBench, 60 transmitters and 360/180/60 receivers
 spread evenly over a sphere around the volume, and noise at the SNR of the 2D benchmark. The implementation matches
-the analytic response of a point scatterer to $10^{-7}$ and passes an adjoint test. Runs on BBBC024 and synthetic
-nuclei, with Gaussians and a voxel grid: \todo{results pending}.
+the analytic response of a point scatterer to $10^{-7}$ and passes an adjoint test. With about ten times fewer
+measurements than the slice-wise model, the voxel grid is better than Gaussians in every setting
+(Table~\ref{tab:born3d}). On BBBC024, Gaussians leave a bright rim at each boundary and under-fill the interior
+(Figure~\ref{fig:born3d}); the voxel grid benefits from being clipped to $[0,1]$, a strong prior for binary objects
+that Gaussians lack. Gaussians are, however, 11--12 times more compact.
 
-\paragraph{Sharper kernels and more samples.} Generalised Gaussians with $\beta=4$ on BBBC024 (both operators), and
-2D runs on 10 cells with mean $\pm$ standard deviation. In a small test on binary masks, $\beta=4$ improved a direct fit
-by about 3\,dB. \todo{results pending}.
+\begin{table}[H]
+\centering
+\caption{True 3D scattering, $32\times128\times128$, sparsity 0.3 for both methods, 3 volumes (PSNR / SSIM).}
+\label{tab:born3d}
+\begin{tabular}{llcccc}
+\toprule
+Volumes & Method & Params & 360 rec. & 180 rec. & 60 rec. \\
+\midrule
+\multirow{2}{*}{Synthetic} & Gaussians & 42k & 37.6 / 0.977 & 36.6 / 0.955 & 32.1 / 0.852 \\
+ & Voxel grid & 524k & \textbf{42.1 / 0.985} & \textbf{39.9 / 0.976} & \textbf{38.2 / 0.966} \\
+\midrule
+\multirow{3}{*}{BBBC024} & Gaussians & 47k & 25.6 / 0.960 & 24.9 / 0.940 & 20.9 / 0.772 \\
+ & Gaussians, $\beta=4$ & 51k & 24.2 / 0.954 & 22.6 / 0.927 & 16.3 / 0.722 \\
+ & Voxel grid & 524k & \textbf{32.5 / 0.983} & \textbf{30.5 / 0.956} & \textbf{25.6 / 0.875} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{born3d_synthetic.png}\\[2pt]
+\includegraphics[width=\linewidth]{born3d_bbbc024.png}
+\caption{True 3D model, middle slices. Top: synthetic nuclei. Bottom: BBBC024. Columns: truth, then Gaussians and
+voxel grid at 360, 180 and 60 receivers.}
+\label{fig:born3d}
+\end{figure}
+
+\paragraph{Sharper kernels.} Generalised Gaussians ($\beta=4$) fit binary masks about 3\,dB better when fitted
+directly, but under the physics loss they are slightly worse (slice-wise BBBC024: 28.1 / 28.0 / 25.5\,dB vs.\
+28.4 / 28.4 / 27.4\,dB).
+
+\paragraph{Ten cells, paired.} In 2D, the pixel grid with the same sparsity term beats Gaussians on all ten cells at
+every receiver count, by $0.6\pm0.3$, $2.3\pm0.7$ and $2.9\pm0.8$\,dB at 60, 180 and 360 receivers. Against the plain
+grid, Gaussians with sparsity keep higher SSIM at 60 receivers (0.951 vs.\ 0.910).
+
+\paragraph{Honest summary.} For scattering, Gaussians are not more accurate than a well-regularised grid, except on
+smooth objects in the slice-wise setting; their advantages are compactness (5--12$\times$ fewer parameters) and, in
+4D, a motion model where Mamba helps with sparse data. A likely cause of the accuracy gap is that the grid is bounded
+to $[0,1]$ while the summed Gaussian density is not.
 
 \section{Code and documents}
 \begin{itemize}
@@ -239,6 +278,8 @@ formulation, setup, results, discussion and Thesis II plan).
 \section{Questions for the meeting}
 \begin{enumerate}
 \item Is the true 3D model above what you had in mind, and is it sufficient for Thesis I?
+\item Is it acceptable to frame the scattering part as a characterisation (when Gaussians help, and why not), or
+should we first try bounded Gaussian densities and grid-initialised Gaussians to close the gap?
 \item Is reconstructing the flow from sparse observations acceptable for the 4D task, or should we add a
 physics term (the Navier--Stokes residual) or recover the initial condition through the solver, as InverseBench does?
 \item Should the next effort go to that physics-informed 4D model, or to extending the literature review?

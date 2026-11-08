@@ -1,0 +1,26 @@
+{
+ "born3d_bbbc024_beta1": {
+  "ok": true,
+  "minutes": 99.2
+ },
+ "born3d_bbbc024_beta4": {
+  "ok": true,
+  "minutes": 83.2
+ },
+ "born3d_synthetic_beta1": {
+  "ok": true,
+  "minutes": 94.2
+ },
+ "slice3d_bbbc024_beta4": {
+  "ok": true,
+  "minutes": 68.0
+ },
+ "scatter2d_10_fair": {
+  "ok": true,
+  "minutes": 8.5
+ },
+ "scatter2d_10_beta2": {
+  "ok": true,
+  "minutes": 8.5
+ }
+}

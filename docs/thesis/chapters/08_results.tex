@@ -3,7 +3,8 @@
 
 Numbers are means over samples (PSNR in dB / SSIM); the number of samples is given in each table. The Gaussian and
 grid methods always use identical measurements and data terms. Initial runs (October 2026) used three samples; the
-final runs (November 2026) used five samples for 2D scattering and added the experiments marked as final.
+final runs (November 2026) used five and then ten samples for 2D scattering, added a true 3D scattering model, and
+added the experiments marked as final.
 
 \section{Representation check}
 Fitting Gaussians directly to the ground truth (no physics) confirms that the representation can express the
@@ -29,6 +30,13 @@ therefore comes from the sparsity prior, not from the Gaussian representation it
 \emph{necessary} for Gaussians (it prevents ghosts) while it costs the grid PSNR at high receiver counts
 (36.1 $\to$ 33.2\,dB at 360).
 
+A run on ten cells confirms this with paired comparisons: with the same sparsity term, the pixel grid is better than
+the Gaussians on \emph{every} cell and at every receiver count, by $0.6\pm0.3$, $2.3\pm0.7$ and $2.9\pm0.8$\,dB at
+60, 180 and 360 receivers. The spread between cells (standard deviation about 3--4\,dB) is larger than most
+differences between methods, which is why paired comparisons are reported. Generalised Gaussians with $\beta=2$
+lower PSNR by about 1--2\,dB. Against the \emph{unregularised} grid, Gaussians with sparsity still have higher SSIM at
+60 receivers on eight of ten cells (0.951 vs.\ 0.910).
+
 \begin{table}[h]
   \centering
   \caption{2D inverse scattering, InverseBench cells (PSNR dB / SSIM).}
@@ -51,6 +59,12 @@ therefore comes from the sparsity prior, not from the Gaussian representation it
     & Gaussians + sparsity, $\lambda=0.3$ & 30.8 / 0.980 & 30.6 / 0.979 & 27.1 / 0.924 \\
     & Pixel grid & \textbf{36.1} / 0.984 & \textbf{34.7} / 0.974 & \textbf{28.6} / 0.886 \\
     & Pixel grid + sparsity, $\lambda=0.3$ & 33.2 / \textbf{0.985} & 32.5 / \textbf{0.983} & 27.7 / \textbf{0.933} \\
+    \midrule
+    \multirow{4}{*}{\shortstack[l]{Final\\(10 samples)}}
+    & Gaussians + sparsity, $\lambda=0.3$ & 32.2 / 0.985 & 31.9 / 0.984 & 29.4 / 0.951 \\
+    & Generalised Gaussians ($\beta=2$) + sparsity & 31.4 / 0.982 & 31.1 / 0.981 & 27.7 / 0.934 \\
+    & Pixel grid & \textbf{37.3} / 0.986 & \textbf{35.9} / 0.976 & \textbf{30.7} / 0.910 \\
+    & Pixel grid + sparsity, $\lambda=0.3$ & 35.0 / \textbf{0.990} & 34.2 / \textbf{0.988} & 30.0 / \textbf{0.957} \\
     \bottomrule
   \end{tabular}}
 \end{table}
@@ -65,7 +79,7 @@ therefore comes from the sparsity prior, not from the Gaussian representation it
   \label{fig:ghost}
 \end{figure}
 
-\section{3D inverse scattering}
+\section{3D inverse scattering, slice-wise model}
 \label{sec:s3d}
 On synthetic nuclei (Table~\ref{tab:s3d}, Figure~\ref{fig:s3d}) Gaussians are almost unaffected by the number of
 receivers (40.6--40.9\,dB), while the voxel grid degrades from 44.1 to 37.3\,dB and becomes speckled. With 60
@@ -80,6 +94,9 @@ representation limit (the PSNR does not change with the receiver count), not a m
 less sensitive to edge error, Gaussians with sparsity (0.955) still beat the unregularised voxel grid (0.936) at 60
 receivers, but not the voxel grid with the same sparsity (0.971). Together with the synthetic result this gives a
 clear rule: Gaussians help when the object is smooth, and hurt when it is piecewise constant with sharp edges.
+Sharper generalised Gaussians ($\beta=4$) did not fix this: although they fit binary masks about 3\,dB better when
+fitted directly to the ground truth, under the physics loss they reach 28.1, 28.0 and 25.5\,dB, slightly below
+ordinary Gaussians.
 
 \begin{table}[h]
   \centering
@@ -93,10 +110,11 @@ clear rule: Gaussians help when the object is smooth, and hurt when it is piecew
     \multirow{2}{*}{Synthetic nuclei} & Gaussians & 40.8 / \textbf{0.994} & 40.6 / \textbf{0.994} & \textbf{40.9 / 0.988} \\
                                       & Voxel grid & \textbf{44.1} / 0.987 & \textbf{41.5} / 0.977 & 37.3 / 0.932 \\
     \midrule
-    \multirow{4}{*}{BBBC024 (CytoPacq)} & Gaussians & 27.9 / 0.967 & 27.6 / 0.965 & 27.0 / 0.943 \\
+    \multirow{5}{*}{BBBC024 (CytoPacq)} & Gaussians & 27.9 / 0.967 & 27.6 / 0.965 & 27.0 / 0.943 \\
                                          & Voxel grid & \textbf{41.8} / 0.989 & \textbf{40.3} / 0.980 & \textbf{35.3} / 0.936 \\
                                          & Gaussians + sparsity, $\lambda=0.3$ & 28.4 / 0.974 & 28.4 / 0.974 & 27.4 / 0.955 \\
                                          & Voxel grid + sparsity, $\lambda=0.3$ & 38.5 / \textbf{0.996} & 38.0 / \textbf{0.995} & 34.4 / \textbf{0.971} \\
+                                         & Gen.\ Gaussians ($\beta=4$) + sparsity & 28.1 / 0.973 & 28.0 / 0.973 & 25.5 / 0.932 \\
     \bottomrule
   \end{tabular}}
 \end{table}
@@ -115,6 +133,52 @@ clear rule: Gaussians help when the object is smooth, and hurt when it is piecew
   \caption{Middle slice of BBBC024 volume 0 (sparsity $\lambda=0.3$): ground truth, then Gaussian and voxel
   reconstructions at 360, 180 and 60 receivers. Gaussians soften the sharp nucleus boundaries and leave a faint rim.}
   \label{fig:s3d_bbbc}
+\end{figure}
+
+\section{True 3D inverse scattering}
+\label{sec:born3d}
+Table~\ref{tab:born3d} and Figure~\ref{fig:born3d} report the true 3D Born model \eqref{eq:born3d} with sensors on a
+sphere, sparsity $\lambda=0.3$ for both methods. With about ten times fewer measurements than the slice-wise model,
+all numbers are lower, and the voxel grid is better than the Gaussians in every setting: by 4.5--6\,dB on synthetic
+nuclei and by 4.6--7.0\,dB on BBBC024 (better on every volume except one synthetic volume at 180 receivers). The
+robustness of Gaussians to fewer receivers seen with the slice-wise model does not carry over: both methods lose
+about 5--7\,dB from 360 to 60 receivers. Generalised Gaussians ($\beta=4$) are again worse (24.2 / 22.6 / 16.3\,dB on
+BBBC024).
+
+The reconstructions show where Gaussians lose. On BBBC024 they place a bright rim at each nucleus boundary and leave
+the interior below the true value, while the voxel grid, which is projected onto $[0,1]$ after every step, fills the
+nuclei uniformly. On binary objects this box constraint is a strong prior that the Gaussians lack: their summed
+density is unbounded during optimisation. The Gaussians are, however, about \textbf{11--12 times more compact}: 3700--4600
+Gaussians (41k--51k numbers) against 524{,}288 voxels.
+
+\begin{table}[h]
+  \centering
+  \caption{True 3D inverse scattering (3D Born model, 60 transmitters, receivers on a sphere), $32\times128\times128$
+  volumes, sparsity $\lambda=0.3$ for both methods (PSNR dB / SSIM, mean of 3 volumes).}
+  \label{tab:born3d}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{lllccc}
+    \toprule
+    Volumes & Method & Parameters & 360 receivers & 180 receivers & 60 receivers \\
+    \midrule
+    \multirow{2}{*}{Synthetic nuclei} & Gaussians & $\approx$42k & 37.6 / 0.977 & 36.6 / 0.955 & 32.1 / 0.852 \\
+                                      & Voxel grid & 524k & \textbf{42.1 / 0.985} & \textbf{39.9 / 0.976} & \textbf{38.2 / 0.966} \\
+    \midrule
+    \multirow{3}{*}{BBBC024 (CytoPacq)} & Gaussians & $\approx$47k & 25.6 / 0.960 & 24.9 / 0.940 & 20.9 / 0.772 \\
+                                         & Gen.\ Gaussians ($\beta=4$) & $\approx$51k & 24.2 / 0.954 & 22.6 / 0.927 & 16.3 / 0.722 \\
+                                         & Voxel grid & 524k & \textbf{32.5 / 0.983} & \textbf{30.5 / 0.956} & \textbf{25.6 / 0.875} \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{born3d_synthetic.png}\\[2pt]
+  \includegraphics[width=\linewidth]{born3d_bbbc024.png}
+  \caption{True 3D Born model, middle slices of volume 0. Top: synthetic nuclei. Bottom: BBBC024. Columns: ground
+  truth, then Gaussian and voxel reconstructions at 360, 180 and 60 receivers. Gaussians leave bright rims at the
+  boundaries of the binary nuclei.}
+  \label{fig:born3d}
 \end{figure}
 
 \section{4D Gaussians for Navier--Stokes}
@@ -170,10 +234,10 @@ times slower than the MLP (28 vs.\ 3\,min per sequence) because of its sequentia
 
 \section{Answers to the research questions}
 \begin{description}
-  \item[RQ1] Partly. On smooth 3D volumes Gaussians are more robust than voxels to scarce measurements (+3.6\,dB at 60
-  receivers). On real, sharp-edged BBBC024 nuclei and on textured 2D cells the grid is better in PSNR; a grid with
-  the same sparsity prior also matches or beats Gaussians in SSIM. The benefit depends on the object matching the
-  smooth Gaussian prior.
+  \item[RQ1] Mostly no, with one exception. Gaussians are more robust than voxels to scarce measurements only on
+  smooth volumes under the slice-wise model (+3.6\,dB at 60 receivers). On textured 2D cells, on sharp-edged BBBC024
+  nuclei and under the true 3D model, a grid with the same sparsity prior is better in PSNR and SSIM. What Gaussians
+  offer is compactness: 5 times fewer parameters in 2D and 11--12 times fewer in 3D for a few dB lower quality.
   \item[RQ2] Adaptive densification can populate the operator's null space with ghost structures; a sparsity term on
   total intensity prevents them and is required for Gaussians.
   \item[RQ3] Yes: canonical Gaussians plus a deformation network reconstruct the flow at held-out times, about 10\,dB
