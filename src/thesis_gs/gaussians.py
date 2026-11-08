@@ -25,10 +25,15 @@ class GaussianField:
     amp is softplus(raw) >= 0 when nonneg=True (permittivity), raw signed otherwise (vorticity).
     Each Gaussian is evaluated only in a local window of +-h cells around its centre (the "3 sigma"
     trick from 3DGS), so cost is O(N * (2h+1)^dim), independent of the grid size.
+    beta = 1 gives ordinary Gaussians exp(-q/2); beta > 1 gives generalised ("super-") Gaussians
+    exp(-q^beta/2) with a flatter top and sharper edges, for piecewise-constant objects.
     """
 
-    def __init__(self, dim, grid, h, nonneg=True, wrap=False, device="cpu"):
+    def __init__(self, dim, grid, h, nonneg=True, wrap=False, device="cpu", beta=1.0):
+        if beta < 1:
+            raise ValueError("beta must be >= 1")
         self.dim, self.grid, self.h, self.nonneg, self.wrap = dim, tuple(grid), h, nonneg, wrap
+        self.beta = float(beta)
         self.P = 6 if dim == 2 else 11
         self.device = device
         r = torch.arange(-h, h + 1, device=device)
@@ -86,6 +91,8 @@ class GaussianField:
         coords = base[:, None, :] + self.offsets[None]                       # (N, K, d)
         diff = coords.float() - mu[:, None, :]
         q = torch.einsum("nkd,nde,nke->nk", diff, self.inv_cov(p), diff)
+        if self.beta != 1.0:
+            q = q.clamp(min=0) ** self.beta
         val = self.amplitude(p)[:, None] * torch.exp(-0.5 * q)
         g = torch.tensor(self.grid, device=p.device)
         if self.wrap:

@@ -1,0 +1,11 @@
+{
+ "description": "Thesis I extra experiments (Nov 2026), ~7 h on a T4. C: true 3D Born scattering (sensors on a sphere). D: sharper generalised-Gaussian kernels and 10 samples for 2D. 3D BBBC024 runs need --volumes; the Kaggle notebook downloads them.",
+ "runs": [
+  {"name": "born3d_bbbc024_beta1", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3"]},
+  {"name": "born3d_bbbc024_beta4", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--gauss_beta", "4", "--skip_grid"]},
+  {"name": "born3d_synthetic_beta1", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--l1", "0.3", "--grid_l1", "0.3"]},
+  {"name": "slice3d_bbbc024_beta4", "args": ["--task", "scatter3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--gauss_beta", "4", "--skip_grid"]},
+  {"name": "scatter2d_10_fair", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3"]},
+  {"name": "scatter2d_10_beta2", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--gauss_beta", "2"]}
+ ]
+}

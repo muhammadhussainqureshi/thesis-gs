@@ -2,7 +2,8 @@
 
 Tasks:
   scatter2d : 2D Gaussians reconstruct InverseBench cell images from scattered-field measurements.
-  scatter3d : 3D Gaussians reconstruct 3D cell volumes (2D scattering operator applied per slice).
+  scatter3d : 3D Gaussians reconstruct 3D cell volumes, with the 2D operator per slice (--physics slice)
+              or true 3D Born scattering with sensors on a sphere (--physics born3d).
   ns4d      : 4D Gaussian Splatting (2D + time) on Navier-Stokes vorticity; deformation MLP / Mamba / static.
 
 Usage:  python -m thesis_gs --task all --data_dir data --out outputs      (add --quick for a smoke test)
@@ -42,6 +43,14 @@ def main():
     ap.add_argument("--densify_add", type=int, default=None, help="Gaussians added per densify step (default n_init/4)")
     ap.add_argument("--densify_until", type=float, default=0.6, help="densify during this fraction of iterations")
     ap.add_argument("--l1", type=float, default=0.0, help="sparsity weight on the mean of the Gaussian field (physics fit)")
+    ap.add_argument("--physics", default="slice", choices=["slice", "born3d"],
+                    help="scatter3d forward model: InverseBench 2D operator per z-slice, or true 3D Born scattering")
+    ap.add_argument("--transmitters", type=int, default=60, help="transmitters on the sphere (born3d only)")
+    ap.add_argument("--noise_rel", type=float, default=None,
+                    help="noise std relative to rms(y); default 0.02 for born3d (~ InverseBench 2D SNR), else --noise is used")
+    ap.add_argument("--gauss_beta", type=float, default=1.0,
+                    help="kernel exponent: 1 = Gaussian, >1 = generalised Gaussian with sharper edges")
+    ap.add_argument("--skip_grid", action="store_true", help="skip the pixel/voxel baseline (e.g. when already run)")
     ap.add_argument("--grid_l1", type=float, default=0.0, help="same sparsity weight for the pixel/voxel baseline")
     # Navier-Stokes 4D
     ap.add_argument("--frames", type=int, default=21)

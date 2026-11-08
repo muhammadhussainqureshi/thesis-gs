@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 from .gaussians import GaussianField
 from .metrics import psnr, rel_l2, ssim
-from .physics import SliceScatter, add_noise
+from .physics import Born3D, SliceScatter, add_noise
 from .utils import cosine_lr, ensure_inversebench, ensure_lmdb_dataset, log, read_lmdb_images
 from .volumes import load_volumes, synthetic_nuclei_volume
 
@@ -97,7 +97,7 @@ def run_scatter(args, dim):
     if dim == 2:
         folder = ensure_lmdb_dataset("inv-scatter-test", args.data_dir, args.local_dir)
         gts = [torch.from_numpy(im).to(dev) for im in read_lmdb_images(folder, args.samples)]
-        field = GaussianField(2, (128, 128), h=args.window, nonneg=True, device=dev)
+        field = GaussianField(2, (128, 128), h=args.window, nonneg=True, device=dev, beta=args.gauss_beta)
         source = "InverseBench inv-scatter-test"
     else:
         if args.volumes:
@@ -107,8 +107,13 @@ def run_scatter(args, dim):
             gts = [torch.from_numpy(synthetic_nuclei_volume(args.depth, 128, 128, seed=100 + i)).to(dev)
                    for i in range(args.samples)]
             source = "synthetic HL60-like nuclei (no --volumes given)"
-        field = GaussianField(3, (args.depth, 128, 128), h=args.window, nonneg=True, device=dev)
-    log(f"[{task}] {len(gts)} samples, shape {tuple(gts[0].shape)}, source: {source}")
+        field = GaussianField(3, (args.depth, 128, 128), h=args.window, nonneg=True, device=dev, beta=args.gauss_beta)
+    born = dim == 3 and args.physics == "born3d"
+    if born and args.noise_rel is None:
+        args.noise_rel = 0.02          # ~ the SNR of the InverseBench 2D setting (sigma 1e-4 vs rms(y) ~ 5e-3)
+    log(f"[{task}] {len(gts)} samples, shape {tuple(gts[0].shape)}, source: {source}, "
+        f"physics: {'true 3D Born, %d transmitters' % args.transmitters if born else 'InverseBench 2D operator' + (' per slice' if dim == 3 else '')}, "
+        f"kernel beta={args.gauss_beta}")
 
     n_init = args.n_init or args.n_gauss // (8 if dim == 2 else 4)
     dens = dict(n_add=args.densify_add, densify_until=args.densify_until, l1=args.l1)
@@ -127,28 +132,46 @@ def run_scatter(args, dim):
 
     # ---- B: reconstruction from measurements
     for R in args.receivers:
-        op = SliceScatter(R, dev)
-        log(f"[{task}] B physics, {R} receivers (operator check vs InverseBench: {op.check(gts[0].view(-1, 128, 128)[0]):.1e})")
+        if born:
+            op = Born3D(tuple(gts[0].shape), R, dev, transmitters=args.transmitters)
+            log(f"[{task}] B physics, {R} receivers, {op.n_meas} measurements for {gts[0].numel()} voxels "
+                f"(adjoint check: {op.check(gts[0]):.1e})")
+        else:
+            op = SliceScatter(R, dev)
+            log(f"[{task}] B physics, {R} receivers (operator check vs InverseBench: {op.check(gts[0].view(-1, 128, 128)[gts[0].view(-1, 128 * 128).sum(1).argmax()]):.1e})")
         for i, gt in enumerate(gts):
             gen = torch.Generator(device=dev).manual_seed(1000 + i)
-            y = add_noise(op(gt), args.noise, gen)
+            y0 = op(gt)
+            sigma = args.noise_rel * y0.abs().pow(2).mean().sqrt().item() if args.noise_rel else args.noise
+            y = add_noise(y0, sigma, gen)
             log(f"[{task}]   sample {i}: Gaussians")
             p, rec_g, rg = fit_scatter(gt, field, "physics", op=op, y=y, n_init=n_init, n_max=args.n_gauss,
                                        iters=args.iters, seed=i, log_every=max(args.iters // 4, 1), **dens)
-            log(f"[{task}]   sample {i}: grid baseline")
-            rec_b, rb = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
-            log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}   "
-                f"grid {rb['psnr']:.2f} dB / SSIM {rb['ssim']:.3f}")
-            rows += [{"experiment": "B_physics", "receivers": R, "sample": i, "method": "gaussians", **rg},
-                     {"experiment": "B_physics", "receivers": R, "sample": i, "method": "grid_baseline", **rb}]
+            rg["n_params"] = rg["n_gauss"] * field.P
+            rows.append({"experiment": "B_physics", "receivers": R, "sample": i, "method": "gaussians", **rg})
+            if args.skip_grid:
+                rec_b, rb = None, None
+                log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}")
+            else:
+                log(f"[{task}]   sample {i}: grid baseline")
+                rec_b, rb = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
+                rb["n_params"] = gt.numel()
+                log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}   "
+                    f"grid {rb['psnr']:.2f} dB / SSIM {rb['ssim']:.3f}")
+                rows.append({"experiment": "B_physics", "receivers": R, "sample": i, "method": "grid_baseline", **rb})
             if i == 0:
-                examples[R] = (rec_g.cpu(), rec_b.cpu(), rg, rb)
+                examples[R] = (rec_g.cpu(), None if rec_b is None else rec_b.cpu(), rg, rb)
                 torch.save(p.cpu(), os.path.join(out, f"B_physics_R{R}_sample0_params.pt"))
 
     df = pd.DataFrame(rows)
     df.to_csv(os.path.join(out, "results.csv"), index=False)
-    summ = df.groupby(["experiment", "receivers", "method"], dropna=False)[
-        ["psnr", "ssim", "rel_l2", "n_gauss", "time_s"]].mean().round(3)
+    cols = [c for c in ["psnr", "ssim", "rel_l2", "n_gauss", "n_params", "time_s"] if c in df]
+    grp = df.groupby(["experiment", "receivers", "method"], dropna=False)
+    summ = grp[cols].mean()
+    std = grp[["psnr", "ssim"]].std().add_suffix("_std")      # spread over samples
+    summ = summ.join(std)
+    summ["n_samples"] = grp.size()
+    summ = summ.round(3)
     summ.to_csv(os.path.join(out, "summary.csv"))
     log(f"[{task}] summary\n{summ.to_string()}")
 
@@ -160,13 +183,16 @@ def run_scatter(args, dim):
         cols.append(("direct fit", sl(examples["direct"])))
     for R in args.receivers:
         g, b, rg, rb = examples[R]
-        cols += [(f"Gaussians {R} rec.\n{rg['psnr']:.1f} dB", sl(g)), (f"grid {R} rec.\n{rb['psnr']:.1f} dB", sl(b))]
+        cols.append((f"Gaussians {R} rec.\n{rg['psnr']:.1f} dB", sl(g)))
+        if b is not None:
+            cols.append((f"grid {R} rec.\n{rb['psnr']:.1f} dB", sl(b)))
     fig, ax = plt.subplots(1, len(cols), figsize=(2.6 * len(cols), 3))
     for a, (t, im) in zip(np.atleast_1d(ax), cols):
         a.imshow(im.numpy(), cmap="gray", vmin=0, vmax=1)
         a.set_title(t, fontsize=8)
         a.axis("off")
-    fig.suptitle(f"{task}: sample 0" + (" (middle slice)" if dim == 3 else ""))
+    fig.suptitle(f"{task}: sample 0" + (" (middle slice)" if dim == 3 else "")
+                 + (", true 3D Born physics" if born else "") + (f", kernel beta={args.gauss_beta:g}" if args.gauss_beta != 1 else ""))
     fig.tight_layout()
     fig.savefig(os.path.join(out, "reconstructions.png"), dpi=130)
     plt.close(fig)
