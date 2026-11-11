@@ -20,6 +20,18 @@ contains $\vect{x}$. A \emph{generalised} Gaussian replaces the quadratic form $
 $q_i(\vect{x})^{\beta}$ with $\beta\ge1$: $\beta=1$ is \eqref{eq:field}, larger $\beta$ gives a flatter top and a sharper
 edge, intended for piecewise-constant objects.
 
+\paragraph{Bounded density.} The sum \eqref{eq:field} is unbounded: overlapping Gaussians can exceed the physical
+range of the contrast, whereas the grid baseline is projected onto $[0,1]$ after every step. The bounded variant
+renders
+\begin{equation}
+  \tilde f_\Theta(\vect{x}) = 1-\exp\!\big(-f_\Theta(\vect{x})\big)\in[0,1),
+  \label{eq:bounded}
+\end{equation}
+the same saturation as opacity accumulation in 3DGS. It is smooth, monotone and close to $f_\Theta$ for small values,
+so it changes only where Gaussians overlap. Optionally the Gaussians are \emph{initialised from the grid solution}:
+centres are sampled in proportion to $-\log(1-\min(f_{\text{grid}},0.95))$, the density that \eqref{eq:bounded} maps
+back to the grid reconstruction, and then refined with the same physics loss.
+
 \section{Scattering forward model}
 On a grid of $P$ points with spacing $\Delta x\,\Delta y$, the linear (Born) scattering operator of the benchmark maps
 a contrast image $\vect{f}\in\R^P$ to measurements for $T$ transmitters and $M$ receivers,

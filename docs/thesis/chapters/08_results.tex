@@ -142,7 +142,8 @@ sphere, sparsity $\lambda=0.3$ for both methods. With about ten times fewer meas
 all numbers are lower, and the voxel grid is better than the Gaussians in every setting: by 4.5--6\,dB on synthetic
 nuclei and by 4.6--7.0\,dB on BBBC024 (better on every volume except one synthetic volume at 180 receivers). The
 robustness of Gaussians to fewer receivers seen with the slice-wise model does not carry over: both methods lose
-about 5--7\,dB from 360 to 60 receivers. Generalised Gaussians ($\beta=4$) are again worse (24.2 / 22.6 / 16.3\,dB on
+about 5--7\,dB from 360 to 60 receivers (Section~\ref{sec:bounded} shows how bounding the density reverses this).
+Generalised Gaussians ($\beta=4$) are again worse (24.2 / 22.6 / 16.3\,dB on
 BBBC024).
 
 The reconstructions show where Gaussians lose. On BBBC024 they place a bright rim at each nucleus boundary and leave
@@ -179,6 +180,63 @@ Gaussians (41k--51k numbers) against 524{,}288 voxels.
   truth, then Gaussian and voxel reconstructions at 360, 180 and 60 receivers. Gaussians leave bright rims at the
   boundaries of the binary nuclei.}
   \label{fig:born3d}
+\end{figure}
+
+\section{Bounded Gaussians close the gap}
+\label{sec:bounded}
+The analysis above pointed to one asymmetry: the grid is bounded to $[0,1]$, the Gaussian sum is not. Rendering the
+bounded density \eqref{eq:bounded} instead, with everything else unchanged, reverses the 3D results
+(Table~\ref{tab:bounded}, Figure~\ref{fig:bounded}). Under the true 3D model on BBBC024, bounded Gaussians gain
+6--7\,dB and now match the voxel grid with the same sparsity term at 360 receivers and beat it at 180 and 60 receivers;
+initialised from the grid solution they beat it on \emph{every} volume at every receiver count (paired differences
+$+0.26\pm0.07$, $+0.97\pm0.09$ and $+1.12\pm0.10$\,dB at 360, 180 and 60 receivers) with higher SSIM, while using
+about 60k parameters instead of 524k. On synthetic nuclei the gain is larger: $+4.3$, $+3.7$ and $+0.9$\,dB over the
+voxel grid, again better on every volume. The rims and under-filled interiors of Figure~\ref{fig:born3d} disappear.
+
+The gain is smaller where the grid is already well conditioned. With the slice-wise model (ten times more
+measurements) bounded, grid-initialised Gaussians improve from 28.4 to 35.8\,dB on BBBC024 but remain below the
+regularised voxel grid at 360 and 180 receivers (38.5, 38.0\,dB) and tie at 60 (34.1 vs.\ 34.4\,dB, higher SSIM).
+On textured 2D cells bounded Gaussians beat the regularised pixel grid at 60 receivers on six of ten cells
+($+0.4$\,dB on average, within the spread) and trail it by 0.2--1.4\,dB at 180 and 360 receivers. The pattern is
+consistent: \emph{the fewer the measurements relative to unknowns, the more the compact, bounded Gaussian
+representation helps.}
+
+\begin{table}[h]
+  \centering
+  \caption{Bounded Gaussians (B) and bounded Gaussians initialised from the grid (B+G) vs.\ the grid with the same
+  sparsity term ($\lambda=0.3$). PSNR dB / SSIM; parameters in brackets.}
+  \label{tab:bounded}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{lllccc}
+    \toprule
+    Setting & Method & Params & 360 receivers & 180 receivers & 60 receivers \\
+    \midrule
+    \multirow{4}{*}{\shortstack[l]{True 3D,\\BBBC024 (3)}} & Gaussians (unbounded) & 47k & 25.6 / 0.960 & 24.9 / 0.940 & 20.9 / 0.772 \\
+     & Gaussians B & 47k & 32.5 / \textbf{0.991} & 31.3 / \textbf{0.983} & \textbf{26.8} / 0.903 \\
+     & Gaussians B+G & 60k & \textbf{32.8} / 0.990 & \textbf{31.4} / 0.980 & 26.7 / \textbf{0.909} \\
+     & Voxel grid & 524k & 32.5 / 0.983 & 30.5 / 0.956 & 25.6 / 0.875 \\
+    \midrule
+    \multirow{2}{*}{\shortstack[l]{True 3D,\\synthetic (3)}} & Gaussians B+G & 54k & \textbf{46.4 / 0.993} & \textbf{43.6 / 0.986} & \textbf{39.1} / 0.963 \\
+     & Voxel grid & 524k & 42.1 / 0.985 & 39.9 / 0.976 & 38.2 / \textbf{0.966} \\
+    \midrule
+    \multirow{2}{*}{\shortstack[l]{Slice-wise,\\BBBC024 (3)}} & Gaussians B+G & 60k & 35.8 / 0.995 & 35.7 / 0.995 & 34.1 / \textbf{0.983} \\
+     & Voxel grid & 524k & \textbf{38.5 / 0.996} & \textbf{38.0} / 0.995 & \textbf{34.4} / 0.971 \\
+    \midrule
+    \multirow{3}{*}{\shortstack[l]{2D cells (10)}} & Gaussians B & 3.2k & 33.7 / 0.988 & 33.3 / 0.988 & 30.4 / 0.957 \\
+     & Gaussians B+G & 4.0k & 34.4 / 0.989 & 34.0 / \textbf{0.989} & \textbf{30.5} / 0.957 \\
+     & Pixel grid & 16.4k & \textbf{35.0 / 0.990} & \textbf{34.2} / 0.988 & 30.0 / 0.957 \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{born3d_bbbc024_bounded.png}\\[2pt]
+  \includegraphics[width=0.62\linewidth]{born3d_synthetic_bounded.png}
+  \caption{True 3D model with bounded, grid-initialised Gaussians. Top: BBBC024 volume 0, ground truth, then Gaussians
+  and voxel grid at 360, 180 and 60 receivers (compare Figure~\ref{fig:born3d}). Bottom: synthetic volume 0, ground
+  truth and Gaussians at 360, 180 and 60 receivers (voxel grid: 38.0 / 35.9 / 34.7\,dB in Figure~\ref{fig:born3d}).}
+  \label{fig:bounded}
 \end{figure}
 
 \section{4D Gaussians for Navier--Stokes}
@@ -234,10 +292,11 @@ times slower than the MLP (28 vs.\ 3\,min per sequence) because of its sequentia
 
 \section{Answers to the research questions}
 \begin{description}
-  \item[RQ1] Mostly no, with one exception. Gaussians are more robust than voxels to scarce measurements only on
-  smooth volumes under the slice-wise model (+3.6\,dB at 60 receivers). On textured 2D cells, on sharp-edged BBBC024
-  nuclei and under the true 3D model, a grid with the same sparsity prior is better in PSNR and SSIM. What Gaussians
-  offer is compactness: 5 times fewer parameters in 2D and 11--12 times fewer in 3D for a few dB lower quality.
+  \item[RQ1] Yes in the most under-determined setting, once the density is bounded. Under the true 3D model,
+  bounded Gaussians beat a voxel grid with the same sparsity prior on every volume (up to +1.1\,dB on real BBBC024
+  nuclei and +4.3\,dB on synthetic nuclei) with about nine times fewer parameters. With better-conditioned
+  measurements (slice-wise 3D, 2D at 360 and 180 receivers) the regularised grid remains slightly better.
+  Unbounded Gaussians lose in almost every setting: bounding the density is essential.
   \item[RQ2] Adaptive densification can populate the operator's null space with ghost structures; a sparsity term on
   total intensity prevents them and is required for Gaussians.
   \item[RQ3] Yes: canonical Gaussians plus a deformation network reconstruct the flow at held-out times, about 10\,dB

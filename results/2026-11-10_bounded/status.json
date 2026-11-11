@@ -1,0 +1,26 @@
+{
+ "born3d_bbbc024_bounded_gridinit": {
+  "ok": true,
+  "minutes": 118.5
+ },
+ "born3d_bbbc024_bounded": {
+  "ok": true,
+  "minutes": 80.9
+ },
+ "scatter2d_10_bounded": {
+  "ok": true,
+  "minutes": 9.3
+ },
+ "scatter2d_10_bounded_gridinit": {
+  "ok": true,
+  "minutes": 9.6
+ },
+ "slice3d_bbbc024_bounded_gridinit": {
+  "ok": true,
+  "minutes": 85.4
+ },
+ "born3d_synthetic_bounded_gridinit": {
+  "ok": true,
+  "minutes": 113.0
+ }
+}

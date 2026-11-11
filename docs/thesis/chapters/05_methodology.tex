@@ -45,6 +45,9 @@ in single precision on the GPU and verify at start-up that it matches the benchm
 error of $3\times10^{-7}$. For 3D volumes we use either the slice-wise operator (applied to every $z$-slice, losses summed) or the true 3D
 Born operator \eqref{eq:born3d}, implemented the same way with precomputed incident fields and
 receiver Green's functions ($P\times T$ and $P\times M$ complex matrices; 1.5\,GB for 360 receivers).
+\paragraph{Bounded Gaussians.} In the final configuration the Gaussian field is passed through the saturation
+\eqref{eq:bounded} before the physics operator, so it obeys the same $[0,1]$ range as the grid baseline, and it can be
+initialised from the grid reconstruction (options \texttt{--bounded} and \texttt{--init\_from\_grid}).
 \paragraph{Fluid observations.} For Navier--Stokes the measurement operator selects the observed pixels of each frame
 (a random mask with 100\% or 10\% coverage); frames that are held out for evaluation are never observed.
 

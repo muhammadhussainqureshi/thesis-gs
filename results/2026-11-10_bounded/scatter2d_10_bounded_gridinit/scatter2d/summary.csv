@@ -1,0 +1,4 @@
+experiment,receivers,method,psnr,ssim,rel_l2,n_gauss,n_params,time_s,psnr_std,ssim_std,n_samples
+B_physics,60,gaussians,30.476,0.957,0.119,669.1,4014.6,18.74,5.081,0.046,10
+B_physics,180,gaussians,34.035,0.989,0.075,668.7,4012.2,18.74,3.599,0.008,10
+B_physics,360,gaussians,34.426,0.989,0.072,668.7,4012.2,18.87,3.704,0.008,10

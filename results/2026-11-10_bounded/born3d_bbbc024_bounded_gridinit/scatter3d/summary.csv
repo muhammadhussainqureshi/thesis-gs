@@ -1,0 +1,7 @@
+experiment,receivers,method,psnr,ssim,rel_l2,n_gauss,n_params,time_s,psnr_std,ssim_std,n_samples
+B_physics,60,gaussians,26.694,0.909,0.164,5441.0,59851.0,614.7,1.292,0.008,3
+B_physics,60,grid_baseline,25.571,0.875,0.187,0.0,524288.0,60.667,1.363,0.015,3
+B_physics,180,gaussians,31.447,0.98,0.095,5479.667,60276.333,762.033,0.789,0.004,3
+B_physics,180,grid_baseline,30.474,0.956,0.106,0.0,524288.0,128.967,0.883,0.006,3
+B_physics,360,gaussians,32.8,0.99,0.081,5479.333,60272.667,973.6,0.797,0.002,3
+B_physics,360,grid_baseline,32.539,0.983,0.084,0.0,524288.0,235.7,0.862,0.004,3

@@ -65,7 +65,18 @@ InverseBench and its test data are downloaded automatically. On Kaggle use
 | BBBC024: Gaussians (≈47k params) | 25.6 / 0.960 | 24.9 / 0.940 | 20.9 / 0.772 |
 | BBBC024: voxel grid (524k params) | **32.5 / 0.983** | **30.5 / 0.956** | **25.6 / 0.875** |
 
-2D on 10 cells (paired): the pixel grid with the same sparsity beats Gaussians on every cell (by 0.6 / 2.3 / 2.9 dB at 60 / 180 / 360 receivers). Generalised Gaussians (β = 2, 4) did not help under the physics loss.
+**Bounded Gaussians** (`--bounded`: render 1 − exp(−Σ), in [0, 1) like the clipped grid; `--init_from_grid`), true 3D, same sparsity for both:
+
+| True 3D, bounded + grid-initialised Gaussians vs voxel grid | 360 | 180 | 60 |
+|---|---|---|---|
+| BBBC024: Gaussians (≈60k params) | **32.8** / 0.990 | **31.4** / 0.980 | **26.7** / 0.909 |
+| BBBC024: voxel grid (524k params) | 32.5 / 0.983 | 30.5 / 0.956 | 25.6 / 0.875 |
+| Synthetic: Gaussians (≈54k params) | **46.4 / 0.993** | **43.6 / 0.986** | **39.1** / 0.963 |
+| Synthetic: voxel grid (524k params) | 42.1 / 0.985 | 39.9 / 0.976 | 38.2 / 0.966 |
+
+Bounded Gaussians win on every volume at every receiver count in true 3D. Slice-wise 3D and 2D (more measurements): the regularised grid is still slightly ahead (see `results/README.md`).
+
+2D on 10 cells (paired, unbounded Gaussians): the pixel grid with the same sparsity beats Gaussians on every cell (by 0.6 / 2.3 / 2.9 dB at 60 / 180 / 360 receivers). Generalised Gaussians (β = 2, 4) did not help under the physics loss.
 
 | Navier-Stokes 4D, held-out frames (PSNR, 3 sequences) | static | MLP | Mamba | bidir. Mamba |
 |---|---|---|---|---|

@@ -7,9 +7,10 @@ density control recover cells from scattered fields and moving vorticity from sp
 as a prior that is helpful when the object matches it (smooth nuclei, scarce data) and neutral or harmful when it does
 not (fine texture, abundant data). The most instructive finding is the ghost failure mode: adaptivity, the main
 strength of Gaussian splatting with cameras, becomes a liability when the measurements are blind to part of the
-domain, and must be balanced by an explicit prior. The final runs sharpen this: Gaussians lose clearly on real nuclei with sharp boundaries, and a pixel grid with the
-same sparsity prior matches their structural similarity on 2D cells, so the gains come from smoothness and sparsity
-priors that must suit the object. For dynamics, the deformation model matters far more than the choice of network;
+domain, and must be balanced by an explicit prior. The final runs add a second lesson: a Gaussian sum is unbounded, and on physical quantities with a known range
+this matters more than the shape of the kernel. Unbounded Gaussians lost to a clipped grid almost everywhere;
+the bounded density $1-e^{-f}$, the same saturation as opacity in 3DGS, turned the true 3D results into a consistent
+win with nine times fewer parameters, while sharper kernels did not help. For dynamics, the deformation model matters far more than the choice of network;
 a sequence model pays off only once regularised in time, and then mainly when observations are sparse.
 
 \section{Limitations}
@@ -22,7 +23,8 @@ a sequence model pays off only once regularised in time, and then mainly when ob
   \item No learned prior is used, and no comparison with InverseBench's diffusion methods is made (by design for
   Thesis I).
   \item Hyper-parameters (sparsity weight, Gaussian budget, window size, smoothness weight) were tuned on few samples.
-  \item Smooth Gaussian kernels cannot represent sharp, piecewise-constant boundaries (BBBC024 masks).
+  \item Under better-conditioned measurements (slice-wise 3D, 2D with many receivers) bounded Gaussians remain
+  slightly below a regularised grid.
 \end{itemize}
 
 \section{Plan for Thesis II}
@@ -33,8 +35,8 @@ a sequence model pays off only once regularised in time, and then mainly when ob
   benchmark's diffusion-prior methods.
   \item Physics-aware density control (densify only within the support indicated by the data; null-space-aware
   regularisers) instead of a global sparsity term.
-  \item Representations for sharp boundaries: generalised Gaussians did not help under the physics loss, so bounded
-  (saturating) densities or hybrid Gaussian--grid models are the next candidates.
+  \item Bounded Gaussians on the full test sets with confidence intervals, and learned or adaptive saturation for
+  quantities without a fixed range.
   \item Motion models: hardware-efficient Mamba (parallel scan), tuning of the smoothness weight, and advection-informed
   deformation that uses the velocity field implied by the vorticity.
   \item The Navier--Stokes initial-value inverse problem through a differentiable solver.

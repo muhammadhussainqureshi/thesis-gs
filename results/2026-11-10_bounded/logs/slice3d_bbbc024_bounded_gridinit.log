@@ -1,0 +1,84 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task scatter3d --skip_direct --volumes /tmp/cytopacq --crop 0.5 --l1 0.3 --grid_l1 0.3 --bounded --init_from_grid --skip_grid --data_dir /kaggle/working/data --out /kaggle/working/thesis1_bounded/slice3d_bbbc024_bounded_gridinit
+
+[17:15:45] device=cuda  task=scatter3d  out=/kaggle/working/thesis1_bounded/slice3d_bbbc024_bounded_gridinit
+[17:15:46]   found 30 image files in /tmp/cytopacq, e.g. ['BBBC024_v1_c00_highSNR_foreground/image-labels_0000.ics', 'BBBC024_v1_c00_highSNR_foreground/image-labels_0001.ics', 'BBBC024_v1_c00_highSNR_foreground/image-labels_0002.ics']
+[17:15:46]   first file shape (129, 565, 807), dtype uint16
+[17:15:48]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0000.ics -> (32, 128, 128), foreground 9.3%
+[17:15:50]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0001.ics -> (32, 128, 128), foreground 7.3%
+[17:15:51]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0002.ics -> (32, 128, 128), foreground 8.0%
+[17:15:51] [scatter3d] 3 samples, shape (32, 128, 128), source: CytoPacq volumes from /tmp/cytopacq, physics: InverseBench 2D operator per slice, kernel beta=1.0
+[17:15:54] [scatter3d] B physics, 360 receivers (operator check vs InverseBench: 2.9e-07)
+[17:15:54] [scatter3d]   sample 0: Gaussians
+[17:15:54] [scatter3d]   sample 0: grid solution (baseline and initialisation)
+[17:18:23]     iter   750  loss 2.786e-02  PSNR  28.14 dB  #G 3500
+[17:20:32]     iter  1500  loss 2.777e-02  PSNR  29.14 dB  #G 4954
+[17:23:17]     iter  2250  loss 2.775e-02  PSNR  34.46 dB  #G 5453
+[17:26:06]     iter  3000  loss 2.775e-02  PSNR  34.81 dB  #G 5453
+[17:26:06] [scatter3d]   -> Gaussians 34.81 dB / SSIM 0.994
+[17:26:06] [scatter3d]   sample 1: Gaussians
+[17:26:06] [scatter3d]   sample 1: grid solution (baseline and initialisation)
+[17:28:34]     iter   750  loss 2.210e-02  PSNR  29.08 dB  #G 3500
+[17:30:42]     iter  1500  loss 2.202e-02  PSNR  29.49 dB  #G 4943
+[17:33:27]     iter  2250  loss 2.200e-02  PSNR  36.33 dB  #G 5441
+[17:36:15]     iter  3000  loss 2.199e-02  PSNR  36.76 dB  #G 5441
+[17:36:15] [scatter3d]   -> Gaussians 36.76 dB / SSIM 0.997
+[17:36:15] [scatter3d]   sample 2: Gaussians
+[17:36:15] [scatter3d]   sample 2: grid solution (baseline and initialisation)
+[17:38:43]     iter   750  loss 2.403e-02  PSNR  28.49 dB  #G 3500
+[17:40:51]     iter  1500  loss 2.394e-02  PSNR  29.44 dB  #G 4950
+[17:43:36]     iter  2250  loss 2.392e-02  PSNR  35.44 dB  #G 5447
+[17:46:24]     iter  3000  loss 2.391e-02  PSNR  35.86 dB  #G 5447
+[17:46:24] [scatter3d]   -> Gaussians 35.86 dB / SSIM 0.996
+[17:46:25] [scatter3d] B physics, 180 receivers (operator check vs InverseBench: 2.9e-07)
+[17:46:25] [scatter3d]   sample 0: Gaussians
+[17:46:25] [scatter3d]   sample 0: grid solution (baseline and initialisation)
+[17:48:23]     iter   750  loss 2.785e-02  PSNR  28.36 dB  #G 3500
+[17:50:25]     iter  1500  loss 2.777e-02  PSNR  29.40 dB  #G 4953
+[17:53:06]     iter  2250  loss 2.775e-02  PSNR  34.36 dB  #G 5453
+[17:55:51]     iter  3000  loss 2.774e-02  PSNR  34.72 dB  #G 5453
+[17:55:52] [scatter3d]   -> Gaussians 34.72 dB / SSIM 0.994
+[17:55:52] [scatter3d]   sample 1: Gaussians
+[17:55:52] [scatter3d]   sample 1: grid solution (baseline and initialisation)
+[17:57:49]     iter   750  loss 2.209e-02  PSNR  29.12 dB  #G 3500
+[17:59:51]     iter  1500  loss 2.201e-02  PSNR  30.04 dB  #G 4944
+[18:02:32]     iter  2250  loss 2.199e-02  PSNR  36.26 dB  #G 5442
+[18:05:16]     iter  3000  loss 2.199e-02  PSNR  36.65 dB  #G 5442
+[18:05:17] [scatter3d]   -> Gaussians 36.65 dB / SSIM 0.997
+[18:05:17] [scatter3d]   sample 2: Gaussians
+[18:05:17] [scatter3d]   sample 2: grid solution (baseline and initialisation)
+[18:07:14]     iter   750  loss 2.402e-02  PSNR  28.50 dB  #G 3500
+[18:09:16]     iter  1500  loss 2.393e-02  PSNR  29.51 dB  #G 4954
+[18:11:57]     iter  2250  loss 2.391e-02  PSNR  35.36 dB  #G 5451
+[18:14:42]     iter  3000  loss 2.391e-02  PSNR  35.75 dB  #G 5451
+[18:14:42] [scatter3d]   -> Gaussians 35.75 dB / SSIM 0.995
+[18:14:43] [scatter3d] B physics, 60 receivers (operator check vs InverseBench: 2.9e-07)
+[18:14:43] [scatter3d]   sample 0: Gaussians
+[18:14:43] [scatter3d]   sample 0: grid solution (baseline and initialisation)
+[18:16:18]     iter   750  loss 2.781e-02  PSNR  28.55 dB  #G 3500
+[18:18:16]     iter  1500  loss 2.772e-02  PSNR  30.80 dB  #G 4951
+[18:20:51]     iter  2250  loss 2.770e-02  PSNR  33.09 dB  #G 5448
+[18:23:30]     iter  3000  loss 2.770e-02  PSNR  33.30 dB  #G 5448
+[18:23:30] [scatter3d]   -> Gaussians 33.30 dB / SSIM 0.985
+[18:23:30] [scatter3d]   sample 1: Gaussians
+[18:23:30] [scatter3d]   sample 1: grid solution (baseline and initialisation)
+[18:25:05]     iter   750  loss 2.203e-02  PSNR  29.68 dB  #G 3499
+[18:27:04]     iter  1500  loss 2.195e-02  PSNR  31.97 dB  #G 4949
+[18:29:38]     iter  2250  loss 2.193e-02  PSNR  34.63 dB  #G 5440
+[18:32:18]     iter  3000  loss 2.192e-02  PSNR  34.86 dB  #G 5440
+[18:32:18] [scatter3d]   -> Gaussians 34.86 dB / SSIM 0.980
+[18:32:18] [scatter3d]   sample 2: Gaussians
+[18:32:18] [scatter3d]   sample 2: grid solution (baseline and initialisation)
+[18:33:53]     iter   750  loss 2.397e-02  PSNR  29.25 dB  #G 3500
+[18:35:51]     iter  1500  loss 2.388e-02  PSNR  31.18 dB  #G 4953
+[18:38:26]     iter  2250  loss 2.386e-02  PSNR  34.03 dB  #G 5450
+[18:41:05]     iter  3000  loss 2.386e-02  PSNR  34.24 dB  #G 5450
+[18:41:06] [scatter3d]   -> Gaussians 34.24 dB / SSIM 0.984
+[18:41:06] [scatter3d] summary
+                                  psnr   ssim  rel_l2   n_gauss   n_params   time_s  psnr_std  ssim_std  n_samples
+experiment receivers method                                                                                       
+B_physics  60        gaussians  34.133  0.983   0.070  5446.000  59906.000  527.567     0.789     0.003          3
+           180       gaussians  35.704  0.995   0.058  5448.667  59935.333  565.800     0.967     0.001          3
+           360       gaussians  35.810  0.995   0.057  5447.000  59917.000  609.667     0.974     0.001          3
+[18:41:06] ===== scatter3d finished in 85.3 min. Results in /kaggle/working/thesis1_bounded/slice3d_bbbc024_bounded_gridinit/scatter3d
+
+EXIT CODE 0
