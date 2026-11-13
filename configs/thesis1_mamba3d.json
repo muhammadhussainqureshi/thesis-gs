@@ -1,0 +1,12 @@
+{
+ "description": "PointMamba over Gaussians (per scene) for 3D inverse scattering, ~8-9 h on a T4. True 3D Born model, bounded grid-initialised Gaussians, same sparsity for Gaussians and grid. Controls: per-Gaussian MLP (no coupling) and Mamba over a random order. 3D BBBC024 runs need --volumes; the Kaggle notebook downloads them.",
+ "runs": [
+  {"name": "born3d_bbbc024_pointmamba", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "pointmamba"]},
+  {"name": "born3d_bbbc024_gm_mlp", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "mlp", "--skip_grid"]},
+  {"name": "born3d_bbbc024_gm_random", "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "random", "--skip_grid"]},
+  {"name": "scatter2d_10_pointmamba", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "pointmamba"]},
+  {"name": "scatter2d_10_pointmamba_res", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "pointmamba", "--gm_residual", "--skip_grid"]},
+  {"name": "scatter2d_10_gm_mlp", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "mlp", "--skip_grid"]},
+  {"name": "scatter2d_10_gm_random", "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "random", "--skip_grid"]}
+ ]
+}

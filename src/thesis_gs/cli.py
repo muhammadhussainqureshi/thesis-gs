@@ -54,6 +54,10 @@ def main():
                     help="bounded density f = 1 - exp(-sum of Gaussians), in [0, 1) like the clipped grid")
     ap.add_argument("--init_from_grid", action="store_true",
                     help="initialise Gaussians from the grid reconstruction (Gaussians then compress and refine it)")
+    ap.add_argument("--gmamba", default="none", choices=["none", "mlp", "random", "hilbert", "pointmamba"],
+                    help="PointMamba over the Gaussians (per scene): network type / serialisation of the patches")
+    ap.add_argument("--gm_residual", action="store_true",
+                    help="give the PointMamba tokens the back-projected measurement residual at each Gaussian")
     ap.add_argument("--skip_grid", action="store_true", help="skip the pixel/voxel baseline (e.g. when already run)")
     ap.add_argument("--grid_l1", type=float, default=0.0, help="same sparsity weight for the pixel/voxel baseline")
     # Navier-Stokes 4D
@@ -61,7 +65,7 @@ def main():
     ap.add_argument("--frame_dt", type=float, default=0.05)
     ap.add_argument("--obs_ratios", type=float, nargs="+", default=[1.0, 0.1])
     ap.add_argument("--ns_noise", type=float, default=0.0)
-    ap.add_argument("--deform", nargs="+", default=["mlp", "mamba"], choices=["mlp", "mamba", "mamba_bi", "static"])
+    ap.add_argument("--deform", nargs="+", default=["mlp", "mamba"], choices=["mlp", "mamba", "mamba_bi", "mamba_st", "mamba_vel", "mamba_st_vel", "static"])
     ap.add_argument("--batch_frames", type=int, default=4)
     ap.add_argument("--temporal_reg", type=float, default=0.0, help="weight of the deformation smoothness term over time")
     ap.add_argument("--lr_gauss", type=float, default=0.01)

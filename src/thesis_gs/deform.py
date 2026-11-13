@@ -3,7 +3,8 @@ import math
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
+from .ssm import MambaBlock, PointMambaEncoder, farthest_point_sampling, serial_orders
 
 
 
@@ -38,57 +39,47 @@ class DeformMLP(nn.Module):
         return self.head(self.body(x))
 
 
-class MambaBlock(nn.Module):
-    """Minimal pure-PyTorch Mamba (selective state-space) block, Gu & Dao 2023. Causal over the sequence."""
-
-    def __init__(self, d_model, d_state=16, expand=2, d_conv=4):
-        super().__init__()
-        di = expand * d_model
-        self.di, self.ds = di, d_state
-        self.dt_rank = max(1, math.ceil(d_model / 16))
-        self.norm = nn.LayerNorm(d_model)
-        self.in_proj = nn.Linear(d_model, 2 * di)
-        self.conv = nn.Conv1d(di, di, d_conv, groups=di, padding=d_conv - 1)
-        self.x_proj = nn.Linear(di, self.dt_rank + 2 * d_state, bias=False)
-        self.dt_proj = nn.Linear(self.dt_rank, di)
-        self.A_log = nn.Parameter(torch.log(torch.arange(1, d_state + 1, dtype=torch.float32)).repeat(di, 1))
-        self.D = nn.Parameter(torch.ones(di))
-        self.out_proj = nn.Linear(di, d_model)
-
-    def forward(self, x):                                     # x: (B, L, d)
-        B, L, _ = x.shape
-        xz = self.in_proj(self.norm(x))
-        u, z = xz.chunk(2, -1)
-        u = F.silu(self.conv(u.transpose(1, 2))[..., :L].transpose(1, 2))
-        dt, Bm, Cm = self.x_proj(u).split([self.dt_rank, self.ds, self.ds], -1)
-        dt = F.softplus(self.dt_proj(dt))                     # (B, L, di)
-        A = -torch.exp(self.A_log)                            # (di, ds)
-        h = torch.zeros(B, self.di, self.ds, device=x.device, dtype=x.dtype)
-        ys = []
-        for t in range(L):                                    # selective scan
-            h = torch.exp(dt[:, t, :, None] * A) * h + dt[:, t, :, None] * Bm[:, t, None, :] * u[:, t, :, None]
-            ys.append((h * Cm[:, t, None, :]).sum(-1))
-        y = (torch.stack(ys, 1) + self.D * u) * F.silu(z)
-        return x + self.out_proj(y)
-
-
 class DeformMamba(nn.Module):
     """Deformation as a sequence model over time: each Gaussian's trajectory is one sequence of length T,
-    processed by Mamba blocks, so the offset at frame t depends on the Gaussian's state at earlier frames."""
+    processed by Mamba blocks, so the offset at frame t depends on the Gaussian's state at earlier frames.
 
-    def __init__(self, n_out=6, n_freq=6, d_model=64, n_layers=2, bidirectional=False):
+    spatial=True adds a PointMamba-style spatial scan (space-time Mamba): the Gaussians are grouped into patches
+    around farthest-point-sampled key points, the patch tokens of every frame are serialised along Hilbert and
+    Trans-Hilbert curves and processed by Mamba, and each Gaussian receives its patch's context, so Gaussians that
+    move together (a vortex) share information. velocity=True predicts a per-frame velocity and integrates it in
+    time (position offset at t = sum of velocities before t), instead of an independent offset per frame."""
+
+    def __init__(self, n_out=6, n_freq=6, d_model=64, n_layers=2, bidirectional=False, spatial=False,
+                 velocity=False, n_patches=64, grid=(128, 128)):
         super().__init__()
-        self.n_freq = n_freq
+        self.n_freq, self.velocity, self.n_patches, self.grid = n_freq, velocity, n_patches, grid
         self.inp = nn.Linear(3 * 2 * n_freq, d_model)
         self.blocks = nn.ModuleList([MambaBlock(d_model) for _ in range(n_layers)])
         # bidirectional: a second stack reads the trajectory backwards in time (future -> past)
         self.blocks_bwd = nn.ModuleList([MambaBlock(d_model) for _ in range(n_layers)]) if bidirectional else None
+        if spatial:
+            self.sp_in = nn.Linear(d_model, d_model)
+            self.sp_pos = nn.Linear(2 * 2 * n_freq, d_model)
+            # lighter blocks: the spatial scan runs for every frame at once (T sequences of 2 x n_patches tokens)
+            self.sp_enc = PointMambaEncoder(d_model, n_layers=n_layers, n_orders=2, d_state=8, expand=1)
+            self.sp_out = nn.Linear(d_model, d_model)
+            nn.init.zeros_(self.sp_out.weight)
+            nn.init.zeros_(self.sp_out.bias)
+        self.spatial = spatial
+        self._patches = None
         self.norm = nn.LayerNorm(d_model)
         self.head = nn.Linear(d_model, n_out)
         nn.init.zeros_(self.head.weight)
         nn.init.zeros_(self.head.bias)
 
-    def forward(self, mu_norm, t_all, idx):
+    def _make_patches(self, mu_norm):
+        pts = mu_norm.detach() * torch.tensor(self.grid, device=mu_norm.device, dtype=mu_norm.dtype)
+        key = farthest_point_sampling(pts, self.n_patches)
+        assign = torch.cdist(pts, pts[key]).argmin(1)
+        orders = serial_orders(pts[key], self.grid, "pointmamba")
+        self._patches = (key, assign, orders, pts.shape[0])
+
+    def forward(self, mu_norm, t_all, idx, full=False):
         N, T = mu_norm.shape[0], t_all.shape[0]
         x = torch.cat([fourier(mu_norm, self.n_freq)[:, None].expand(N, T, -1),
                        fourier(t_all[None, :, None].expand(N, T, 1), self.n_freq)], -1)
@@ -101,8 +92,24 @@ class DeformMamba(nn.Module):
             for b in self.blocks_bwd:
                 hb = b(hb)
             h = h + torch.flip(hb, [1])
-        out = self.head(self.norm(h))                         # (N, T, n_out)
-        return out[:, idx].transpose(0, 1)                    # (len(idx), N, n_out)
+        if self.spatial:
+            if self._patches is None or self._patches[3] != N:
+                self._make_patches(mu_norm)
+            key, assign, orders, _ = self._patches
+            M = key.shape[0]
+            f = self.sp_in(h).transpose(0, 1)                                 # (T, N, d)
+            cnt = torch.zeros(M, device=h.device).index_add(0, assign, torch.ones(N, device=h.device))
+            tok = torch.zeros(T, M, f.shape[-1], device=h.device).index_add(1, assign, f) / cnt[None, :, None]
+            tok = tok + self.sp_pos(fourier(mu_norm[key].detach(), self.n_freq))[None]
+            ctx = self.sp_enc(tok, orders)                                    # (T, M, d)
+            h = h + self.sp_out(ctx[:, assign].transpose(0, 1))              # each Gaussian gets its patch context
+        out = self.head(self.norm(h))                                         # (N, T, n_out)
+        if self.velocity:                                                     # integrate velocities over time
+            pos = torch.cumsum(out[:, :, :2], 1) * 0.25
+            pos = torch.cat([torch.zeros_like(pos[:, :1]), pos[:, :-1]], 1)
+            out = torch.cat([pos, out[:, :, 2:]], -1)
+        out = out.transpose(0, 1)                                             # (T, N, n_out)
+        return out if full else out[idx]
 
 
 class StaticDeform(nn.Module):

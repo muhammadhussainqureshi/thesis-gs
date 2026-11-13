@@ -40,7 +40,11 @@ def run_ns4d(args):
             for kind in args.deform:
                 torch.manual_seed(si)
                 net = {"mlp": DeformMLP, "mamba": DeformMamba, "static": StaticDeform,
-                       "mamba_bi": lambda: DeformMamba(bidirectional=True)}[kind]().to(dev)
+                       "mamba_bi": lambda: DeformMamba(bidirectional=True),
+                       "mamba_st": lambda: DeformMamba(spatial=True),
+                       "mamba_vel": lambda: DeformMamba(velocity=True),
+                       "mamba_st_vel": lambda: DeformMamba(spatial=True, velocity=True)}[kind]().to(dev)
+                seq_net = isinstance(net, DeformMamba)
                 g0 = torch.Generator(device=dev).manual_seed(si)
                 canon = field.init_from_field(obs[0] * mask[0], args.n_gauss, scale=2.0, generator=g0)
                 canon.requires_grad_(True)
@@ -53,14 +57,19 @@ def run_ns4d(args):
                 for it in range(1, args.iters + 1):
                     bidx = train_idx[torch.randint(len(train_idx), (min(args.batch_frames, len(train_idx)),),
                                                    device=dev)]
-                    delta = net(canon[:, :2] / 128.0, t_all, bidx)
+                    if seq_net:     # one pass over all frames serves the data term and the smoothness term
+                        full = net(canon[:, :2] / 128.0, t_all, None, full=True)
+                        delta = full[bidx]
+                    else:
+                        delta = net(canon[:, :2] / 128.0, t_all, bidx)
                     params = apply_deform(canon, delta)
                     pred = torch.stack([field.render(params[b]) for b in range(len(bidx))])
                     m = mask[bidx]
                     loss = (((pred - obs[bidx]) ** 2) * m).sum() / m.sum().clamp(min=1)
                     if args.temporal_reg and kind != "static":
                         # smooth motion: offsets at t and t+1 should be close (also covers unobserved frames)
-                        delta_next = net(canon[:, :2] / 128.0, t_all, (bidx + 1).clamp(max=T - 1))
+                        nxt = (bidx + 1).clamp(max=T - 1)
+                        delta_next = full[nxt] if seq_net else net(canon[:, :2] / 128.0, t_all, nxt)
                         loss = loss + args.temporal_reg * ((delta_next - delta) ** 2).mean()
                     opt.zero_grad()
                     loss.backward()
@@ -90,7 +99,10 @@ def run_ns4d(args):
     df = pd.DataFrame(rows)
     df.to_csv(os.path.join(out, "results.csv"), index=False)
     cols = [c for c in df.columns if c.endswith(("rel_l2", "psnr", "ssim"))] + ["time_s"]
-    summ = df.groupby(["obs_ratio", "deform"])[cols].mean().round(4)
+    grp = df.groupby(["obs_ratio", "deform"])
+    summ = grp[cols].mean().join(grp[["heldout_frames_psnr"]].std().add_suffix("_std"))
+    summ["n_samples"] = grp.size()
+    summ = summ.round(4)
     summ.to_csv(os.path.join(out, "summary.csv"))
     log(f"[ns4d] summary\n{summ.to_string()}")
 

@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 
 from .gaussians import GaussianField
+from .gmamba import GaussPointMamba
 from .metrics import psnr, rel_l2, ssim
 from .physics import Born3D, SliceScatter, add_noise
 from .utils import cosine_lr, ensure_inversebench, ensure_lmdb_dataset, log, read_lmdb_images
@@ -20,10 +21,11 @@ def saturate(s):
 
 def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=3000, lr=0.05,
                 densify_every=250, n_add=None, densify_until=0.6, l1=0.0, seed=0, log_every=500,
-                bounded=False, init_field=None):
+                bounded=False, init_field=None, gnet=None, gnet_lr=1e-3, residual_every=10):
     """mode='direct': MSE to ground truth.  mode='physics': ||A f - y||^2/||y||^2 (gt only for metrics).
     bounded: the field is 1 - exp(-sum of Gaussians), so it stays in [0, 1) like the clipped grid baseline.
-    init_field: start from Gaussians fitted to this field (e.g. the grid reconstruction) instead of uniform."""
+    init_field: start from Gaussians fitted to this field (e.g. the grid reconstruction) instead of uniform.
+    gnet: optional GaussPointMamba; the rendered Gaussians are gnet(p) = p + delta(p), fitted jointly."""
     g = torch.Generator(device=gt.device).manual_seed(seed)
     n_add = n_add or max(50, n_init // 4)
     if mode == "direct":
@@ -34,19 +36,39 @@ def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=
     else:
         p = field.init_uniform(n_init, generator=g)
     p = p.requires_grad_(True)
-    render = (lambda q: saturate(field.render(q))) if bounded else field.render
+    render0 = (lambda q: saturate(field.render(q))) if bounded else field.render
+    resid = None
+    if gnet is not None:
+        gnet.update_patches(p)
+        opt_net = torch.optim.Adam(gnet.parameters(), lr=gnet_lr)
+        for pg in opt_net.param_groups:
+            pg["base_lr"] = gnet_lr
+        eff = lambda q: gnet(q, resid)                     # noqa: E731
+    else:
+        eff = lambda q: q                                  # noqa: E731
+    render = lambda q: render0(eff(q))                     # noqa: E731
     opt = torch.optim.Adam([p], lr=lr)
     ynorm = (y.abs() ** 2).sum() if y is not None else None
     t0 = time.time()
     for it in range(1, iters + 1):
         img = render(p)
-        loss = F.mse_loss(img, gt) if mode == "direct" else ((op(img) - y).abs() ** 2).sum() / ynorm
+        r_meas = None if mode == "direct" else op(img) - y
+        loss = F.mse_loss(img, gt) if mode == "direct" else (r_meas.abs() ** 2).sum() / ynorm
+        if gnet is not None and gnet.residual_feat and mode != "direct" and (it == 1 or it % residual_every == 0):
+            with torch.no_grad():                  # what the measurements still ask for, as a token feature
+                r = op.adjoint_real(-r_meas.detach()).view(gt.shape)
+                resid = r / r.abs().max().clamp(min=1e-12)
         if l1 and mode != "direct":
             loss = loss + l1 * img.mean()          # sparsity: no mass where the measurements don't ask for it
         opt.zero_grad()
+        if gnet is not None:
+            opt_net.zero_grad()
         loss.backward()
         opt.step()
         cosine_lr(opt, lr, it, iters)
+        if gnet is not None:
+            opt_net.step()
+            cosine_lr(opt_net, gnet_lr, it, iters)
         if densify_every and it % densify_every == 0 and it <= densify_until * iters:
             with torch.no_grad():
                 img = render(p)
@@ -55,7 +77,7 @@ def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=
                 else:
                     res = op.adjoint_real(y - op(img)).view(gt.shape)
                     res = res / res.abs().max().clamp(min=1e-12) * 0.3
-                keep = field.amplitude(p) > 1e-3
+                keep = field.amplitude(eff(p)) > 1e-3
                 k = max(0, min(n_add, n_max - int(keep.sum())))
                 new = []
                 if k:
@@ -66,11 +88,15 @@ def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=
                 cur = opt.param_groups[0]["lr"]
                 opt = torch.optim.Adam([p], lr=cur)
                 opt.param_groups[0]["base_lr"] = lr
+                if gnet is not None:
+                    gnet.update_patches(p)
         if it % log_every == 0 or it == iters:
             with torch.no_grad():
                 log(f"    iter {it:5d}  loss {loss.item():.3e}  PSNR {psnr(render(p).clamp(0, 1), gt):6.2f} dB  #G {p.shape[0]}")
     with torch.no_grad():
         rec = render(p).clamp(0, 1)
+        if gnet is not None:
+            p = eff(p)
     return p.detach(), rec, {"psnr": psnr(rec, gt), "ssim": ssim(rec, gt), "rel_l2": rel_l2(rec, gt),
                              "n_gauss": p.shape[0], "time_s": round(time.time() - t0, 1)}
 
@@ -128,7 +154,7 @@ def run_scatter(args, dim):
         args.noise_rel = 0.02          # ~ the SNR of the InverseBench 2D setting (sigma 1e-4 vs rms(y) ~ 5e-3)
     log(f"[{task}] {len(gts)} samples, shape {tuple(gts[0].shape)}, source: {source}, "
         f"physics: {'true 3D Born, %d transmitters' % args.transmitters if born else 'InverseBench 2D operator' + (' per slice' if dim == 3 else '')}, "
-        f"kernel beta={args.gauss_beta}")
+        f"kernel beta={args.gauss_beta}, bounded={args.bounded}, PointMamba={args.gmamba}")
 
     n_init = args.n_init or args.n_gauss // (8 if dim == 2 else 4)
     dens = dict(n_add=args.densify_add, densify_until=args.densify_until, l1=args.l1)
@@ -165,10 +191,16 @@ def run_scatter(args, dim):
                 log(f"[{task}]   sample {i}: grid solution (baseline and initialisation)")
                 grid_done = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
                 init_field = grid_done[0]
+            gnet = None
+            if args.gmamba != "none":
+                torch.manual_seed(i)
+                gnet = GaussPointMamba(dim, field.P, field.grid, mode=args.gmamba,
+                                       residual_feat=args.gm_residual).to(dev)
             p, rec_g, rg = fit_scatter(gt, field, "physics", op=op, y=y, n_init=n_init, n_max=args.n_gauss,
                                        iters=args.iters, seed=i, log_every=max(args.iters // 4, 1),
-                                       bounded=args.bounded, init_field=init_field, **dens)
+                                       bounded=args.bounded, init_field=init_field, gnet=gnet, **dens)
             rg["n_params"] = rg["n_gauss"] * field.P
+            rg["net_params"] = gnet.n_params() if gnet is not None else 0
             if grid_done:
                 rg["time_s"] = round(rg["time_s"] + grid_done[1]["time_s"], 1)   # include the initialising grid fit
             rows.append({"experiment": "B_physics", "receivers": R, "sample": i, "method": "gaussians", **rg})
@@ -188,7 +220,7 @@ def run_scatter(args, dim):
 
     df = pd.DataFrame(rows)
     df.to_csv(os.path.join(out, "results.csv"), index=False)
-    cols = [c for c in ["psnr", "ssim", "rel_l2", "n_gauss", "n_params", "time_s"] if c in df]
+    cols = [c for c in ["psnr", "ssim", "rel_l2", "n_gauss", "n_params", "net_params", "time_s"] if c in df]
     grp = df.groupby(["experiment", "receivers", "method"], dropna=False)
     summ = grp[cols].mean()
     std = grp[["psnr", "ssim"]].std().add_suffix("_std")      # spread over samples
@@ -215,7 +247,8 @@ def run_scatter(args, dim):
         a.set_title(t, fontsize=8)
         a.axis("off")
     fig.suptitle(f"{task}: sample 0" + (" (middle slice)" if dim == 3 else "")
-                 + (", true 3D Born physics" if born else "") + (f", kernel beta={args.gauss_beta:g}" if args.gauss_beta != 1 else ""))
+                 + (", true 3D Born physics" if born else "") + (f", kernel beta={args.gauss_beta:g}" if args.gauss_beta != 1 else "")
+                 + (f", PointMamba ({args.gmamba})" if args.gmamba != "none" else ""))
     fig.tight_layout()
     fig.savefig(os.path.join(out, "reconstructions.png"), dpi=130)
     plt.close(fig)

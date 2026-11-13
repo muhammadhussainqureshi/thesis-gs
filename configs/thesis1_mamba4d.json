@@ -1,0 +1,6 @@
+{
+ "description": "Improved Mamba for 4D Navier-Stokes, ~4-5 h on a T4. 5 flows, 10% of pixels observed, temporal smoothness 1. MLP vs Mamba (time only) vs space-time Mamba (PointMamba spatial scan across Gaussians) vs space-time Mamba with velocity integration.",
+ "runs": [
+  {"name": "ns4d_mamba_st", "args": ["--task", "ns4d", "--samples", "5", "--obs_ratios", "0.1", "--deform", "mlp", "mamba", "mamba_st", "mamba_st_vel", "--temporal_reg", "1"]}
+ ]
+}
