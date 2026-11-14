@@ -23,15 +23,26 @@ def main():
     ap.add_argument("--data_dir", default="data")
     ap.add_argument("--volumes", default=None, help="folder with 3D volumes; replaces VOLUMES in the config")
     ap.add_argument("--only", nargs="*", help="run only these run names")
+    ap.add_argument("--budget_hours", type=float, default=None,
+                    help="skip a run if it would not finish within this many hours (uses each run's est_min)")
+    ap.add_argument("--zip", default=None, help="after every run, write all results so far to this .zip")
     a, extra = ap.parse_known_args()          # anything unknown (e.g. --quick) is passed on to every run
     extra = [x for x in extra if x != "--"]
     cfg = json.load(open(a.config))
     os.makedirs(os.path.join(a.out, "logs"), exist_ok=True)
     status = {}
+    t_start = time.time()
     for run in cfg["runs"]:
         name = run["name"]
         if a.only and name not in a.only:
             continue
+        if a.budget_hours and "--quick" not in extra:
+            used = (time.time() - t_start) / 60
+            need = run.get("est_min", 0) * 1.15                 # 15% safety margin on the estimate
+            if used + need > a.budget_hours * 60:
+                print(f"===> {name}: SKIPPED (time budget: {used:.0f} min used, needs ~{need:.0f} min)", flush=True)
+                status[name] = {"ok": False, "skipped": "time budget"}
+                continue
         args = list(run["args"])
         if "VOLUMES" in args:
             if not a.volumes:
@@ -54,6 +65,10 @@ def main():
             logf.write(f"\nEXIT CODE {p.returncode}\n")
         status[name] = {"ok": p.returncode == 0, "minutes": round((time.time() - t0) / 60, 1)}
         print(f"===> {name}: {'OK' if p.returncode == 0 else 'FAILED, see ' + log_path}", flush=True)
+        json.dump(status, open(os.path.join(a.out, "status.json"), "w"), indent=1)
+        if a.zip:                                               # partial results survive a time-out
+            import shutil
+            shutil.make_archive(a.zip[:-4] if a.zip.endswith(".zip") else a.zip, "zip", a.out)
     json.dump(status, open(os.path.join(a.out, "status.json"), "w"), indent=1)
     print("\nSummary:", json.dumps(status, indent=1))
 

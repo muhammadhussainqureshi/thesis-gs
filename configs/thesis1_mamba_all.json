@@ -1,0 +1,16 @@
+{
+ "description": "All Mamba experiments in one GPU session (3D PointMamba over Gaussians + improved 4D Mamba), ordered by priority, with time estimates (est_min, T4). Use with --budget_hours so the session ends before Kaggle's 12 h limit; runs that do not fit are skipped and listed in status.json.",
+ "runs": [
+  {"name": "born3d_bbbc024_pointmamba", "est_min": 140, "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "pointmamba"]},
+  {"name": "ns4d_mamba_st", "est_min": 90, "args": ["--task", "ns4d", "--samples", "5", "--obs_ratios", "0.1", "--deform", "mamba_st", "--temporal_reg", "1"]},
+  {"name": "ns4d_mamba", "est_min": 80, "args": ["--task", "ns4d", "--samples", "5", "--obs_ratios", "0.1", "--deform", "mamba", "--temporal_reg", "1"]},
+  {"name": "ns4d_mlp", "est_min": 20, "args": ["--task", "ns4d", "--samples", "5", "--obs_ratios", "0.1", "--deform", "mlp", "--temporal_reg", "1"]},
+  {"name": "born3d_bbbc024_gm_mlp", "est_min": 130, "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "mlp", "--skip_grid"]},
+  {"name": "scatter2d_10_pointmamba", "est_min": 25, "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "pointmamba"]},
+  {"name": "scatter2d_10_gm_mlp", "est_min": 15, "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "mlp", "--skip_grid"]},
+  {"name": "scatter2d_10_gm_random", "est_min": 25, "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "random", "--skip_grid"]},
+  {"name": "ns4d_mamba_st_vel", "est_min": 90, "args": ["--task", "ns4d", "--samples", "5", "--obs_ratios", "0.1", "--deform", "mamba_st_vel", "--temporal_reg", "1"]},
+  {"name": "scatter2d_10_pointmamba_res", "est_min": 25, "args": ["--task", "scatter2d", "--skip_direct", "--samples", "10", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "pointmamba", "--gm_residual", "--skip_grid"]},
+  {"name": "born3d_bbbc024_gm_random", "est_min": 140, "args": ["--task", "scatter3d", "--physics", "born3d", "--skip_direct", "--volumes", "VOLUMES", "--crop", "0.5", "--l1", "0.3", "--grid_l1", "0.3", "--bounded", "--init_from_grid", "--gmamba", "random", "--skip_grid"]}
+ ]
+}
