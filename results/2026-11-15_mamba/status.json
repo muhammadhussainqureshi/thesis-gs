@@ -1,0 +1,46 @@
+{
+ "born3d_bbbc024_pointmamba": {
+  "ok": true,
+  "minutes": 123.1
+ },
+ "ns4d_mamba_st": {
+  "ok": true,
+  "minutes": 189.0
+ },
+ "ns4d_mamba": {
+  "ok": true,
+  "minutes": 184.1
+ },
+ "ns4d_mlp": {
+  "ok": true,
+  "minutes": 15.4
+ },
+ "born3d_bbbc024_gm_mlp": {
+  "ok": false,
+  "skipped": "time budget"
+ },
+ "scatter2d_10_pointmamba": {
+  "ok": true,
+  "minutes": 29.6
+ },
+ "scatter2d_10_gm_mlp": {
+  "ok": true,
+  "minutes": 12.0
+ },
+ "scatter2d_10_gm_random": {
+  "ok": true,
+  "minutes": 28.2
+ },
+ "ns4d_mamba_st_vel": {
+  "ok": false,
+  "skipped": "time budget"
+ },
+ "scatter2d_10_pointmamba_res": {
+  "ok": true,
+  "minutes": 29.9
+ },
+ "born3d_bbbc024_gm_random": {
+  "ok": false,
+  "skipped": "time budget"
+ }
+}

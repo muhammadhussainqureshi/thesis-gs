@@ -1,0 +1,2 @@
+obs_ratio,deform,train_frames_rel_l2,train_frames_psnr,train_frames_ssim,heldout_frames_rel_l2,heldout_frames_psnr,heldout_frames_ssim,time_s,heldout_frames_psnr_std,n_samples
+0.1,mamba_st,0.1346,29.7755,0.9053,0.2134,25.7789,0.7956,2265.08,1.2741,5

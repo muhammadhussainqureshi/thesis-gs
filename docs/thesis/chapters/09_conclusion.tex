@@ -29,6 +29,9 @@ a sequence model pays off only once regularised in time, and then mainly when ob
 
 \section{Plan for Thesis II}
 \begin{enumerate}
+  \item Mamba as a real prior for 3D Gaussians: a PointMamba network that \emph{generates} the Gaussian parameters
+  (no free per-Gaussian parameters), or one trained across volumes (synthetic and BBBC024) as a learned reconstructor,
+  optionally pre-trained by PointMamba-style masked modelling.
   \item Multiple scattering in 3D, and better optimisation of Gaussians under the true 3D model (initialisation
   from a back-projection or grid solution, bounded densities).
   \item Systematic evaluation on the full InverseBench test sets with confidence intervals, and comparison with the

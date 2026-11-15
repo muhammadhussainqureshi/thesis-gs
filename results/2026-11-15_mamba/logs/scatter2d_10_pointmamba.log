@@ -1,0 +1,260 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task scatter2d --skip_direct --samples 10 --l1 0.3 --grid_l1 0.3 --bounded --init_from_grid --gmamba pointmamba --data_dir /kaggle/working/data --out /kaggle/working/thesis1_mamba_all/scatter2d_10_pointmamba
+
+[03:48:57] device=cuda  task=scatter2d  out=/kaggle/working/thesis1_mamba_all/scatter2d_10_pointmamba
+[03:48:57] Downloading inv-scatter-test.zip from CaltechDATA ...
+[03:48:59] [scatter2d] 10 samples, shape (128, 128), source: InverseBench inv-scatter-test, physics: InverseBench 2D operator, kernel beta=1.0, bounded=True, PointMamba=pointmamba
+[03:49:02] [scatter2d] B physics, 360 receivers (operator check vs InverseBench: 2.0e-07)
+[03:49:02] [scatter2d]   sample 0: Gaussians
+[03:49:02] [scatter2d]   sample 0: grid solution (baseline and initialisation)
+[03:49:22]     iter   750  loss 1.944e-02  PSNR  29.83 dB  #G 423
+[03:49:35]     iter  1500  loss 1.943e-02  PSNR  30.03 dB  #G 608
+[03:49:49]     iter  2250  loss 1.943e-02  PSNR  39.43 dB  #G 670
+[03:50:02]     iter  3000  loss 1.942e-02  PSNR  39.31 dB  #G 670
+[03:50:02] [scatter2d]   sample 0: grid baseline
+[03:50:02] [scatter2d]   -> Gaussians 39.31 dB / SSIM 0.997   grid 38.69 dB / SSIM 0.996
+[03:50:02] [scatter2d]   sample 1: Gaussians
+[03:50:02] [scatter2d]   sample 1: grid solution (baseline and initialisation)
+[03:50:20]     iter   750  loss 4.855e-02  PSNR  28.44 dB  #G 428
+[03:50:33]     iter  1500  loss 4.849e-02  PSNR  29.66 dB  #G 613
+[03:50:47]     iter  2250  loss 4.848e-02  PSNR  32.14 dB  #G 675
+[03:51:00]     iter  3000  loss 4.848e-02  PSNR  31.93 dB  #G 675
+[03:51:00] [scatter2d]   sample 1: grid baseline
+[03:51:00] [scatter2d]   -> Gaussians 31.93 dB / SSIM 0.985   grid 32.63 dB / SSIM 0.985
+[03:51:00] [scatter2d]   sample 2: Gaussians
+[03:51:00] [scatter2d]   sample 2: grid solution (baseline and initialisation)
+[03:51:19]     iter   750  loss 5.794e-02  PSNR  26.50 dB  #G 426
+[03:51:32]     iter  1500  loss 5.783e-02  PSNR  27.74 dB  #G 610
+[03:51:46]     iter  2250  loss 5.781e-02  PSNR  30.31 dB  #G 672
+[03:52:00]     iter  3000  loss 5.781e-02  PSNR  30.06 dB  #G 672
+[03:52:00] [scatter2d]   sample 2: grid baseline
+[03:52:00] [scatter2d]   -> Gaussians 30.06 dB / SSIM 0.980   grid 30.49 dB / SSIM 0.979
+[03:52:00] [scatter2d]   sample 3: Gaussians
+[03:52:00] [scatter2d]   sample 3: grid solution (baseline and initialisation)
+[03:52:18]     iter   750  loss 5.794e-02  PSNR  27.05 dB  #G 426
+[03:52:31]     iter  1500  loss 5.783e-02  PSNR  27.76 dB  #G 611
+[03:52:45]     iter  2250  loss 5.781e-02  PSNR  30.45 dB  #G 673
+[03:52:58]     iter  3000  loss 5.780e-02  PSNR  30.31 dB  #G 673
+[03:52:58] [scatter2d]   sample 3: grid baseline
+[03:52:58] [scatter2d]   -> Gaussians 30.31 dB / SSIM 0.976   grid 30.50 dB / SSIM 0.976
+[03:52:58] [scatter2d]   sample 4: Gaussians
+[03:52:58] [scatter2d]   sample 4: grid solution (baseline and initialisation)
+[03:53:16]     iter   750  loss 4.359e-02  PSNR  27.75 dB  #G 420
+[03:53:30]     iter  1500  loss 4.350e-02  PSNR  28.11 dB  #G 605
+[03:53:44]     iter  2250  loss 4.349e-02  PSNR  32.34 dB  #G 667
+[03:53:57]     iter  3000  loss 4.348e-02  PSNR  32.15 dB  #G 667
+[03:53:57] [scatter2d]   sample 4: grid baseline
+[03:53:57] [scatter2d]   -> Gaussians 32.15 dB / SSIM 0.985   grid 33.46 dB / SSIM 0.988
+[03:53:57] [scatter2d]   sample 5: Gaussians
+[03:53:57] [scatter2d]   sample 5: grid solution (baseline and initialisation)
+[03:54:15]     iter   750  loss 4.744e-02  PSNR  28.56 dB  #G 416
+[03:54:28]     iter  1500  loss 4.737e-02  PSNR  29.00 dB  #G 601
+[03:54:42]     iter  2250  loss 4.735e-02  PSNR  32.29 dB  #G 663
+[03:54:56]     iter  3000  loss 4.735e-02  PSNR  32.07 dB  #G 663
+[03:54:56] [scatter2d]   sample 5: grid baseline
+[03:54:56] [scatter2d]   -> Gaussians 32.07 dB / SSIM 0.987   grid 33.02 dB / SSIM 0.988
+[03:54:56] [scatter2d]   sample 6: Gaussians
+[03:54:56] [scatter2d]   sample 6: grid solution (baseline and initialisation)
+[03:55:13]     iter   750  loss 3.189e-02  PSNR  29.13 dB  #G 425
+[03:55:27]     iter  1500  loss 3.186e-02  PSNR  28.30 dB  #G 611
+[03:55:40]     iter  2250  loss 3.185e-02  PSNR  35.27 dB  #G 673
+[03:55:54]     iter  3000  loss 3.185e-02  PSNR  35.22 dB  #G 673
+[03:55:54] [scatter2d]   sample 6: grid baseline
+[03:55:54] [scatter2d]   -> Gaussians 35.22 dB / SSIM 0.993   grid 35.97 dB / SSIM 0.994
+[03:55:54] [scatter2d]   sample 7: Gaussians
+[03:55:54] [scatter2d]   sample 7: grid solution (baseline and initialisation)
+[03:56:12]     iter   750  loss 1.806e-02  PSNR  29.74 dB  #G 414
+[03:56:26]     iter  1500  loss 1.804e-02  PSNR  29.92 dB  #G 600
+[03:56:39]     iter  2250  loss 1.804e-02  PSNR  39.05 dB  #G 662
+[03:56:53]     iter  3000  loss 1.804e-02  PSNR  39.00 dB  #G 662
+[03:56:53] [scatter2d]   sample 7: grid baseline
+[03:56:53] [scatter2d]   -> Gaussians 39.00 dB / SSIM 0.998   grid 39.39 dB / SSIM 0.998
+[03:56:53] [scatter2d]   sample 8: Gaussians
+[03:56:53] [scatter2d]   sample 8: grid solution (baseline and initialisation)
+[03:57:11]     iter   750  loss 1.876e-02  PSNR  29.28 dB  #G 414
+[03:57:24]     iter  1500  loss 1.875e-02  PSNR  29.76 dB  #G 599
+[03:57:38]     iter  2250  loss 1.875e-02  PSNR  39.27 dB  #G 661
+[03:57:51]     iter  3000  loss 1.875e-02  PSNR  39.16 dB  #G 661
+[03:57:51] [scatter2d]   sample 8: grid baseline
+[03:57:51] [scatter2d]   -> Gaussians 39.16 dB / SSIM 0.998   grid 39.68 dB / SSIM 0.998
+[03:57:51] [scatter2d]   sample 9: Gaussians
+[03:57:51] [scatter2d]   sample 9: grid solution (baseline and initialisation)
+[03:58:10]     iter   750  loss 3.109e-02  PSNR  30.74 dB  #G 423
+[03:58:23]     iter  1500  loss 3.107e-02  PSNR  29.73 dB  #G 608
+[03:58:37]     iter  2250  loss 3.107e-02  PSNR  35.90 dB  #G 670
+[03:58:50]     iter  3000  loss 3.106e-02  PSNR  35.77 dB  #G 670
+[03:58:50] [scatter2d]   sample 9: grid baseline
+[03:58:50] [scatter2d]   -> Gaussians 35.77 dB / SSIM 0.995   grid 36.51 dB / SSIM 0.994
+[03:58:51] [scatter2d] B physics, 180 receivers (operator check vs InverseBench: 2.9e-07)
+[03:58:51] [scatter2d]   sample 0: Gaussians
+[03:58:51] [scatter2d]   sample 0: grid solution (baseline and initialisation)
+[03:59:09]     iter   750  loss 1.941e-02  PSNR  30.04 dB  #G 427
+[03:59:23]     iter  1500  loss 1.940e-02  PSNR  29.70 dB  #G 613
+[03:59:37]     iter  2250  loss 1.940e-02  PSNR  38.48 dB  #G 675
+[03:59:50]     iter  3000  loss 1.940e-02  PSNR  38.37 dB  #G 675
+[03:59:50] [scatter2d]   sample 0: grid baseline
+[03:59:50] [scatter2d]   -> Gaussians 38.37 dB / SSIM 0.997   grid 37.88 dB / SSIM 0.996
+[03:59:50] [scatter2d]   sample 1: Gaussians
+[03:59:50] [scatter2d]   sample 1: grid solution (baseline and initialisation)
+[04:00:08]     iter   750  loss 4.854e-02  PSNR  27.17 dB  #G 426
+[04:00:22]     iter  1500  loss 4.848e-02  PSNR  28.01 dB  #G 611
+[04:00:36]     iter  2250  loss 4.847e-02  PSNR  31.42 dB  #G 673
+[04:00:49]     iter  3000  loss 4.846e-02  PSNR  31.09 dB  #G 673
+[04:00:49] [scatter2d]   sample 1: grid baseline
+[04:00:49] [scatter2d]   -> Gaussians 31.09 dB / SSIM 0.983   grid 31.82 dB / SSIM 0.983
+[04:00:49] [scatter2d]   sample 2: Gaussians
+[04:00:49] [scatter2d]   sample 2: grid solution (baseline and initialisation)
+[04:01:07]     iter   750  loss 5.794e-02  PSNR  26.64 dB  #G 430
+[04:01:21]     iter  1500  loss 5.783e-02  PSNR  27.06 dB  #G 616
+[04:01:34]     iter  2250  loss 5.781e-02  PSNR  30.19 dB  #G 678
+[04:01:48]     iter  3000  loss 5.781e-02  PSNR  29.97 dB  #G 678
+[04:01:48] [scatter2d]   sample 2: grid baseline
+[04:01:48] [scatter2d]   -> Gaussians 29.97 dB / SSIM 0.979   grid 30.04 dB / SSIM 0.977
+[04:01:48] [scatter2d]   sample 3: Gaussians
+[04:01:48] [scatter2d]   sample 3: grid solution (baseline and initialisation)
+[04:02:06]     iter   750  loss 5.794e-02  PSNR  26.83 dB  #G 426
+[04:02:20]     iter  1500  loss 5.783e-02  PSNR  27.61 dB  #G 610
+[04:02:34]     iter  2250  loss 5.780e-02  PSNR  30.26 dB  #G 671
+[04:02:47]     iter  3000  loss 5.780e-02  PSNR  30.08 dB  #G 671
+[04:02:47] [scatter2d]   sample 3: grid baseline
+[04:02:47] [scatter2d]   -> Gaussians 30.08 dB / SSIM 0.976   grid 29.98 dB / SSIM 0.973
+[04:02:47] [scatter2d]   sample 4: Gaussians
+[04:02:47] [scatter2d]   sample 4: grid solution (baseline and initialisation)
+[04:03:05]     iter   750  loss 4.360e-02  PSNR  27.66 dB  #G 424
+[04:03:19]     iter  1500  loss 4.349e-02  PSNR  29.17 dB  #G 609
+[04:03:32]     iter  2250  loss 4.348e-02  PSNR  32.43 dB  #G 670
+[04:03:46]     iter  3000  loss 4.347e-02  PSNR  32.30 dB  #G 670
+[04:03:46] [scatter2d]   sample 4: grid baseline
+[04:03:46] [scatter2d]   -> Gaussians 32.30 dB / SSIM 0.986   grid 32.83 dB / SSIM 0.986
+[04:03:46] [scatter2d]   sample 5: Gaussians
+[04:03:46] [scatter2d]   sample 5: grid solution (baseline and initialisation)
+[04:04:04]     iter   750  loss 4.742e-02  PSNR  28.11 dB  #G 416
+[04:04:17]     iter  1500  loss 4.735e-02  PSNR  28.70 dB  #G 602
+[04:04:31]     iter  2250  loss 4.734e-02  PSNR  31.50 dB  #G 664
+[04:04:44]     iter  3000  loss 4.734e-02  PSNR  31.33 dB  #G 664
+[04:04:44] [scatter2d]   sample 5: grid baseline
+[04:04:44] [scatter2d]   -> Gaussians 31.33 dB / SSIM 0.985   grid 32.50 dB / SSIM 0.987
+[04:04:44] [scatter2d]   sample 6: Gaussians
+[04:04:44] [scatter2d]   sample 6: grid solution (baseline and initialisation)
+[04:05:03]     iter   750  loss 3.187e-02  PSNR  28.84 dB  #G 421
+[04:05:16]     iter  1500  loss 3.183e-02  PSNR  27.99 dB  #G 607
+[04:05:30]     iter  2250  loss 3.183e-02  PSNR  34.50 dB  #G 669
+[04:05:43]     iter  3000  loss 3.183e-02  PSNR  34.36 dB  #G 669
+[04:05:43] [scatter2d]   sample 6: grid baseline
+[04:05:43] [scatter2d]   -> Gaussians 34.36 dB / SSIM 0.992   grid 35.08 dB / SSIM 0.992
+[04:05:43] [scatter2d]   sample 7: Gaussians
+[04:05:43] [scatter2d]   sample 7: grid solution (baseline and initialisation)
+[04:06:01]     iter   750  loss 1.802e-02  PSNR  28.51 dB  #G 409
+[04:06:15]     iter  1500  loss 1.801e-02  PSNR  30.20 dB  #G 595
+[04:06:28]     iter  2250  loss 1.801e-02  PSNR  39.04 dB  #G 657
+[04:06:42]     iter  3000  loss 1.801e-02  PSNR  39.07 dB  #G 657
+[04:06:42] [scatter2d]   sample 7: grid baseline
+[04:06:42] [scatter2d]   -> Gaussians 39.07 dB / SSIM 0.997   grid 38.15 dB / SSIM 0.997
+[04:06:42] [scatter2d]   sample 8: Gaussians
+[04:06:42] [scatter2d]   sample 8: grid solution (baseline and initialisation)
+[04:07:00]     iter   750  loss 1.874e-02  PSNR  31.47 dB  #G 415
+[04:07:14]     iter  1500  loss 1.873e-02  PSNR  30.73 dB  #G 600
+[04:07:27]     iter  2250  loss 1.873e-02  PSNR  39.05 dB  #G 662
+[04:07:41]     iter  3000  loss 1.873e-02  PSNR  38.98 dB  #G 662
+[04:07:41] [scatter2d]   sample 8: grid baseline
+[04:07:41] [scatter2d]   -> Gaussians 38.98 dB / SSIM 0.998   grid 38.73 dB / SSIM 0.997
+[04:07:41] [scatter2d]   sample 9: Gaussians
+[04:07:41] [scatter2d]   sample 9: grid solution (baseline and initialisation)
+[04:07:59]     iter   750  loss 3.108e-02  PSNR  30.17 dB  #G 419
+[04:08:12]     iter  1500  loss 3.105e-02  PSNR  29.70 dB  #G 604
+[04:08:26]     iter  2250  loss 3.105e-02  PSNR  35.49 dB  #G 666
+[04:08:39]     iter  3000  loss 3.105e-02  PSNR  35.29 dB  #G 666
+[04:08:39] [scatter2d]   sample 9: grid baseline
+[04:08:39] [scatter2d]   -> Gaussians 35.29 dB / SSIM 0.994   grid 35.46 dB / SSIM 0.993
+[04:08:40] [scatter2d] B physics, 60 receivers (operator check vs InverseBench: 1.9e-07)
+[04:08:40] [scatter2d]   sample 0: Gaussians
+[04:08:40] [scatter2d]   sample 0: grid solution (baseline and initialisation)
+[04:08:58]     iter   750  loss 1.936e-02  PSNR  27.39 dB  #G 424
+[04:09:11]     iter  1500  loss 1.934e-02  PSNR  29.97 dB  #G 607
+[04:09:25]     iter  2250  loss 1.933e-02  PSNR  36.37 dB  #G 669
+[04:09:38]     iter  3000  loss 1.933e-02  PSNR  36.12 dB  #G 669
+[04:09:38] [scatter2d]   sample 0: grid baseline
+[04:09:38] [scatter2d]   -> Gaussians 36.12 dB / SSIM 0.989   grid 34.62 dB / SSIM 0.986
+[04:09:38] [scatter2d]   sample 1: Gaussians
+[04:09:38] [scatter2d]   sample 1: grid solution (baseline and initialisation)
+[04:09:57]     iter   750  loss 4.845e-02  PSNR  26.00 dB  #G 431
+[04:10:10]     iter  1500  loss 4.840e-02  PSNR  26.49 dB  #G 614
+[04:10:24]     iter  2250  loss 4.839e-02  PSNR  28.30 dB  #G 675
+[04:10:38]     iter  3000  loss 4.839e-02  PSNR  28.06 dB  #G 675
+[04:10:38] [scatter2d]   sample 1: grid baseline
+[04:10:38] [scatter2d]   -> Gaussians 28.06 dB / SSIM 0.959   grid 27.96 dB / SSIM 0.956
+[04:10:38] [scatter2d]   sample 2: Gaussians
+[04:10:38] [scatter2d]   sample 2: grid solution (baseline and initialisation)
+[04:10:56]     iter   750  loss 5.782e-02  PSNR  22.82 dB  #G 430
+[04:11:10]     iter  1500  loss 5.775e-02  PSNR  23.58 dB  #G 616
+[04:11:23]     iter  2250  loss 5.773e-02  PSNR  23.45 dB  #G 677
+[04:11:37]     iter  3000  loss 5.773e-02  PSNR  23.10 dB  #G 677
+[04:11:37] [scatter2d]   sample 2: grid baseline
+[04:11:37] [scatter2d]   -> Gaussians 23.10 dB / SSIM 0.891   grid 23.89 dB / SSIM 0.902
+[04:11:37] [scatter2d]   sample 3: Gaussians
+[04:11:37] [scatter2d]   sample 3: grid solution (baseline and initialisation)
+[04:11:55]     iter   750  loss 5.781e-02  PSNR  24.10 dB  #G 430
+[04:12:08]     iter  1500  loss 5.773e-02  PSNR  23.60 dB  #G 615
+[04:12:22]     iter  2250  loss 5.771e-02  PSNR  23.67 dB  #G 677
+[04:12:36]     iter  3000  loss 5.770e-02  PSNR  23.35 dB  #G 677
+[04:12:36] [scatter2d]   sample 3: grid baseline
+[04:12:36] [scatter2d]   -> Gaussians 23.35 dB / SSIM 0.859   grid 23.63 dB / SSIM 0.861
+[04:12:36] [scatter2d]   sample 4: Gaussians
+[04:12:36] [scatter2d]   sample 4: grid solution (baseline and initialisation)
+[04:12:54]     iter   750  loss 4.350e-02  PSNR  25.84 dB  #G 426
+[04:13:08]     iter  1500  loss 4.343e-02  PSNR  26.67 dB  #G 608
+[04:13:21]     iter  2250  loss 4.342e-02  PSNR  28.34 dB  #G 669
+[04:13:35]     iter  3000  loss 4.341e-02  PSNR  28.13 dB  #G 669
+[04:13:35] [scatter2d]   sample 4: grid baseline
+[04:13:35] [scatter2d]   -> Gaussians 28.13 dB / SSIM 0.959   grid 28.48 dB / SSIM 0.959
+[04:13:35] [scatter2d]   sample 5: Gaussians
+[04:13:35] [scatter2d]   sample 5: grid solution (baseline and initialisation)
+[04:13:53]     iter   750  loss 4.739e-02  PSNR  26.63 dB  #G 420
+[04:14:07]     iter  1500  loss 4.733e-02  PSNR  27.24 dB  #G 601
+[04:14:20]     iter  2250  loss 4.732e-02  PSNR  28.28 dB  #G 663
+[04:14:34]     iter  3000  loss 4.732e-02  PSNR  28.01 dB  #G 663
+[04:14:34] [scatter2d]   sample 5: grid baseline
+[04:14:34] [scatter2d]   -> Gaussians 28.01 dB / SSIM 0.967   grid 28.25 dB / SSIM 0.967
+[04:14:34] [scatter2d]   sample 6: Gaussians
+[04:14:34] [scatter2d]   sample 6: grid solution (baseline and initialisation)
+[04:14:51]     iter   750  loss 3.179e-02  PSNR  27.94 dB  #G 430
+[04:15:05]     iter  1500  loss 3.175e-02  PSNR  26.87 dB  #G 610
+[04:15:18]     iter  2250  loss 3.174e-02  PSNR  31.95 dB  #G 670
+[04:15:32]     iter  3000  loss 3.174e-02  PSNR  31.96 dB  #G 670
+[04:15:32] [scatter2d]   sample 6: grid baseline
+[04:15:32] [scatter2d]   -> Gaussians 31.96 dB / SSIM 0.973   grid 31.35 dB / SSIM 0.973
+[04:15:32] [scatter2d]   sample 7: Gaussians
+[04:15:32] [scatter2d]   sample 7: grid solution (baseline and initialisation)
+[04:15:50]     iter   750  loss 1.795e-02  PSNR  28.40 dB  #G 418
+[04:16:03]     iter  1500  loss 1.794e-02  PSNR  29.24 dB  #G 595
+[04:16:17]     iter  2250  loss 1.793e-02  PSNR  37.02 dB  #G 657
+[04:16:30]     iter  3000  loss 1.793e-02  PSNR  36.80 dB  #G 657
+[04:16:30] [scatter2d]   sample 7: grid baseline
+[04:16:30] [scatter2d]   -> Gaussians 36.80 dB / SSIM 0.990   grid 35.02 dB / SSIM 0.990
+[04:16:30] [scatter2d]   sample 8: Gaussians
+[04:16:30] [scatter2d]   sample 8: grid solution (baseline and initialisation)
+[04:16:48]     iter   750  loss 1.868e-02  PSNR  29.84 dB  #G 428
+[04:17:02]     iter  1500  loss 1.867e-02  PSNR  30.35 dB  #G 604
+[04:17:16]     iter  2250  loss 1.866e-02  PSNR  36.53 dB  #G 666
+[04:17:29]     iter  3000  loss 1.866e-02  PSNR  36.12 dB  #G 666
+[04:17:29] [scatter2d]   sample 8: grid baseline
+[04:17:29] [scatter2d]   -> Gaussians 36.12 dB / SSIM 0.992   grid 34.82 dB / SSIM 0.990
+[04:17:29] [scatter2d]   sample 9: Gaussians
+[04:17:29] [scatter2d]   sample 9: grid solution (baseline and initialisation)
+[04:17:47]     iter   750  loss 3.102e-02  PSNR  29.72 dB  #G 421
+[04:18:01]     iter  1500  loss 3.099e-02  PSNR  29.87 dB  #G 605
+[04:18:14]     iter  2250  loss 3.098e-02  PSNR  32.96 dB  #G 667
+[04:18:28]     iter  3000  loss 3.098e-02  PSNR  32.70 dB  #G 667
+[04:18:28] [scatter2d]   sample 9: grid baseline
+[04:18:28] [scatter2d]   -> Gaussians 32.70 dB / SSIM 0.989   grid 32.26 dB / SSIM 0.987
+[04:18:28] [scatter2d] summary
+                                      psnr   ssim  rel_l2  n_gauss  n_params  net_params  time_s  psnr_std  ssim_std  n_samples
+experiment receivers method                                                                                                    
+B_physics  60        gaussians      30.435  0.957   0.119    669.0    4014.0     85958.0   58.74     5.093     0.046         10
+                     grid_baseline  30.026  0.957   0.122      0.0   16384.0         NaN    4.49     4.270     0.043         10
+           180       gaussians      34.083  0.989   0.075    668.5    4011.0     85958.0   58.83     3.671     0.008         10
+                     grid_baseline  34.245  0.988   0.073      0.0   16384.0         NaN    4.55     3.292     0.008         10
+           360       gaussians      34.498  0.989   0.071    668.6    4011.6     85958.0   58.64     3.690     0.008         10
+                     grid_baseline  35.034  0.990   0.067      0.0   16384.0         NaN    4.55     3.505     0.008         10
+[04:18:28] ===== scatter2d finished in 29.5 min. Results in /kaggle/working/thesis1_mamba_all/scatter2d_10_pointmamba/scatter2d
+
+EXIT CODE 0

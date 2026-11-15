@@ -1,0 +1,47 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --samples 5 --obs_ratios 0.1 --deform mamba_st --temporal_reg 1 --data_dir /kaggle/working/data --out /kaggle/working/thesis1_mamba_all/ns4d_mamba_st
+
+[21:20:26] device=cuda  task=ns4d  out=/kaggle/working/thesis1_mamba_all/ns4d_mamba_st
+[21:20:27] Downloading navier-stokes-test.zip from CaltechDATA ...
+[21:20:30] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.6s
+[21:20:31] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.3s
+[21:20:32] [ns4d] rolled out sample 2: 21 frames x dt=0.05 in 1.5s
+[21:20:34] [ns4d] rolled out sample 3: 21 frames x dt=0.05 in 1.4s
+[21:20:35] [ns4d] rolled out sample 4: 21 frames x dt=0.05 in 1.3s
+[21:20:35] [ns4d] 5 sequences x 21 frames; train frames 16, held-out 5; observed pixel ratios [0.1]; deformations ['mamba_st']
+[21:20:36] [ns4d] ratio 0.1, sample 0, deform=mamba_st
+[21:30:03]     iter   750  loss 2.493e-03
+[21:39:30]     iter  1500  loss 1.475e-03
+[21:48:56]     iter  2250  loss 1.354e-03
+[21:58:22]     iter  3000  loss 1.131e-03
+[21:58:23]     -> rel L2 train 0.1421 | held-out 0.2325   PSNR held-out 25.51 dB  (2266s)
+[21:58:23] [ns4d] ratio 0.1, sample 1, deform=mamba_st
+[22:07:49]     iter   750  loss 4.602e-03
+[22:17:16]     iter  1500  loss 1.910e-03
+[22:26:42]     iter  2250  loss 1.242e-03
+[22:36:08]     iter  3000  loss 1.255e-03
+[22:36:08]     -> rel L2 train 0.1336 | held-out 0.2068   PSNR held-out 26.11 dB  (2265s)
+[22:36:08] [ns4d] ratio 0.1, sample 2, deform=mamba_st
+[22:45:35]     iter   750  loss 8.533e-03
+[22:55:01]     iter  1500  loss 2.157e-03
+[23:04:27]     iter  2250  loss 2.089e-03
+[23:13:53]     iter  3000  loss 1.554e-03
+[23:13:53]     -> rel L2 train 0.1468 | held-out 0.2448   PSNR held-out 23.86 dB  (2265s)
+[23:13:53] [ns4d] ratio 0.1, sample 3, deform=mamba_st
+[23:23:20]     iter   750  loss 4.279e-03
+[23:32:46]     iter  1500  loss 1.853e-03
+[23:42:12]     iter  2250  loss 1.613e-03
+[23:51:39]     iter  3000  loss 1.288e-03
+[23:51:39]     -> rel L2 train 0.1345 | held-out 0.2104   PSNR held-out 26.05 dB  (2265s)
+[23:51:39] [ns4d] ratio 0.1, sample 4, deform=mamba_st
+[00:01:05]     iter   750  loss 4.684e-03
+[00:10:31]     iter  1500  loss 1.660e-03
+[00:19:57]     iter  2250  loss 1.238e-03
+[00:29:23]     iter  3000  loss 1.053e-03
+[00:29:23]     -> rel L2 train 0.1161 | held-out 0.1727   PSNR held-out 27.37 dB  (2264s)
+[00:29:23] [ns4d] summary
+                    train_frames_rel_l2  train_frames_psnr  train_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim   time_s  heldout_frames_psnr_std  n_samples
+obs_ratio deform                                                                                                                                                                           
+0.1       mamba_st               0.1346            29.7755             0.9053                 0.2134              25.7789               0.7956  2265.08                   1.2741          5
+[00:29:24] ===== ns4d finished in 189.0 min. Results in /kaggle/working/thesis1_mamba_all/ns4d_mamba_st/ns4d
+
+EXIT CODE 0

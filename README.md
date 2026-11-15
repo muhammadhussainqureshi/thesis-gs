@@ -76,6 +76,8 @@ InverseBench and its test data are downloaded automatically. On Kaggle use
 
 Bounded Gaussians win on every volume at every receiver count in true 3D. Slice-wise 3D and 2D (more measurements): the regularised grid is still slightly ahead (see `results/README.md`).
 
+**Mamba (Nov 15).** PointMamba over Gaussians (per scene, `--gmamba pointmamba`): no gain over the same Gaussians without a network (true 3D BBBC024: 32.9 / 31.3 / 26.4 vs 32.8 / 31.4 / 26.7 dB; 2D: all variants within ±0.1 dB), still above the voxel grid. 4D on 5 flows, 10% observed: **Mamba 25.9 ± 1.1 dB vs MLP 23.1 ± 1.4 dB on unseen frames (better on all 5 flows)**; space-time Mamba 25.8 (no gain).
+
 2D on 10 cells (paired, unbounded Gaussians): the pixel grid with the same sparsity beats Gaussians on every cell (by 0.6 / 2.3 / 2.9 dB at 60 / 180 / 360 receivers). Generalised Gaussians (β = 2, 4) did not help under the physics loss.
 
 | Navier-Stokes 4D, held-out frames (PSNR, 3 sequences) | static | MLP | Mamba | bidir. Mamba |

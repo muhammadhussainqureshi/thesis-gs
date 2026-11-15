@@ -290,6 +290,55 @@ times slower than the MLP (28 vs.\ 3\,min per sequence) because of its sequentia
   \label{fig:ns_smooth}
 \end{figure}
 
+\section{Mamba over the Gaussians and in space--time}
+\label{sec:mamba_more}
+Two further Mamba designs were evaluated (Table~\ref{tab:mamba_more}). \textbf{(i) PointMamba over Gaussians (3D and
+2D).} Following PointMamba~\citep{pointmamba}, the Gaussians of one scene are grouped into patches around
+farthest-point-sampled key points, the patch tokens are serialised along Hilbert and Trans-Hilbert curves with an
+order indicator, processed by Mamba blocks, and each Gaussian receives a correction from its patch context
+(zero-initialised, fitted per scene with the physics loss, on top of bounded grid-initialised Gaussians).
+\textbf{(ii) Space--time Mamba (4D).} The temporal Mamba is complemented by a PointMamba spatial scan across patches of
+Gaussians in every frame.
+
+Neither added accuracy. Under the true 3D model, PointMamba over Gaussians changes PSNR by $+0.13$, $-0.17$ and
+$-0.31$\,dB at 360, 180 and 60 receivers relative to the same Gaussians without a network (still beating the voxel
+grid on every volume, by 0.4--0.8\,dB). On ten 2D cells all network variants, including the controls (a per-Gaussian
+MLP without any coupling and Mamba over a random order), stay within $\pm0.1$\,dB of the network-free result. The
+reason is structural: the network only adds an offset to Gaussian parameters that are themselves free, so anything it
+could contribute the Gaussians can also learn directly; a per-scene network of this kind does not constrain the
+solution. For Mamba to act as a prior it must either \emph{generate} the Gaussian parameters (no free per-Gaussian
+parameters) or be \emph{trained across scenes}, as PointMamba is pre-trained on ShapeNet.
+
+In 4D, five flows confirm the earlier result with more confidence: with 10\% of pixels observed, Mamba beats the
+MLP on every flow, by $+2.8\pm0.9$\,dB on unseen frames (25.9 vs.\ 23.1\,dB). The spatial scan does not help
+($-0.2\pm0.2$\,dB, 25.8\,dB), consistent with the 3D finding.
+
+\begin{table}[h]
+  \centering
+  \caption{Further Mamba designs. Top: 3D/2D scattering, bounded grid-initialised Gaussians (B+G) with and without a
+  PointMamba network (PSNR dB). Bottom: 4D Navier--Stokes, 5 flows, 10\% observed, PSNR on unseen frames (mean $\pm$ std).}
+  \label{tab:mamba_more}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{llccc}
+    \toprule
+    Setting & Method & 360 receivers & 180 receivers & 60 receivers \\
+    \midrule
+    \multirow{3}{*}{True 3D, BBBC024 (3)} & B+G Gaussians & 32.8 & \textbf{31.4} & \textbf{26.7} \\
+     & B+G + PointMamba (87k net params) & \textbf{32.9} & 31.3 & 26.4 \\
+     & Voxel grid & 32.5 & 30.5 & 25.6 \\
+    \midrule
+    \multirow{5}{*}{2D cells (10)} & B+G Gaussians & 34.4 & 34.0 & \textbf{30.5} \\
+     & + per-Gaussian MLP (no coupling) & 34.5 & 34.0 & \textbf{30.5} \\
+     & + Mamba, random order & 34.5 & \textbf{34.1} & 30.4 \\
+     & + PointMamba (Hilbert, Trans-Hilbert) & \textbf{34.5} & \textbf{34.1} & 30.4 \\
+     & + PointMamba + residual tokens & 34.4 & 34.0 & 30.4 \\
+    \midrule
+    \multicolumn{2}{l}{4D, 5 flows, 10\% observed} & MLP & Mamba & Space--time Mamba \\
+    \multicolumn{2}{l}{\quad PSNR on unseen frames} & 23.1 $\pm$ 1.4 & \textbf{25.9 $\pm$ 1.1} & 25.8 $\pm$ 1.3 \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
 \section{Answers to the research questions}
 \begin{description}
   \item[RQ1] Yes in the most under-determined setting, once the density is bounded. Under the true 3D model,
@@ -301,7 +350,8 @@ times slower than the MLP (28 vs.\ 3\,min per sequence) because of its sequentia
   total intensity prevents them and is required for Gaussians.
   \item[RQ3] Yes: canonical Gaussians plus a deformation network reconstruct the flow at held-out times, about 10\,dB
   better than static Gaussians, from full or 10\% observations.
-  \item[RQ4] Yes, when observations are sparse and the model is regularised in time: Mamba with temporal smoothness
-  beats the MLP by 2.4\,dB on held-out frames with 10\% observations. With full observations there is no gain, and the
-  bidirectional variant adds cost without benefit.
+  \item[RQ4] Yes, along time, when observations are sparse and the model is regularised in time: Mamba with temporal
+  smoothness beats the MLP on every one of five flows by $2.8\pm0.9$\,dB on unseen frames with 10\% observations.
+  With full observations there is no gain; bidirectional and spatial (PointMamba) scans add cost without benefit,
+  and a per-scene PointMamba network over 3D Gaussians does not improve scattering reconstructions.
 \end{description}
