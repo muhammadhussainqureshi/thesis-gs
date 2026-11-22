@@ -112,6 +112,29 @@ class DeformMamba(nn.Module):
         return out if full else out[idx]
 
 
+class DeformGRU(nn.Module):
+    """Recurrent control for DeformMamba: the same inputs (Fourier features of canonical position and t), each
+    Gaussian's trajectory read causally in time, but by a GRU instead of Mamba blocks. Same output head."""
+
+    def __init__(self, n_out=6, n_freq=6, hidden=103, n_layers=1):
+        super().__init__()
+        self.n_freq = n_freq
+        self.inp = nn.Linear(3 * 2 * n_freq, hidden)
+        self.gru = nn.GRU(hidden, hidden, num_layers=n_layers, batch_first=True)
+        self.norm = nn.LayerNorm(hidden)
+        self.head = nn.Linear(hidden, n_out)
+        nn.init.zeros_(self.head.weight)
+        nn.init.zeros_(self.head.bias)
+
+    def forward(self, mu_norm, t_all, idx, full=False):
+        N, T = mu_norm.shape[0], t_all.shape[0]
+        x = torch.cat([fourier(mu_norm, self.n_freq)[:, None].expand(N, T, -1),
+                       fourier(t_all[None, :, None].expand(N, T, 1), self.n_freq)], -1)
+        h, _ = self.gru(self.inp(x))
+        out = self.head(self.norm(h)).transpose(0, 1)                         # (T, N, n_out)
+        return out if full else out[idx]
+
+
 class StaticDeform(nn.Module):
     """No deformation (ablation): the same Gaussians for every frame."""
 

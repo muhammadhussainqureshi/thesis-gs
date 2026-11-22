@@ -1,0 +1,75 @@
+{
+ "description": "Step 1, session B of 2: Mamba final runs (5 flows, seeds 0/1/2 as separate runs so a time-out keeps finished seeds) with the weight chosen in session A (LAMBDA_MAMBA is replaced by the notebook), then the fully observed Mamba ceiling.",
+ "runs": [
+  {
+   "name": "final_mamba_s0",
+   "est_min": 190,
+   "args": [
+    "--task",
+    "ns4d",
+    "--obs_ratios",
+    "0.1",
+    "--deform",
+    "mamba",
+    "--samples",
+    "5",
+    "--seeds",
+    "0",
+    "--temporal_reg",
+    "LAMBDA_MAMBA"
+   ]
+  },
+  {
+   "name": "final_mamba_s1",
+   "est_min": 190,
+   "args": [
+    "--task",
+    "ns4d",
+    "--obs_ratios",
+    "0.1",
+    "--deform",
+    "mamba",
+    "--samples",
+    "5",
+    "--seeds",
+    "1",
+    "--temporal_reg",
+    "LAMBDA_MAMBA"
+   ]
+  },
+  {
+   "name": "final_mamba_s2",
+   "est_min": 190,
+   "args": [
+    "--task",
+    "ns4d",
+    "--obs_ratios",
+    "0.1",
+    "--deform",
+    "mamba",
+    "--samples",
+    "5",
+    "--seeds",
+    "2",
+    "--temporal_reg",
+    "LAMBDA_MAMBA"
+   ]
+  },
+  {
+   "name": "ceiling_mamba",
+   "est_min": 80,
+   "args": [
+    "--task",
+    "ns4d",
+    "--obs_ratios",
+    "1.0",
+    "--deform",
+    "mamba",
+    "--samples",
+    "2",
+    "--temporal_reg",
+    "LAMBDA_MAMBA"
+   ]
+  }
+ ]
+}

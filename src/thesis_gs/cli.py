@@ -65,9 +65,18 @@ def main():
     ap.add_argument("--frame_dt", type=float, default=0.05)
     ap.add_argument("--obs_ratios", type=float, nargs="+", default=[1.0, 0.1])
     ap.add_argument("--ns_noise", type=float, default=0.0)
-    ap.add_argument("--deform", nargs="+", default=["mlp", "mamba"], choices=["mlp", "mamba", "mamba_bi", "mamba_st", "mamba_vel", "mamba_st_vel", "static"])
+    ap.add_argument("--deform", nargs="+", default=["mlp", "mamba"], choices=["mlp", "gru", "mamba", "mamba_bi", "mamba_st", "mamba_vel", "mamba_st_vel", "static",
+                             "interp"])
     ap.add_argument("--batch_frames", type=int, default=4)
-    ap.add_argument("--temporal_reg", type=float, default=0.0, help="weight of the deformation smoothness term over time")
+    ap.add_argument("--temporal_reg", type=float, nargs="+", default=[0.0],
+                    help="weight(s) of the deformation smoothness term over time; several = one run each")
+    ap.add_argument("--lambda_from", default=None,
+                    help="tuning results.csv: use, per deformation, the weight with the best validation PSNR")
+    ap.add_argument("--val_frames", type=int, nargs="*", default=[],
+                    help="training frames moved to a validation split (for choosing the weight)")
+    ap.add_argument("--seeds", type=int, nargs="+", default=None, help="initialisation seeds (default: 0)")
+    ap.add_argument("--mlp_width", type=int, default=128, help="hidden width of the deformation MLP")
+    ap.add_argument("--gru_hidden", type=int, default=103, help="hidden size of the deformation GRU")
     ap.add_argument("--lr_gauss", type=float, default=0.01)
     ap.add_argument("--lr_net", type=float, default=1e-3)
     ap.add_argument("--quick", action="store_true", help="tiny settings for a smoke test")

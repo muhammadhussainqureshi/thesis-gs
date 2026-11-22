@@ -50,6 +50,7 @@ def main():
                 status[name] = {"ok": False, "skipped": "no --volumes"}
                 continue
             args = [a.volumes if x == "VOLUMES" else x for x in args]
+        args = [x.replace("OUTDIR", a.out) for x in args]    # OUTDIR = this session's output folder
         cmd = [sys.executable, os.path.join(HERE, "thesis-gs")] + args + \
               ["--data_dir", a.data_dir, "--out", os.path.join(a.out, name)] + extra
         log_path = os.path.join(a.out, "logs", f"{name}.log")
