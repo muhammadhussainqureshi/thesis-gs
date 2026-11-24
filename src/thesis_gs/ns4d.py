@@ -26,7 +26,9 @@ PEAK = 2.0                                      # vorticity / 10 lies in about [
 
 def psnr_region(x, gt, m):
     """PSNR (peak-to-peak 2) over the pixels where m == 1."""
-    mse = (((x - gt) ** 2) * m).sum().item() / max(m.sum().item(), 1.0)
+    if m.sum().item() == 0:                     # no such pixels (e.g. unobserved pixels when 100% observed)
+        return float("nan")
+    mse = (((x - gt) ** 2) * m).sum().item() / m.sum().item()
     return float(10 * np.log10(PEAK ** 2 / max(mse, 1e-12)))
 
 
