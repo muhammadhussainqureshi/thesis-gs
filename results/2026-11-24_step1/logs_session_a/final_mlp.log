@@ -1,0 +1,107 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --obs_ratios 0.1 --deform mlp --mlp_width 175 --samples 5 --seeds 0 1 2 --lambda_from /kaggle/working/thesis1_step1_a/tune_mlp/ns4d/results.csv --data_dir /kaggle/working/data --out /kaggle/working/thesis1_step1_a/final_mlp
+
+[05:49:02] device=cuda  task=ns4d  out=/kaggle/working/thesis1_step1_a/final_mlp
+[05:49:04] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.2s
+[05:49:05] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.1s
+[05:49:06] [ns4d] rolled out sample 2: 21 frames x dt=0.05 in 1.4s
+[05:49:08] [ns4d] rolled out sample 3: 21 frames x dt=0.05 in 1.3s
+[05:49:09] [ns4d] rolled out sample 4: 21 frames x dt=0.05 in 1.1s
+[05:49:09] [ns4d] mlp: validation PSNR by smoothness weight {0.0: 22.909, 0.3: 23.16, 1.0: 22.816, 3.0: 22.665} -> chose 0.3
+[05:49:09] [ns4d] 5 flows x 21 frames; train [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20], val [], test [2, 6, 10, 14, 18]; observed pixel ratios [0.1]; deformations ['mlp']; weights {'mlp': [0.3]}; seeds [0, 1, 2]
+[05:49:09] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=0.3, seed=0
+[05:49:57]     iter   750  loss 1.174e-02
+[05:50:43]     iter  1500  loss 5.717e-03
+[05:51:30]     iter  2250  loss 4.882e-03
+[05:52:16]     iter  3000  loss 4.801e-03
+[05:52:16]     -> PSNR test 24.37 dB | observed px 29.85 | unobserved px 25.33 | 69131 net params (187s)
+[05:52:16] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=0.3, seed=1
+[05:53:03]     iter   750  loss 1.516e-02
+[05:53:49]     iter  1500  loss 6.842e-03
+[05:54:35]     iter  2250  loss 4.565e-03
+[05:55:22]     iter  3000  loss 4.656e-03
+[05:55:22]     -> PSNR test 24.46 dB | observed px 30.05 | unobserved px 25.57 | 69131 net params (186s)
+[05:55:22] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=0.3, seed=2
+[05:56:08]     iter   750  loss 1.899e-02
+[05:56:54]     iter  1500  loss 5.711e-03
+[05:57:41]     iter  2250  loss 5.001e-03
+[05:58:27]     iter  3000  loss 4.161e-03
+[05:58:27]     -> PSNR test 24.04 dB | observed px 29.56 | unobserved px 24.82 | 69131 net params (186s)
+[05:58:27] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=0.3, seed=0
+[05:59:14]     iter   750  loss 2.418e-02
+[06:00:00]     iter  1500  loss 8.502e-03
+[06:00:46]     iter  2250  loss 5.974e-03
+[06:01:33]     iter  3000  loss 5.756e-03
+[06:01:33]     -> PSNR test 24.12 dB | observed px 29.06 | unobserved px 24.45 | 69131 net params (185s)
+[06:01:33] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=0.3, seed=1
+[06:02:19]     iter   750  loss 2.648e-02
+[06:03:06]     iter  1500  loss 9.160e-03
+[06:03:52]     iter  2250  loss 6.756e-03
+[06:04:38]     iter  3000  loss 6.038e-03
+[06:04:39]     -> PSNR test 23.66 dB | observed px 28.80 | unobserved px 24.01 | 69131 net params (186s)
+[06:04:39] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=0.3, seed=2
+[06:05:25]     iter   750  loss 2.995e-02
+[06:06:11]     iter  1500  loss 1.185e-02
+[06:06:58]     iter  2250  loss 7.658e-03
+[06:07:44]     iter  3000  loss 7.938e-03
+[06:07:44]     -> PSNR test 23.08 dB | observed px 28.22 | unobserved px 23.52 | 69131 net params (185s)
+[06:07:44] [ns4d] ratio 0.1, flow 2, deform=mlp, lambda=0.3, seed=0
+[06:08:30]     iter   750  loss 2.784e-02
+[06:09:16]     iter  1500  loss 1.270e-02
+[06:10:03]     iter  2250  loss 9.797e-03
+[06:10:49]     iter  3000  loss 7.719e-03
+[06:10:50]     -> PSNR test 21.22 dB | observed px 27.23 | unobserved px 22.17 | 69131 net params (186s)
+[06:10:50] [ns4d] ratio 0.1, flow 2, deform=mlp, lambda=0.3, seed=1
+[06:11:36]     iter   750  loss 2.891e-02
+[06:12:22]     iter  1500  loss 1.133e-02
+[06:13:09]     iter  2250  loss 7.515e-03
+[06:13:55]     iter  3000  loss 8.159e-03
+[06:13:55]     -> PSNR test 22.04 dB | observed px 27.53 | unobserved px 22.64 | 69131 net params (185s)
+[06:13:55] [ns4d] ratio 0.1, flow 2, deform=mlp, lambda=0.3, seed=2
+[06:14:42]     iter   750  loss 2.741e-02
+[06:15:28]     iter  1500  loss 1.220e-02
+[06:16:14]     iter  2250  loss 8.789e-03
+[06:17:01]     iter  3000  loss 7.998e-03
+[06:17:01]     -> PSNR test 22.59 dB | observed px 27.49 | unobserved px 23.34 | 69131 net params (186s)
+[06:17:01] [ns4d] ratio 0.1, flow 3, deform=mlp, lambda=0.3, seed=0
+[06:17:47]     iter   750  loss 2.556e-02
+[06:18:34]     iter  1500  loss 9.936e-03
+[06:19:20]     iter  2250  loss 8.522e-03
+[06:20:07]     iter  3000  loss 7.099e-03
+[06:20:07]     -> PSNR test 22.61 dB | observed px 27.65 | unobserved px 22.72 | 69131 net params (186s)
+[06:20:07] [ns4d] ratio 0.1, flow 3, deform=mlp, lambda=0.3, seed=1
+[06:20:53]     iter   750  loss 3.177e-02
+[06:21:40]     iter  1500  loss 1.029e-02
+[06:22:26]     iter  2250  loss 8.093e-03
+[06:23:13]     iter  3000  loss 7.034e-03
+[06:23:13]     -> PSNR test 23.32 dB | observed px 27.91 | unobserved px 23.69 | 69131 net params (186s)
+[06:23:13] [ns4d] ratio 0.1, flow 3, deform=mlp, lambda=0.3, seed=2
+[06:23:59]     iter   750  loss 2.651e-02
+[06:24:45]     iter  1500  loss 1.146e-02
+[06:25:31]     iter  2250  loss 6.677e-03
+[06:26:18]     iter  3000  loss 6.441e-03
+[06:26:18]     -> PSNR test 22.99 dB | observed px 28.26 | unobserved px 23.49 | 69131 net params (185s)
+[06:26:18] [ns4d] ratio 0.1, flow 4, deform=mlp, lambda=0.3, seed=0
+[06:27:04]     iter   750  loss 1.968e-02
+[06:27:50]     iter  1500  loss 7.755e-03
+[06:28:36]     iter  2250  loss 6.176e-03
+[06:29:23]     iter  3000  loss 4.816e-03
+[06:29:23]     -> PSNR test 24.99 dB | observed px 29.45 | unobserved px 25.44 | 69131 net params (185s)
+[06:29:23] [ns4d] ratio 0.1, flow 4, deform=mlp, lambda=0.3, seed=1
+[06:30:09]     iter   750  loss 1.796e-02
+[06:30:55]     iter  1500  loss 5.958e-03
+[06:31:42]     iter  2250  loss 4.990e-03
+[06:32:28]     iter  3000  loss 4.456e-03
+[06:32:28]     -> PSNR test 25.18 dB | observed px 30.02 | unobserved px 25.87 | 69131 net params (186s)
+[06:32:28] [ns4d] ratio 0.1, flow 4, deform=mlp, lambda=0.3, seed=2
+[06:33:15]     iter   750  loss 2.391e-02
+[06:34:01]     iter  1500  loss 8.714e-03
+[06:34:47]     iter  2250  loss 6.329e-03
+[06:35:34]     iter  3000  loss 5.853e-03
+[06:35:34]     -> PSNR test 23.77 dB | observed px 28.74 | unobserved px 24.21 | 69131 net params (185s)
+[06:35:34] [ns4d] summary
+                               train_frames_rel_l2  train_frames_psnr  train_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim  train_obs_psnr  train_unobs_psnr  spec_log_err  enstrophy_ratio_test  net_params    time_s  heldout_frames_psnr_std  n_runs
+obs_ratio deform temporal_reg                                                                                                                                                                                                                                                         
+0.1       mlp    0.3                        0.2508            24.3719             0.7486                 0.2751              23.4958               0.7084         28.6551           24.0844        0.1025                0.9769     69131.0  185.5867                   1.0993      15
+[06:35:35] ===== ns4d finished in 46.5 min. Results in /kaggle/working/thesis1_step1_a/final_mlp/ns4d
+
+EXIT CODE 0

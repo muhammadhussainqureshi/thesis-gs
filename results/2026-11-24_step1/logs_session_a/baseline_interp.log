@@ -1,0 +1,28 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --obs_ratios 0.1 --samples 5 --deform interp --data_dir /kaggle/working/data --out /kaggle/working/thesis1_step1_a/baseline_interp
+
+[23:58:39] device=cuda  task=ns4d  out=/kaggle/working/thesis1_step1_a/baseline_interp
+[23:58:40] Cloning InverseBench -> /tmp/InverseBench
+[23:58:40] Downloading navier-stokes-test.zip from CaltechDATA ...
+[23:58:44] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.6s
+[23:58:45] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.2s
+[23:58:47] [ns4d] rolled out sample 2: 21 frames x dt=0.05 in 1.4s
+[23:58:48] [ns4d] rolled out sample 3: 21 frames x dt=0.05 in 1.3s
+[23:58:49] [ns4d] rolled out sample 4: 21 frames x dt=0.05 in 1.2s
+[23:58:49] [ns4d] 5 flows x 21 frames; train [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20], val [], test [2, 6, 10, 14, 18]; observed pixel ratios [0.1]; deformations ['interp']; weights {'interp': [0.0]}; seeds [0]
+[23:58:50] [ns4d] ratio 0.1, flow 0, deform=interp, lambda=0.0, seed=0
+[23:58:52]     -> PSNR test 27.90 dB | observed px 126.02 | unobserved px 27.11 | 0 net params (2s)
+[23:58:52] [ns4d] ratio 0.1, flow 1, deform=interp, lambda=0.0, seed=0
+[23:58:52]     -> PSNR test 27.73 dB | observed px 126.02 | unobserved px 26.85 | 0 net params (1s)
+[23:58:52] [ns4d] ratio 0.1, flow 2, deform=interp, lambda=0.0, seed=0
+[23:58:53]     -> PSNR test 25.82 dB | observed px 126.02 | unobserved px 24.87 | 0 net params (1s)
+[23:58:53] [ns4d] ratio 0.1, flow 3, deform=interp, lambda=0.0, seed=0
+[23:58:54]     -> PSNR test 27.38 dB | observed px 126.02 | unobserved px 26.28 | 0 net params (1s)
+[23:58:54] [ns4d] ratio 0.1, flow 4, deform=interp, lambda=0.0, seed=0
+[23:58:54]     -> PSNR test 27.95 dB | observed px 126.02 | unobserved px 26.79 | 0 net params (1s)
+[23:58:54] [ns4d] summary
+                               train_frames_rel_l2  train_frames_psnr  train_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim  train_obs_psnr  train_unobs_psnr  spec_log_err  enstrophy_ratio_test  net_params  time_s  heldout_frames_psnr_std  n_runs
+obs_ratio deform temporal_reg                                                                                                                                                                                                                                                       
+0.1       interp 0.0                        0.1865             26.838             0.8599                 0.1755              27.3561               0.8585        126.0206           26.3803        0.4208                0.9285         0.0    0.78                   0.8851       5
+[23:58:55] ===== ns4d finished in 0.3 min. Results in /kaggle/working/thesis1_step1_a/baseline_interp/ns4d
+
+EXIT CODE 0

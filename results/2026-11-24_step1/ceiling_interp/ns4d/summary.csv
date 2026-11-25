@@ -1,0 +1,2 @@
+obs_ratio,deform,temporal_reg,train_frames_rel_l2,train_frames_psnr,train_frames_ssim,heldout_frames_rel_l2,heldout_frames_psnr,heldout_frames_ssim,train_obs_psnr,train_unobs_psnr,spec_log_err,enstrophy_ratio_test,net_params,time_s,heldout_frames_psnr_std,n_runs
+1.0,interp,0.0,0.0,126.0206,1.0,0.0841,34.0354,0.9609,126.0206,126.0206,0.1456,0.9556,0.0,6.9,0.1977,2

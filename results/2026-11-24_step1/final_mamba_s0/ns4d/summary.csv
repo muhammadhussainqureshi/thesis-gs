@@ -1,0 +1,2 @@
+obs_ratio,deform,temporal_reg,train_frames_rel_l2,train_frames_psnr,train_frames_ssim,heldout_frames_rel_l2,heldout_frames_psnr,heldout_frames_ssim,train_obs_psnr,train_unobs_psnr,spec_log_err,enstrophy_ratio_test,net_params,time_s,heldout_frames_psnr_std,n_runs
+0.1,mamba,1.0,0.1411,29.3565,0.8981,0.2091,25.9464,0.8032,36.3096,28.9895,0.0489,0.9795,69062.0,2204.88,1.1227,5

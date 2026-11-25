@@ -1,0 +1,46 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --obs_ratios 0.1 --deform mamba --samples 5 --seeds 1 --temporal_reg 1.0 --data_dir /kaggle/working/data --out /kaggle/working/thesis1_step1_b/final_mamba_s1
+
+[06:08:02] device=cuda  task=ns4d  out=/kaggle/working/thesis1_step1_b/final_mamba_s1
+[06:08:04] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.2s
+[06:08:05] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.2s
+[06:08:07] [ns4d] rolled out sample 2: 21 frames x dt=0.05 in 1.4s
+[06:08:08] [ns4d] rolled out sample 3: 21 frames x dt=0.05 in 1.4s
+[06:08:09] [ns4d] rolled out sample 4: 21 frames x dt=0.05 in 1.2s
+[06:08:09] [ns4d] 5 flows x 21 frames; train [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20], val [], test [2, 6, 10, 14, 18]; observed pixel ratios [0.1]; deformations ['mamba']; weights {'mamba': [1.0]}; seeds [1]
+[06:08:09] [ns4d] ratio 0.1, flow 0, deform=mamba, lambda=1.0, seed=1
+[06:17:21]     iter   750  loss 3.972e-03
+[06:26:32]     iter  1500  loss 2.017e-03
+[06:35:42]     iter  2250  loss 1.378e-03
+[06:44:53]     iter  3000  loss 1.315e-03
+[06:44:53]     -> PSNR test 26.19 dB | observed px 36.68 | unobserved px 29.34 | 69062 net params (2204s)
+[06:44:54] [ns4d] ratio 0.1, flow 1, deform=mamba, lambda=1.0, seed=1
+[06:54:04]     iter   750  loss 3.653e-03
+[07:03:15]     iter  1500  loss 1.964e-03
+[07:12:25]     iter  2250  loss 1.779e-03
+[07:21:36]     iter  3000  loss 1.535e-03
+[07:21:36]     -> PSNR test 25.62 dB | observed px 35.96 | unobserved px 28.54 | 69062 net params (2202s)
+[07:21:36] [ns4d] ratio 0.1, flow 2, deform=mamba, lambda=1.0, seed=1
+[07:30:47]     iter   750  loss 7.229e-03
+[07:39:57]     iter  1500  loss 2.550e-03
+[07:49:08]     iter  2250  loss 1.541e-03
+[07:58:19]     iter  3000  loss 2.521e-03
+[07:58:19]     -> PSNR test 24.56 dB | observed px 35.12 | unobserved px 27.63 | 69062 net params (2203s)
+[07:58:19] [ns4d] ratio 0.1, flow 3, deform=mamba, lambda=1.0, seed=1
+[08:07:30]     iter   750  loss 7.594e-03
+[08:16:41]     iter  1500  loss 2.366e-03
+[08:25:52]     iter  2250  loss 1.619e-03
+[08:35:03]     iter  3000  loss 1.688e-03
+[08:35:04]     -> PSNR test 26.34 dB | observed px 35.94 | unobserved px 28.98 | 69062 net params (2204s)
+[08:35:04] [ns4d] ratio 0.1, flow 4, deform=mamba, lambda=1.0, seed=1
+[08:44:14]     iter   750  loss 4.724e-03
+[08:53:25]     iter  1500  loss 1.806e-03
+[09:02:36]     iter  2250  loss 1.608e-03
+[09:11:47]     iter  3000  loss 1.292e-03
+[09:11:47]     -> PSNR test 26.82 dB | observed px 36.68 | unobserved px 29.88 | 69062 net params (2204s)
+[09:11:47] [ns4d] summary
+                               train_frames_rel_l2  train_frames_psnr  train_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim  train_obs_psnr  train_unobs_psnr  spec_log_err  enstrophy_ratio_test  net_params   time_s  heldout_frames_psnr_std  n_runs
+obs_ratio deform temporal_reg                                                                                                                                                                                                                                                        
+0.1       mamba  1.0                         0.143            29.2381             0.8951                 0.2096              25.9061               0.8015         36.0752           28.8736        0.0453                  0.98     69062.0  2203.48                   0.8668       5
+[09:11:48] ===== ns4d finished in 183.8 min. Results in /kaggle/working/thesis1_step1_b/final_mamba_s1/ns4d
+
+EXIT CODE 0

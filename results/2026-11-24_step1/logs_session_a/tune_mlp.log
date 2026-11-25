@@ -1,0 +1,64 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --obs_ratios 0.1 --deform mlp --mlp_width 175 --samples 2 --val_frames 8 16 --temporal_reg 0 0.3 1 3 --data_dir /kaggle/working/data --out /kaggle/working/thesis1_step1_a/tune_mlp
+
+[23:59:01] device=cuda  task=ns4d  out=/kaggle/working/thesis1_step1_a/tune_mlp
+[23:59:03] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.2s
+[23:59:04] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.2s
+[23:59:04] [ns4d] 2 flows x 21 frames; train [0, 1, 3, 4, 5, 7, 9, 11, 12, 13, 15, 17, 19, 20], val [8, 16], test [2, 6, 10, 14, 18]; observed pixel ratios [0.1]; deformations ['mlp']; weights {'mlp': [0.0, 0.3, 1.0, 3.0]}; seeds [0]
+[23:59:05] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=0.0, seed=0
+[23:59:53]     iter   750  loss 1.280e-02
+[00:00:38]     iter  1500  loss 6.675e-03
+[00:01:23]     iter  2250  loss 4.220e-03
+[00:02:08]     iter  3000  loss 4.169e-03
+[00:02:08]     -> PSNR test 23.88 dB | val 24.04 | observed px 30.10 | unobserved px 24.31 | 69131 net params (183s)
+[00:02:08] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=0.3, seed=0
+[00:02:54]     iter   750  loss 1.196e-02
+[00:03:41]     iter  1500  loss 7.246e-03
+[00:04:27]     iter  2250  loss 4.463e-03
+[00:05:13]     iter  3000  loss 4.521e-03
+[00:05:13]     -> PSNR test 24.16 dB | val 24.26 | observed px 30.23 | unobserved px 24.92 | 69131 net params (185s)
+[00:05:13] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=1.0, seed=0
+[00:05:59]     iter   750  loss 1.208e-02
+[00:06:46]     iter  1500  loss 7.154e-03
+[00:07:32]     iter  2250  loss 4.776e-03
+[00:08:18]     iter  3000  loss 4.707e-03
+[00:08:18]     -> PSNR test 23.74 dB | val 23.97 | observed px 30.04 | unobserved px 24.83 | 69131 net params (185s)
+[00:08:18] [ns4d] ratio 0.1, flow 0, deform=mlp, lambda=3.0, seed=0
+[00:09:04]     iter   750  loss 1.326e-02
+[00:09:50]     iter  1500  loss 7.912e-03
+[00:10:37]     iter  2250  loss 5.311e-03
+[00:11:23]     iter  3000  loss 5.364e-03
+[00:11:23]     -> PSNR test 23.21 dB | val 23.69 | observed px 29.72 | unobserved px 24.55 | 69131 net params (185s)
+[00:11:23] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=0.0, seed=0
+[00:12:07]     iter   750  loss 2.146e-02
+[00:12:52]     iter  1500  loss 9.028e-03
+[00:13:37]     iter  2250  loss 5.347e-03
+[00:14:21]     iter  3000  loss 4.567e-03
+[00:14:21]     -> PSNR test 22.61 dB | val 21.78 | observed px 29.25 | unobserved px 23.06 | 69131 net params (178s)
+[00:14:21] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=0.3, seed=0
+[00:15:08]     iter   750  loss 2.159e-02
+[00:15:54]     iter  1500  loss 9.365e-03
+[00:16:40]     iter  2250  loss 6.094e-03
+[00:17:27]     iter  3000  loss 5.311e-03
+[00:17:27]     -> PSNR test 22.90 dB | val 22.06 | observed px 29.09 | unobserved px 23.15 | 69131 net params (186s)
+[00:17:27] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=1.0, seed=0
+[00:18:13]     iter   750  loss 2.343e-02
+[00:19:00]     iter  1500  loss 1.061e-02
+[00:19:46]     iter  2250  loss 6.646e-03
+[00:20:32]     iter  3000  loss 5.784e-03
+[00:20:32]     -> PSNR test 22.47 dB | val 21.66 | observed px 28.85 | unobserved px 22.92 | 69131 net params (185s)
+[00:20:32] [ns4d] ratio 0.1, flow 1, deform=mlp, lambda=3.0, seed=0
+[00:21:19]     iter   750  loss 2.740e-02
+[00:22:05]     iter  1500  loss 1.205e-02
+[00:22:51]     iter  2250  loss 7.380e-03
+[00:23:38]     iter  3000  loss 6.414e-03
+[00:23:38]     -> PSNR test 22.22 dB | val 21.64 | observed px 28.41 | unobserved px 22.80 | 69131 net params (186s)
+[00:23:38] [ns4d] summary
+                               train_frames_rel_l2  train_frames_psnr  train_frames_ssim  val_frames_rel_l2  val_frames_psnr  val_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim  train_obs_psnr  train_unobs_psnr  spec_log_err  enstrophy_ratio_test  net_params  time_s  heldout_frames_psnr_std  n_runs
+obs_ratio deform temporal_reg                                                                                                                                                                                                                                                                                                            
+0.1       mlp    0.0                        0.2682            24.0226             0.7306             0.3057          22.9086           0.6631                 0.2904              23.2477               0.6916         29.6770           23.6878        0.1325                0.9852     69131.0  180.85                   0.8996       2
+                 0.3                        0.2576            24.3605             0.7455             0.2969          23.1598           0.6760                 0.2817              23.5258               0.7048         29.6609           24.0353        0.1260                0.9606     69131.0  185.30                   0.8915       2
+                 1.0                        0.2630            24.1960             0.7386             0.3089          22.8161           0.6604                 0.2963              23.1056               0.6838         29.4434           23.8728        0.1320                0.9568     69131.0  184.95                   0.9027       2
+                 3.0                        0.2691            23.9955             0.7304             0.3139          22.6652           0.6519                 0.3104              22.7185               0.6635         29.0666           23.6782        0.1381                0.9570     69131.0  185.25                   0.6983       2
+[00:23:40] ===== ns4d finished in 24.6 min. Results in /kaggle/working/thesis1_step1_a/tune_mlp/ns4d
+
+EXIT CODE 0

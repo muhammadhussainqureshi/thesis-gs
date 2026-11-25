@@ -1,0 +1,25 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task ns4d --obs_ratios 1.0 --deform mamba --samples 2 --temporal_reg 1.0 --data_dir /kaggle/working/data --out /kaggle/working/thesis1_step1_b/ceiling_mamba
+
+[12:15:38] device=cuda  task=ns4d  out=/kaggle/working/thesis1_step1_b/ceiling_mamba
+[12:15:41] [ns4d] rolled out sample 0: 21 frames x dt=0.05 in 1.3s
+[12:15:42] [ns4d] rolled out sample 1: 21 frames x dt=0.05 in 1.2s
+[12:15:42] [ns4d] 2 flows x 21 frames; train [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20], val [], test [2, 6, 10, 14, 18]; observed pixel ratios [1.0]; deformations ['mamba']; weights {'mamba': [1.0]}; seeds [0]
+[12:15:42] [ns4d] ratio 1.0, flow 0, deform=mamba, lambda=1.0, seed=0
+[12:24:54]     iter   750  loss 2.821e-03
+[12:34:04]     iter  1500  loss 3.445e-03
+[12:43:15]     iter  2250  loss 1.701e-03
+[12:52:26]     iter  3000  loss 1.736e-03
+[12:52:26]     -> PSNR test 27.73 dB | observed px 35.99 | unobserved px nan | 69062 net params (2204s)
+[12:52:26] [ns4d] ratio 1.0, flow 1, deform=mamba, lambda=1.0, seed=0
+[13:01:37]     iter   750  loss 6.016e-03
+[13:10:47]     iter  1500  loss 2.494e-03
+[13:19:58]     iter  2250  loss 1.741e-03
+[13:29:08]     iter  3000  loss 1.929e-03
+[13:29:09]     -> PSNR test 28.05 dB | observed px 35.58 | unobserved px nan | 69062 net params (2203s)
+[13:29:09] [ns4d] summary
+                               train_frames_rel_l2  train_frames_psnr  train_frames_ssim  heldout_frames_rel_l2  heldout_frames_psnr  heldout_frames_ssim  train_obs_psnr  train_unobs_psnr  spec_log_err  enstrophy_ratio_test  net_params   time_s  heldout_frames_psnr_std  n_runs
+obs_ratio deform temporal_reg                                                                                                                                                                                                                                                        
+1.0       mamba  1.0                         0.069            35.7854             0.9701                 0.1759              27.8907               0.8522         35.7854               NaN        0.0726                0.9964     69062.0  2203.15                   0.2248       2
+[13:29:09] ===== ns4d finished in 73.5 min. Results in /kaggle/working/thesis1_step1_b/ceiling_mamba/ns4d
+
+EXIT CODE 0
