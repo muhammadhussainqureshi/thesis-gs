@@ -60,6 +60,12 @@ def main():
                     help="give the PointMamba tokens the back-projected measurement residual at each Gaussian")
     ap.add_argument("--skip_grid", action="store_true", help="skip the pixel/voxel baseline (e.g. when already run)")
     ap.add_argument("--grid_l1", type=float, default=0.0, help="same sparsity weight for the pixel/voxel baseline")
+    ap.add_argument("--grid_tv", type=float, nargs="*", default=[],
+                    help="extra grid baselines with total-variation weight(s) (same sparsity as --grid_l1)")
+    ap.add_argument("--grid_tv_from", default=None,
+                    help="tuning results.csv: use the TV weight with the best PSNR on the tuning volumes")
+    ap.add_argument("--skip_gauss", action="store_true", help="run only the grid baselines (e.g. to tune TV)")
+    ap.add_argument("--vol_start", type=int, default=0, help="skip the first volumes (kept for tuning)")
     # Navier-Stokes 4D
     ap.add_argument("--frames", type=int, default=21)
     ap.add_argument("--frame_dt", type=float, default=0.05)

@@ -101,9 +101,14 @@ def fit_scatter(gt, field, mode, op=None, y=None, n_init=400, n_max=4000, iters=
                              "n_gauss": p.shape[0], "time_s": round(time.time() - t0, 1)}
 
 
-def fit_grid_baseline(gt, op, y, iters=3000, lr=0.01, l1=0.0):
+def total_variation(x):
+    """Anisotropic total variation: mean absolute difference between neighbouring pixels/voxels, per axis."""
+    return sum((x.diff(dim=d).abs().mean()) for d in range(x.ndim))
+
+
+def fit_grid_baseline(gt, op, y, iters=3000, lr=0.01, l1=0.0, tv=0.0):
     """Baseline: optimise every pixel/voxel directly with the same physics loss (and optionally the same
-    sparsity term), projected to 0 <= f <= 1."""
+    sparsity term and a total-variation term), projected to 0 <= f <= 1."""
     x = torch.zeros_like(gt, requires_grad=True)
     opt = torch.optim.Adam([x], lr=lr)
     ynorm = (y.abs() ** 2).sum()
@@ -112,6 +117,8 @@ def fit_grid_baseline(gt, op, y, iters=3000, lr=0.01, l1=0.0):
         loss = ((op(x) - y).abs() ** 2).sum() / ynorm
         if l1:
             loss = loss + l1 * x.mean()
+        if tv:
+            loss = loss + tv * total_variation(x)
         opt.zero_grad()
         loss.backward()
         opt.step()
@@ -120,6 +127,17 @@ def fit_grid_baseline(gt, op, y, iters=3000, lr=0.01, l1=0.0):
     rec = x.detach()
     return rec, {"psnr": psnr(rec, gt), "ssim": ssim(rec, gt), "rel_l2": rel_l2(rec, gt),
                  "n_gauss": 0, "time_s": round(time.time() - t0, 1)}
+
+
+def choose_tv(path):
+    """TV weight with the best mean PSNR on the tuning volumes (separate from the test volumes)."""
+    import pandas as pd
+    df = pd.read_csv(path)
+    df = df[df["method"].astype(str).str.startswith("grid_tv")]
+    by = df.groupby("tv")["psnr"].mean()
+    tv = float(by.idxmax())
+    log(f"[scatter] TV weight from {path}: PSNR by weight {by.round(3).to_dict()} -> chose {tv}")
+    return tv
 
 
 def run_scatter(args, dim):
@@ -137,16 +155,17 @@ def run_scatter(args, dim):
     # ---- data
     if dim == 2:
         folder = ensure_lmdb_dataset("inv-scatter-test", args.data_dir, args.local_dir)
-        gts = [torch.from_numpy(im).to(dev) for im in read_lmdb_images(folder, args.samples)]
+        gts = [torch.from_numpy(im).to(dev) for im in read_lmdb_images(folder, args.vol_start + args.samples)][args.vol_start:]
         field = GaussianField(2, (128, 128), h=args.window, nonneg=True, device=dev, beta=args.gauss_beta)
         source = "InverseBench inv-scatter-test"
     else:
         if args.volumes:
-            gts = load_volumes(args.volumes, args.samples, args.depth, dev, crop=args.crop)
-            source = f"CytoPacq volumes from {args.volumes}"
+            gts = load_volumes(args.volumes, args.vol_start + args.samples, args.depth, dev,
+                               crop=args.crop)[args.vol_start:]
+            source = f"CytoPacq volumes {args.vol_start}..{args.vol_start + len(gts) - 1} from {args.volumes}"
         else:
             gts = [torch.from_numpy(synthetic_nuclei_volume(args.depth, 128, 128, seed=100 + i)).to(dev)
-                   for i in range(args.samples)]
+                   for i in range(args.vol_start, args.vol_start + args.samples)]
             source = "synthetic HL60-like nuclei (no --volumes given)"
         field = GaussianField(3, (args.depth, 128, 128), h=args.window, nonneg=True, device=dev, beta=args.gauss_beta)
     born = dim == 3 and args.physics == "born3d"
@@ -180,43 +199,55 @@ def run_scatter(args, dim):
         else:
             op = SliceScatter(R, dev)
             log(f"[{task}] B physics, {R} receivers (operator check vs InverseBench: {op.check(gts[0].view(-1, 128, 128)[gts[0].view(-1, 128 * 128).sum(1).argmax()]):.1e})")
-        for i, gt in enumerate(gts):
+        tvs = [choose_tv(args.grid_tv_from)] if args.grid_tv_from else (args.grid_tv or [])
+        seeds = args.seeds or [0]
+        for i0, gt in enumerate(gts):
+            i = i0 + args.vol_start                       # global volume index: same noise everywhere
             gen = torch.Generator(device=dev).manual_seed(1000 + i)
             y0 = op(gt)
             sigma = args.noise_rel * y0.abs().pow(2).mean().sqrt().item() if args.noise_rel else args.noise
             y = add_noise(y0, sigma, gen)
-            log(f"[{task}]   sample {i}: Gaussians")
-            init_field, grid_done = None, None
-            if args.init_from_grid:
-                log(f"[{task}]   sample {i}: grid solution (baseline and initialisation)")
+            snr = 20 * np.log10(y0.abs().pow(2).mean().sqrt().item() / max(sigma, 1e-30))
+            meta = {"experiment": "B_physics", "receivers": R, "sample": i, "snr_db": round(snr, 1)}
+            # grids are deterministic: once per volume
+            grid_done, rec_b, rb = None, None, None
+            if args.init_from_grid or not args.skip_grid:
+                log(f"[{task}]   volume {i}: grid (sparsity {args.grid_l1})")
                 grid_done = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
-                init_field = grid_done[0]
-            gnet = None
-            if args.gmamba != "none":
-                torch.manual_seed(i)
-                gnet = GaussPointMamba(dim, field.P, field.grid, mode=args.gmamba,
-                                       residual_feat=args.gm_residual).to(dev)
-            p, rec_g, rg = fit_scatter(gt, field, "physics", op=op, y=y, n_init=n_init, n_max=args.n_gauss,
-                                       iters=args.iters, seed=i, log_every=max(args.iters // 4, 1),
-                                       bounded=args.bounded, init_field=init_field, gnet=gnet, **dens)
-            rg["n_params"] = rg["n_gauss"] * field.P
-            rg["net_params"] = gnet.n_params() if gnet is not None else 0
-            if grid_done:
-                rg["time_s"] = round(rg["time_s"] + grid_done[1]["time_s"], 1)   # include the initialising grid fit
-            rows.append({"experiment": "B_physics", "receivers": R, "sample": i, "method": "gaussians", **rg})
-            if args.skip_grid:
-                rec_b, rb = None, None
-                log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}")
-            else:
-                log(f"[{task}]   sample {i}: grid baseline")
-                rec_b, rb = grid_done or fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1)
-                rb["n_params"] = gt.numel()
-                log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}   "
-                    f"grid {rb['psnr']:.2f} dB / SSIM {rb['ssim']:.3f}")
-                rows.append({"experiment": "B_physics", "receivers": R, "sample": i, "method": "grid_baseline", **rb})
-            if i == 0:
-                examples[R] = (rec_g.cpu(), None if rec_b is None else rec_b.cpu(), rg, rb)
-                torch.save(p.cpu(), os.path.join(out, f"B_physics_R{R}_sample0_params.pt"))
+                rec_b, rb = grid_done
+                if not args.skip_grid:
+                    rows.append({**meta, "seed": 0, "method": "grid_baseline", "n_params": gt.numel(), **rb})
+                    log(f"[{task}]   -> grid {rb['psnr']:.2f} dB / SSIM {rb['ssim']:.3f}")
+            for tv in tvs:
+                rec_t, rt = fit_grid_baseline(gt, op, y, iters=args.iters, l1=args.grid_l1, tv=tv)
+                rows.append({**meta, "seed": 0, "method": f"grid_tv{tv:g}", "tv": tv, "n_params": gt.numel(), **rt})
+                log(f"[{task}]   -> grid + TV {tv:g}: {rt['psnr']:.2f} dB / SSIM {rt['ssim']:.3f}")
+            if args.skip_gauss:
+                continue
+            for seed in seeds:
+                fs = i + 1000 * seed                      # fit seed (seed 0 = the earlier runs)
+                log(f"[{task}]   volume {i}, seed {seed}: Gaussians")
+                gnet = None
+                if args.gmamba != "none":
+                    torch.manual_seed(fs)
+                    gnet = GaussPointMamba(dim, field.P, field.grid, mode=args.gmamba,
+                                           residual_feat=args.gm_residual).to(dev)
+                p, rec_g, rg = fit_scatter(gt, field, "physics", op=op, y=y, n_init=n_init, n_max=args.n_gauss,
+                                           iters=args.iters, seed=fs, log_every=max(args.iters // 4, 1),
+                                           bounded=args.bounded,
+                                           init_field=grid_done[0] if args.init_from_grid else None,
+                                           gnet=gnet, **dens)
+                rg["n_params"] = rg["n_gauss"] * field.P
+                rg["net_params"] = gnet.n_params() if gnet is not None else 0
+                if args.init_from_grid:
+                    rg["time_s"] = round(rg["time_s"] + grid_done[1]["time_s"], 1)   # include the initialising grid
+                rows.append({**meta, "seed": seed, "method": "gaussians", **rg})
+                log(f"[{task}]   -> Gaussians {rg['psnr']:.2f} dB / SSIM {rg['ssim']:.3f}"
+                    + (f"   grid {rb['psnr']:.2f} dB" if rb else ""))
+                if i0 == 0 and seed == seeds[0]:
+                    examples[R] = (rec_g.cpu(), None if rec_b is None else rec_b.cpu(), rg, rb)
+                    torch.save(p.cpu(), os.path.join(out, f"B_physics_R{R}_sample{i}_params.pt"))
+            pd.DataFrame(rows).to_csv(os.path.join(out, "results.csv"), index=False)   # survive a time-out
 
     df = pd.DataFrame(rows)
     df.to_csv(os.path.join(out, "results.csv"), index=False)
@@ -230,7 +261,9 @@ def run_scatter(args, dim):
     summ.to_csv(os.path.join(out, "summary.csv"))
     log(f"[{task}] summary\n{summ.to_string()}")
 
-    # ---- figure: sample 0 (middle slice for 3D)
+    if not examples:                                      # grids only: no figure
+        return summ
+    # ---- figure: first volume (middle slice for 3D)
     def sl(v):
         return v[v.shape[0] // 2] if v.ndim == 3 else v
     cols = [("ground truth", sl(gts[0].cpu()))]
