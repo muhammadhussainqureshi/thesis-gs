@@ -39,6 +39,7 @@
 \newcommand{\university}{Information Technology University (ITU), Lahore}
 \newcommand{\submissiondate}{December 2026}
 
+\usepackage{placeins}
 \begin{document}
 
 % ================================================================ title page
@@ -70,20 +71,22 @@ representation is useful for \emph{scientific inverse problems}, where an unknow
 from indirect, incomplete and noisy measurements produced by a known physics model. Using datasets and forward
 models from the InverseBench benchmark, we study two problems: (i) linear inverse scattering, where the permittivity
 of cells is recovered from scattered electromagnetic fields measured by 360, 180 or 60 receivers, in 2D and on 3D
-cell volumes; and (ii) the 2D incompressible Navier--Stokes equations, where an evolving vorticity field is
-reconstructed from dense or sparse observations over time with a 4D (space--time) Gaussian representation whose
-deformation is modelled either by a multilayer perceptron, as in 4D Gaussian Splatting, or by a Mamba selective
-state-space model. We replace the camera rasteriser with the physics operator, render Gaussians on a grid with a
+cell volumes; and (ii) flow reconstruction from sparse observations, where a 2D vorticity field evolving over time
+(generated with the Navier--Stokes solver) is reconstructed from all or 10\% of its pixels with canonical Gaussians
+and a 4DGS-style deformation model, modelled by a multilayer perceptron, a GRU or a Mamba selective state-space
+model. We replace the camera rasteriser with the physics operator, render Gaussians on a grid with a
 local-window evaluation, and train end-to-end by gradient descent with 3DGS-style densification and pruning.
 
 The proof of concept, which includes a true 3D Born scattering model with sensors on a sphere, shows that (1)
 unbounded Gaussians lose to a regularised voxel grid in most settings, but rendering a bounded density
 $1-e^{-f}$ (the opacity saturation of 3DGS) makes them beat the voxel grid under the true 3D model on every volume
-(up to +1.1\,dB on real BBBC024 nuclei and +4.3\,dB on synthetic nuclei) with about nine times fewer parameters; (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
-(the operator's null space), which a simple sparsity term removes; and (3) for fluid flow, a deformation model is
-essential (+10\,dB over static Gaussians), and a Mamba deformation model with temporal smoothness generalises to
-unobserved time steps better than the MLP of 4D Gaussian Splatting when only 10\% of pixels are observed
-(25.4 vs.\ 23.0\,dB). These results establish feasibility and point to the open problems addressed in Thesis II.
+(up to +1.1\,dB on BBBC024 phantom nuclei and +4.3\,dB on our synthetic nuclei) with about nine times fewer parameters; (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
+(the operator's null space), which a simple sparsity term removes; and (3) for flow, a deformation model is
+essential (+10\,dB over static Gaussians). In a controlled comparison with matched network size, a smoothness weight
+tuned per network, and 5 flows $\times$ 3 seeds, Mamba beats the MLP of 4D Gaussian Splatting on unseen frames
+(+2.4\,dB) but not a GRU of the same size ($-0.5$\,dB), and a non-learned interpolation baseline is better still:
+the gain comes from temporal regularisation, not from Mamba. A per-scene PointMamba correction of 3D Gaussians
+likewise gives no gain. These results establish feasibility and point to the open problems addressed in Thesis II.
 
 \tableofcontents
 \listoffigures

@@ -10,14 +10,23 @@ strength of Gaussian splatting with cameras, becomes a liability when the measur
 domain, and must be balanced by an explicit prior. The final runs add a second lesson: a Gaussian sum is unbounded, and on physical quantities with a known range
 this matters more than the shape of the kernel. Unbounded Gaussians lost to a clipped grid almost everywhere;
 the bounded density $1-e^{-f}$, the same saturation as opacity in 3DGS, turned the true 3D results into a consistent
-win with nine times fewer parameters, while sharper kernels did not help. For dynamics, the deformation model matters far more than the choice of network;
-a sequence model pays off only once regularised in time, and then mainly when observations are sparse.
+win with nine times fewer parameters, while sharper kernels did not help. For dynamics, a deformation model is essential, but the controlled comparison shows that
+the choice of sequence network is not: a GRU of the same size matches Mamba, both gain mainly from the temporal
+smoothness term, and a non-learned interpolation in space and time is better still on PSNR. Mamba's advantages are
+limited to secondary measures (energy spectrum, filling unobserved pixels of observed frames), and it overfits the
+observed pixels. Together with the 3D result, where a per-scene PointMamba correction of free Gaussians adds no
+constraint, this suggests that a network acts as a prior only when it constrains the solution, by generating the
+Gaussians or by being trained across scenes, not when it is one more set of free parameters.
 
 \section{Limitations}
 \begin{itemize}
-  \item The true 3D model is linear (first Born approximation); multiple scattering is not modelled, and 3D results
-  use three volumes.
-  \item Results use three to five samples per setting; differences of a few tenths of a dB are not yet significant.
+  \item The 3D objects are synthetic: BBBC024 and our nuclei are simulated phantoms, not microscope data.
+  \item The same forward model generates and inverts the measurements (``inverse crime''): the true 3D model is the
+  linear first Born approximation in both, so model error is not tested; multiple scattering is not modelled.
+  \item The 3D results in this chapter use three volumes; the larger 3D controls (10 volumes, 2 seeds, TV-regularised
+  grid, two noise levels) are reported separately.
+  \item Most results use three to ten samples per setting; differences of a few tenths of a dB are not significant.
+  The flow comparison uses 5 flows $\times$ 3 seeds of one flow configuration.
   \item The 4D problem reconstructs a field from observations of itself; InverseBench's harder task of recovering the
   initial condition through the solver is not addressed.
   \item No learned prior is used, and no comparison with InverseBench's diffusion methods is made (by design for
@@ -29,7 +38,7 @@ a sequence model pays off only once regularised in time, and then mainly when ob
 
 \section{Plan for Thesis II}
 \begin{enumerate}
-  \item Mamba as a real prior for 3D Gaussians: a PointMamba network that \emph{generates} the Gaussian parameters
+  \item Mamba as an actual prior for 3D Gaussians: a PointMamba network that \emph{generates} the Gaussian parameters
   (no free per-Gaussian parameters), or one trained across volumes (synthetic and BBBC024) as a learned reconstructor,
   optionally pre-trained by PointMamba-style masked modelling.
   \item Multiple scattering in 3D, and better optimisation of Gaussians under the true 3D model (initialisation
@@ -40,8 +49,9 @@ a sequence model pays off only once regularised in time, and then mainly when ob
   regularisers) instead of a global sparsity term.
   \item Bounded Gaussians on the full test sets with confidence intervals, and learned or adaptive saturation for
   quantities without a fixed range.
-  \item Motion models: hardware-efficient Mamba (parallel scan), tuning of the smoothness weight, and advection-informed
-  deformation that uses the velocity field implied by the vorticity.
+  \item Flow: physics-informed deformation (advection by the velocity implied by the vorticity), comparison against
+  stronger non-learned baselines, and the observation-rate and sequence-length dependence of the recurrent-network
+  gain; Mamba only where a controlled comparison shows a benefit.
   \item The Navier--Stokes initial-value inverse problem through a differentiable solver.
   \item Connection to the original direction of this work: attaching semantic features to physical Gaussians, in the
   spirit of LangSplat~\citep{qin2024langsplat} and 4D LangSplat~\citep{li2025langsplat4d}.

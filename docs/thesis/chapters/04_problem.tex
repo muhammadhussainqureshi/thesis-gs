@@ -22,7 +22,7 @@ for fitting; it is used only to evaluate the reconstruction.
   \item[RQ3] Can a 4D Gaussian representation (canonical Gaussians plus deformation) reconstruct an evolving fluid
   field from dense and sparse observations, including at time steps that were never observed?
   \item[RQ4] Does a selective state-space model (Mamba) over each Gaussian's trajectory model the dynamics better than
-  the per-time MLP deformation of 4D Gaussian Splatting?
+  the per-time MLP deformation of 4D Gaussian Splatting and a recurrent network (GRU) of the same size?
 \end{description}
 
 \section{Scope}
@@ -33,20 +33,22 @@ for fitting; it is used only to evaluate the reconstruction.
   noise level.
   \item 3D physics with two models: the 2D operator applied to every $z$-slice (\emph{slice-wise}) and a \emph{true 3D}
   first-order Born model with transmitters and receivers on a sphere around the volume.
-  \item 2D Navier--Stokes ($Re=200$) as a 2D + time (``4D'') problem: sequences of 21 frames, observations of all or
-  10\% of the pixels per frame, every fourth frame held out.
+  \item Flow reconstruction from sparse observations: 2D vorticity fields over time, generated with the
+  Navier--Stokes solver ($Re=200$); sequences of 21 frames, observations of all or 10\% of the pixels per frame,
+  every fourth frame never observed.
   \item Baselines: direct optimisation of a pixel/voxel grid with the same data term (and the same sparsity term).
   \item Metrics: PSNR, SSIM, relative $\ell_2$ error, number of Gaussians, run time.
 \end{itemize}
 \paragraph{Out of scope (deferred to Thesis II).}
 \begin{itemize}
-  \item A full 3D scattering model with sensors on a sphere, and non-linear (multiple-scattering) physics.
+  \item Non-linear (multiple-scattering) physics.
   \item Recovering the Navier--Stokes \emph{initial condition} through the solver, as posed in InverseBench.
   \item Exhaustive benchmarking against the diffusion-prior methods of InverseBench; training learned priors.
   \item Real (non-simulated) measurement data, and the remaining InverseBench problems.
 \end{itemize}
 
 \section{Assumptions}
-The forward models are known exactly and are differentiable; measurement noise is additive Gaussian at the benchmark
-level ($\sigma=10^{-4}$ for scattering); permittivity contrast is non-negative and bounded in $[0,1]$; vorticity is
+The forward models are known exactly and are differentiable; measurement noise is additive complex Gaussian on the measured
+field ($\sigma=10^{-4}$ for the InverseBench 2D operator, 2\% of the rms measurement, i.e.\ SNR 34\,dB, for the true
+3D model); permittivity contrast is non-negative and bounded in $[0,1]$; vorticity is
 periodic in space.

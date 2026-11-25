@@ -42,7 +42,8 @@ neural field constrained by gravitational lensing and orbital dynamics, an examp
 geometry.
 \paragraph{Microscopy data.} Simulated cell images with exact ground truth are produced by CytoPacq and related
 generators~\citep{wiesner2019cytopacq}; the Broad Bioimage Benchmark Collection~\citep{ljosa2012bbbc} distributes such
-synthetic 3D nucleus datasets (BBBC024), which we use as real 3D cell shapes.
+synthetic 3D nucleus datasets (BBBC024), which we use as 3D cell shapes with exact ground truth. They are synthetic
+phantoms, not microscope measurements.
 
 \section{Dynamic representations and sequence models}
 D-NeRF~\citep{pumarola2021dnerf} and 4D Gaussian Splatting~\citep{wu20244dgs} model motion with a canonical
@@ -51,17 +52,30 @@ K-Planes~\citep{fridovich2023kplanes} factorise space--time features into planes
 Gaussians~\citep{luiten2024dynamic} track persistent Gaussians frame by frame, and native 4D
 Gaussians~\citep{yang2024realtime4dgs} slice 4D primitives in time. Language-embedded variants
 (LangSplat~\citep{qin2024langsplat}, 4D LangSplat~\citep{li2025langsplat4d}) attach semantic features to such
-Gaussians, the starting point of this thesis' original direction. None of these treats a Gaussian's trajectory as a
-sequence. State-space models~\citep{gu2022s4,gu2023mamba} are efficient sequence models that could do exactly that,
-and have been adopted in vision~\citep{zhu2024visionmamba}; their use as a motion model for 4D Gaussians is, to our
-knowledge, unexplored.
+Gaussians, the starting point of this thesis' original direction. State-space
+models~\citep{gu2022s4,gu2023mamba} are efficient sequence models and have been adopted in
+vision~\citep{zhu2024visionmamba} and for point clouds~\citep{pointmamba}. They have also been combined with Gaussians.
+Gamba~\citep{shen2025gamba} uses a Mamba backbone to predict 3D Gaussians from a single image in one forward pass.
+4DSTR~\citep{liu2026fourdstr} applies Mamba to the attributes of each Gaussian over time (a temporal buffer of scales
+and rotations) to make generated 4D Gaussians consistent across frames, and compares it with GRU and attention
+alternatives. Gaussians on their Way~\citep{deng2024gaussiansontheirway} adds a state-space component to 4D Gaussians,
+a filter that merges predicted and observed Gaussian states in the style of a Kalman filter rather than a Mamba
+network, together with a Wasserstein constraint on how Gaussians move between frames.
+
+\paragraph{What differs in this thesis.} Reading Gaussian attributes over time with Mamba is therefore not new
+(4DSTR). The differences here are the setting and the question. The unknown is a \emph{physical field observed sparsely}
+(10\% of the pixels of a flow, or a few scattered-field measurements) rather than a scene seen in dense video, and the
+deformation or correction network is fitted per scene with no training set. The question is \emph{when such a network
+acts as a prior}: we test it against matched MLP and GRU controls and a non-learned baseline, and find that temporal
+regularisation, not the Mamba architecture, explains the gain in 4D, and that a per-scene correction of free Gaussians
+adds no constraint in 3D.
 
 \section{Synthesis and research gap}
 Table~\ref{tab:lit} summarises the landscape. Diffusion-prior methods are general but represent the unknown on a
 grid and need large training sets; Gaussian methods are compact and adaptive but have been demonstrated mainly with
 camera- or ray-based measurements. The gap addressed here is the use of 3D/4D Gaussian representations as the unknown
 in \emph{wave-based and PDE-based scientific inverse problems}, the analysis of their failure modes under severe
-ill-posedness, and sequence-model motion priors for their dynamics.
+ill-posedness, and a controlled test of whether sequence-model networks act as priors for them.
 
 \begin{table}[t]
   \centering
@@ -79,8 +93,11 @@ ill-posedness, and sequence-model motion priors for their dynamics.
     X-Gaussian~\citep{cai2024xgaussian}, R$^2$-Gaussian~\citep{zha2024r2gaussian} & 3D Gaussians & X-ray projections & Gaussians for physics, ray-based \\
     BH-NeRF~\citep{levis2022bhnerf} & neural field & radio interferometry & physics replaces multi-view geometry \\
     DPS~\citep{chung2023dps}, InverseBench~\citep{zheng2025inversebench} & pixel grid + diffusion prior & physics operators & same problems, learned prior \\
-    Mamba~\citep{gu2023mamba} & selective SSM & sequences & our motion model over time \\
-    \textbf{This thesis} & 2D/3D/4D Gaussians & scattering; sparse flow samples & Gaussians + physics; Mamba motion \\
+    Mamba~\citep{gu2023mamba} & selective SSM & sequences & tested as motion model over time \\
+    Gamba~\citep{shen2025gamba} & 3D Gaussians + Mamba & single image & Mamba predicts Gaussians (trained) \\
+    4DSTR~\citep{liu2026fourdstr} & 4D Gaussians + Mamba & video & Mamba over Gaussian attributes in time \\
+    Gaussians on their Way~\citep{deng2024gaussiansontheirway} & 4D Gaussians + filter & video & Kalman-style state filter \\
+    \textbf{This thesis} & 2D/3D/4D Gaussians & scattering; sparse flow samples & Gaussians + physics; when a network acts as a prior \\
     \bottomrule
   \end{tabular}
 \end{table}

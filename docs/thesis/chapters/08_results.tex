@@ -86,7 +86,7 @@ receivers (40.6--40.9\,dB), while the voxel grid degrades from 44.1 to 37.3\,dB 
 receivers Gaussians are better on all three volumes (+3.6\,dB on average) and have higher SSIM at every receiver
 count.
 
-The real CytoPacq nuclei from BBBC024 reverse this picture. The voxel grid reaches 35--42\,dB, while Gaussians stay at
+The CytoPacq nuclei from BBBC024 (synthetic phantoms with sharp boundaries) reverse this picture. The voxel grid reaches 35--42\,dB, while Gaussians stay at
 27--28\,dB regardless of the number of receivers or the sparsity term. Figure~\ref{fig:s3d_bbbc} shows the reason: the
 BBBC024 volumes are binary masks with sharp nucleus boundaries, and a sum of smooth Gaussians reproduces each
 nucleus with a soft edge and a faint bright rim. The error is concentrated at the boundaries and is a
@@ -239,57 +239,152 @@ representation helps.}
   \label{fig:bounded}
 \end{figure}
 
-\section{4D Gaussians for Navier--Stokes}
-Table~\ref{tab:ns} reports PSNR on held-out frames, with observed-frame PSNR in brackets. Static Gaussians reach only
-about 17\,dB: the flow changes too much over 21 frames for one fixed field. A deformation network adds about 10\,dB.
-Without regularisation, Mamba fits the observed frames much better than the MLP (36.1 vs.\ 30.3\,dB with full
-observations), but on held-out frames the two are within 0.3\,dB: Mamba's extra capacity is spent memorising
-observed times.
+\section{Flow reconstruction from sparse observations}
+\label{sec:flow}
+The unknown is a 2D vorticity field over 21 frames, generated with the Navier--Stokes solver and observed at all or
+10\% of the pixels of each frame; it is reconstructed with canonical Gaussians and a 4DGS-style deformation model.
+Frames 2, 6, 10, 14 and 18 are never observed and are used for testing.
 
-The final runs add the temporal smoothness term ($\lambda_T=1$). With 10\% of pixels observed, Mamba now generalises
-clearly better than the MLP: 25.4 vs.\ 23.0\,dB on held-out frames, better on each of the three sequences
-(+2.2, +2.0 and +2.9\,dB), and 2.3\,dB better than unregularised Mamba. The MLP is unchanged by the term, and the MLP
-reconstructions show streak artefacts where data are sparse (Figure~\ref{fig:ns_smooth}). With full observations
-all deformation models are within about 1\,dB (MLP 27.4, Mamba 27.2\,dB). The bidirectional Mamba fits observed frames
-best but does not improve held-out frames (25.1 and 26.4\,dB) and doubles the training time. Mamba is about nine
-times slower than the MLP (28 vs.\ 3\,min per sequence) because of its sequential pure-PyTorch scan.
+\subsection{Exploratory runs}
+Table~\ref{tab:ns} reports the first runs (3 flows, one seed, no tuning). Static Gaussians reach only about 17\,dB:
+the flow changes too much over 21 frames for one fixed field, and a deformation network adds about 10\,dB. Without
+regularisation, Mamba fits the observed frames much better than the MLP but not the unseen frames. With a temporal
+smoothness term ($\lambda_T=1$, applied to both networks) and 10\% of pixels observed, Mamba reached 25.4\,dB and the
+MLP 23.0\,dB on unseen frames, and 25.9 vs.\ 23.1\,dB on five flows. These runs did not match network size (Mamba
+69k, MLP 38.5k parameters), did not tune $\lambda_T$ for each model, used one seed, and had no recurrent or non-learned
+baseline, so they cannot attribute the gain to Mamba. Section~\ref{sec:flow_control} repeats the comparison with
+these controls.
 
-\begin{table}[h]
+\begin{table}[htbp]
   \centering
-  \caption{4D Navier--Stokes, PSNR (dB) on held-out frames; observed-frame PSNR in brackets (mean of 3 sequences).
-  ``+ smooth'' = temporal smoothness $\lambda_T=1$ (final runs).}
+  \caption{Exploratory runs (3 flows, one seed, $\lambda_T$ not tuned): PSNR (dB) on unseen frames, observed-frame
+  PSNR in brackets. ``+ smooth'' = temporal smoothness $\lambda_T=1$ for every network.}
   \label{tab:ns}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{lcccc}
     \toprule
     Observed pixels & Static & MLP (4DGS-style) & Mamba & Bidirectional Mamba \\
     \midrule
-    100\% & 17.0 (16.8) & 27.6 (30.3) & \textbf{27.9} (36.1) & -- \\
-    100\% + smooth & -- & 27.4 (30.6) & 27.2 (35.2) & 26.4 (\textbf{36.5}) \\
+    100\% & 17.0 (16.8) & 27.6 (30.3) & 27.9 (36.1) & -- \\
+    100\% + smooth & -- & 27.4 (30.6) & 27.2 (35.2) & 26.4 (36.5) \\
     10\%  & 16.0 (15.9) & 23.2 (24.0) & 23.1 (27.7) & -- \\
-    10\% + smooth & -- & 23.0 (24.1) & \textbf{25.4} (28.9) & 25.1 (\textbf{29.6}) \\
-    \midrule
-    Training time per sequence & 3\,min & 3\,min & 15--28\,min & 52\,min \\
+    10\% + smooth & -- & 23.0 (24.1) & 25.4 (28.9) & 25.1 (29.6) \\
     \bottomrule
   \end{tabular}}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{ns4d_first.png}
-  \caption{Initial runs: vorticity of sequence 0 at five times (held-out frames marked). Rows: ground truth, then
+  \caption{Exploratory runs: vorticity of flow 0 at five times (unseen frames marked). Rows: ground truth, then
   MLP, Mamba and static models with 100\% and 10\% of pixels observed.}
   \label{fig:ns}
 \end{figure}
 
-\begin{figure}[h]
+\FloatBarrier
+\subsection{Controlled comparison}
+\label{sec:flow_control}
+\paragraph{Design.} Three deformation networks with matched size and the same inputs and output head: an MLP (width
+175, 69{,}131 parameters), a causal GRU over each trajectory (hidden size 103, 68{,}913) and the causal Mamba (69{,}062).
+All use the same smoothness term $\lambda_T\,\mathrm{mean}\lVert\Delta\theta(t{+}1)-\Delta\theta(t)\rVert^2$ on the
+deformation offsets and 3000 iterations. $\lambda_T\in\{0,0.3,1,3\}$ was chosen for each network on validation frames
+8 and 16 (held out from training, flows 0--1); the test frames were not used. Final runs use all 16 training frames,
+5 flows and 3 seeds, with 10\% of pixels observed. A non-learned baseline interpolates the observed pixels of each
+training frame (cubic, periodic) and interpolates linearly in time for the other frames. The success criterion was
+fixed before the runs: \emph{Mamba wins if its test PSNR is at least 1\,dB above both the MLP and the GRU and the 95\%
+CI of each paired difference (per flow, seed-averaged) is above zero.}
+
+\begin{table}[htbp]
   \centering
-  \includegraphics[width=0.75\linewidth]{ns4d_smooth.png}
-  \caption{Final runs with temporal smoothness: ground truth, then MLP, Mamba and bidirectional Mamba with 100\% and
-  10\% of pixels observed. With 10\% observations the MLP shows streaks; Mamba stays coherent.}
-  \label{fig:ns_smooth}
+  \caption{Smoothness weight: mean validation PSNR (dB), flows 0--1. Bold: chosen.}
+  \label{tab:flow_tune}
+  \begin{tabular}{lcccc}
+    \toprule
+    $\lambda_T$ & 0 & 0.3 & 1 & 3 \\
+    \midrule
+    MLP   & 22.91 & \textbf{23.16} & 22.82 & 22.67 \\
+    GRU   & 25.24 & \textbf{25.80} & 25.58 & 25.04 \\
+    Mamba & 22.26 & 25.32 & \textbf{25.39} & 25.18 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Controlled comparison, 10\% observed, 5 flows $\times$ 3 seeds (interpolation: 5 flows). PSNR (dB) on the
+  5 unseen frames; observed/unobserved pixels refer to training frames; spectrum error is the mean
+  $|\log_{10}(E_{\mathrm{rec}}/E_{\mathrm{true}})|$ for $k\le32$.}
+  \label{tab:flow_final}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{lcccccccc}
+    \toprule
+    Model & $\lambda_T$ & Test PSNR & SD (flows) & Observed px & Unobserved px & Spectrum err. & Enstrophy ratio & min/run \\
+    \midrule
+    Interpolation & -- & \textbf{27.36} & 0.89 & exact & 26.38 & 0.421 & 0.929 & 0.01 \\
+    GRU   & 0.3 & 26.38 & 1.53 & 32.25 & 26.38 & 0.072 & 0.980 & 3.8 \\
+    Mamba & 1.0 & 25.92 & 0.96 & 36.22 & \textbf{28.89} & \textbf{0.046} & 0.979 & 36.7 \\
+    MLP   & 0.3 & 23.50 & 1.08 & 28.66 & 24.08 & 0.103 & 0.977 & 3.1 \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Paired differences in test PSNR (per flow, seed-averaged; $t$-interval over 5 flows).}
+  \label{tab:flow_paired}
+  \begin{tabular}{lccc}
+    \toprule
+    Difference & Mean (dB) & 95\% CI & Flows where the first is better \\
+    \midrule
+    Mamba $-$ MLP & $+2.42$ & $[+1.61, +3.23]$ & 5/5 \\
+    Mamba $-$ GRU & $-0.46$ & $[-1.73, +0.80]$ & 1/5 \\
+    GRU $-$ MLP & $+2.88$ & $[+2.24, +3.53]$ & 5/5 \\
+    Interpolation $-$ Mamba & $+1.44$ & $[+0.78, +2.10]$ & 5/5 \\
+    Interpolation $-$ GRU & $+0.98$ & $[-0.18, +2.13]$ & 4/5 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Result.} Mamba does not meet the criterion (Tables~\ref{tab:flow_final} and~\ref{tab:flow_paired}). It
+beats the MLP by 2.4\,dB but is 0.5\,dB behind the GRU of the same size, which trains ten times faster. The gain of
+the exploratory runs therefore comes from reading each trajectory in time order together with a tuned temporal
+smoothness term, not from Mamba itself. Table~\ref{tab:flow_tune} supports this: without smoothness, Mamba is the
+weakest of the three networks, and the term helps it by 3.1\,dB. The non-learned interpolation baseline is the best
+model on test PSNR and beats Mamba on every flow; with about a quarter of an eddy turnover between frames, the flow is
+smooth enough in time for linear interpolation to work well.
+
+\paragraph{Further observations} (not part of the criterion). Mamba reproduces the energy spectrum most closely and
+fills the unobserved pixels of observed frames best, while interpolation is too smooth beyond $k\approx10$
+(Figure~\ref{fig:flow_spectra}), which PSNR barely penalises. Mamba also overfits the observed pixels (36.2\,dB vs.\
+32.3 for the GRU), and with all pixels observed (2 flows) it is the weakest model on unseen frames: interpolation 34.0,
+GRU 33.3, MLP 29.0, Mamba 27.9\,dB. The error at the first and last frames is on the unobserved pixels, while the
+observed pixels there are fitted well (Figure~\ref{fig:flow_frames}): it reflects the ends of the time window, where a
+causal network has no history, not underfitting.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\linewidth]{step1_recon_flow0.png}
+  \caption{Controlled comparison, flow 0, seed 0, 10\% observed. Top: ground truth (frames 2, 10, 18 never observed).
+  Rows: interpolation, MLP, GRU, Mamba.}
+  \label{fig:flow_recon}
 \end{figure}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{step1_per_frame.png}
+  \caption{Error per frame (mean over flows and seeds): fit on observed pixels (dotted), unobserved pixels of training
+  frames (dashed), unseen test frames (dots).}
+  \label{fig:flow_frames}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\linewidth]{step1_spectra.png}
+  \caption{Energy spectrum on the unseen frames (mean over flows and seeds).}
+  \label{fig:flow_spectra}
+\end{figure}
+
+\FloatBarrier
 \section{Mamba over the Gaussians and in space--time}
 \label{sec:mamba_more}
 Two further Mamba designs were evaluated (Table~\ref{tab:mamba_more}). \textbf{(i) PointMamba over Gaussians (3D and
@@ -303,20 +398,20 @@ Gaussians in every frame.
 Neither added accuracy. Under the true 3D model, PointMamba over Gaussians changes PSNR by $+0.13$, $-0.17$ and
 $-0.31$\,dB at 360, 180 and 60 receivers relative to the same Gaussians without a network (still beating the voxel
 grid on every volume, by 0.4--0.8\,dB). On ten 2D cells all network variants, including the controls (a per-Gaussian
-MLP without any coupling and Mamba over a random order), stay within $\pm0.1$\,dB of the network-free result. The
-reason is structural: the network only adds an offset to Gaussian parameters that are themselves free, so anything it
+MLP without any coupling and Mamba over a random order), stay within $\pm0.1$\,dB of the network-free result.
+Both variants were trained for the same 3000 iterations from the same grid initialisation, so the comparison is not
+confounded by extra optimisation. This is a null result for Mamba, and the likely reason is structural: the network only adds an offset to Gaussian parameters that are themselves free, so anything it
 could contribute the Gaussians can also learn directly; a per-scene network of this kind does not constrain the
 solution. For Mamba to act as a prior it must either \emph{generate} the Gaussian parameters (no free per-Gaussian
 parameters) or be \emph{trained across scenes}, as PointMamba is pre-trained on ShapeNet.
 
-In 4D, five flows confirm the earlier result with more confidence: with 10\% of pixels observed, Mamba beats the
-MLP on every flow, by $+2.8\pm0.9$\,dB on unseen frames (25.9 vs.\ 23.1\,dB). The spatial scan does not help
-($-0.2\pm0.2$\,dB, 25.8\,dB), consistent with the 3D finding.
+In 4D, adding the spatial scan to the temporal Mamba does not help ($-0.2\pm0.2$\,dB on unseen frames over five
+flows), consistent with the 3D finding.
 
 \begin{table}[h]
   \centering
   \caption{Further Mamba designs. Top: 3D/2D scattering, bounded grid-initialised Gaussians (B+G) with and without a
-  PointMamba network (PSNR dB). Bottom: 4D Navier--Stokes, 5 flows, 10\% observed, PSNR on unseen frames (mean $\pm$ std).}
+  PointMamba network (PSNR dB). Bottom: flow, 5 flows, 10\% observed, $\lambda_T=1$, PSNR on unseen frames (mean $\pm$ std).}
   \label{tab:mamba_more}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccc}
@@ -333,16 +428,17 @@ MLP on every flow, by $+2.8\pm0.9$\,dB on unseen frames (25.9 vs.\ 23.1\,dB). Th
      & + PointMamba (Hilbert, Trans-Hilbert) & \textbf{34.5} & \textbf{34.1} & 30.4 \\
      & + PointMamba + residual tokens & 34.4 & 34.0 & 30.4 \\
     \midrule
-    \multicolumn{2}{l}{4D, 5 flows, 10\% observed} & MLP & Mamba & Space--time Mamba \\
-    \multicolumn{2}{l}{\quad PSNR on unseen frames} & 23.1 $\pm$ 1.4 & \textbf{25.9 $\pm$ 1.1} & 25.8 $\pm$ 1.3 \\
+    \multicolumn{2}{l}{Flow, 5 flows, 10\% observed} & Mamba & Space--time Mamba & -- \\
+    \multicolumn{2}{l}{\quad PSNR on unseen frames} & 25.9 $\pm$ 1.1 & 25.8 $\pm$ 1.3 & -- \\
     \bottomrule
   \end{tabular}}
 \end{table}
 
+\FloatBarrier
 \section{Answers to the research questions}
 \begin{description}
   \item[RQ1] Yes in the most under-determined setting, once the density is bounded. Under the true 3D model,
-  bounded Gaussians beat a voxel grid with the same sparsity prior on every volume (up to +1.1\,dB on real BBBC024
+  bounded Gaussians beat a voxel grid with the same sparsity prior on every volume (up to +1.1\,dB on BBBC024
   nuclei and +4.3\,dB on synthetic nuclei) with about nine times fewer parameters. With better-conditioned
   measurements (slice-wise 3D, 2D at 360 and 180 receivers) the regularised grid remains slightly better.
   Unbounded Gaussians lose in almost every setting: bounding the density is essential.
@@ -350,8 +446,10 @@ MLP on every flow, by $+2.8\pm0.9$\,dB on unseen frames (25.9 vs.\ 23.1\,dB). Th
   total intensity prevents them and is required for Gaussians.
   \item[RQ3] Yes: canonical Gaussians plus a deformation network reconstruct the flow at held-out times, about 10\,dB
   better than static Gaussians, from full or 10\% observations.
-  \item[RQ4] Yes, along time, when observations are sparse and the model is regularised in time: Mamba with temporal
-  smoothness beats the MLP on every one of five flows by $2.8\pm0.9$\,dB on unseen frames with 10\% observations.
-  With full observations there is no gain; bidirectional and spatial (PointMamba) scans add cost without benefit,
-  and a per-scene PointMamba network over 3D Gaussians does not improve scattering reconstructions.
+  \item[RQ4] No. In a controlled comparison (matched size, smoothness weight tuned per network on validation frames,
+  5 flows $\times$ 3 seeds, 10\% observed), Mamba beats the MLP of 4D Gaussian Splatting by 2.4\,dB but not a GRU of
+  the same size ($-0.5$\,dB, 95\% CI $[-1.7, 0.8]$), and a non-learned interpolation baseline is better than both. The
+  gain comes from temporal regularisation with a recurrent reading of each trajectory, not from the Mamba
+  architecture. Bidirectional and spatial (PointMamba) scans add cost without benefit, and a per-scene PointMamba
+  network over 3D Gaussians does not improve scattering reconstructions.
 \end{description}

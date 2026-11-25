@@ -3,7 +3,7 @@
 
 \section{Overview}
 The same training loop serves every task (Figure~\ref{fig:pipeline}). A set of Gaussians is rendered on the grid of
-the unknown; a physics operator turns the rendered field into simulated measurements; the misfit to the real
+the unknown; a physics operator turns the rendered field into simulated measurements; the misfit to the observed
 measurements, plus an optional sparsity term, is back-propagated to all Gaussian parameters; and an adaptive density
 control step periodically adds and removes Gaussians. For dynamic fields a deformation network maps the canonical
 Gaussians to their state at each time step before rendering.
@@ -67,12 +67,14 @@ not require. Because the field is non-negative, the mean of the field equals its
 \section{4D representation of fluid flow}
 A canonical set of 2D Gaussians is initialised from the observed pixels of the first frame. A deformation network maps
 each Gaussian's canonical centre and the time $t$ to offsets of all its parameters; positions move in pixel units.
-Three deformation models are compared:
+Four deformation models are compared:
 \begin{itemize}
   \item \textbf{MLP} (as in 4D Gaussian Splatting): Fourier features of $(\mu_i,t)$ fed to a three-layer MLP,
   evaluated independently for every Gaussian and time.
   \item \textbf{Mamba}: for each Gaussian the inputs at all $T$ time steps form a sequence processed by two Mamba
   blocks, so the offset at time $t$ depends on the Gaussian's earlier states (causal).
+  \item \textbf{GRU}: the same sequence over time read by a causal gated recurrent unit, a recurrent control for
+  Mamba with the same inputs and output head.
   \item \textbf{Bidirectional Mamba}: a second Mamba stack reads the sequence backwards and the two are summed, so
   every time step sees both past and future.
 \end{itemize}
@@ -83,7 +85,8 @@ smoothness term penalises differences between offsets at consecutive times, incl
 \section{Baselines}
 The baseline for scattering optimises every pixel (2D) or voxel (3D) directly with the same data term, starting from
 zero and projected to $[0,1]$ after each step; optionally it uses the same sparsity term. Only the representation
-differs between the two methods. For fluids, the static-Gaussian model is the baseline.
+differs between the two methods. For flow, the static-Gaussian model is the ablation, and a non-learned baseline interpolates the observed pixels of
+each observed frame (cubic, periodic) and interpolates linearly in time for unobserved frames.
 
 \section{Implementation}
 The pipeline is a Python/PyTorch package (\texttt{thesis\_gs}) with modules for the Gaussian field, physics,

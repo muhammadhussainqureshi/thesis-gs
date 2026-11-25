@@ -41,7 +41,8 @@ Chapter~\ref{ch:problem}.
   solution, and trains them with densification, pruning and an optional sparsity term.
   \item \textbf{4D Gaussians with a state-space motion model.} A 4D (2D + time) Gaussian representation whose
   deformation is modelled either by an MLP, as in 4D Gaussian Splatting, or by a Mamba selective state-space
-  model~\citep{gu2023mamba} that treats each Gaussian's trajectory as a sequence.
+  model~\citep{gu2023mamba} that treats each Gaussian's trajectory as a sequence, and the two are tested against a
+  GRU of the same size and a non-learned interpolation baseline.
   \item \textbf{Initial results and a failure analysis.} Baseline comparisons against pixel/voxel optimisation with
   identical physics, and the identification of a ``ghost'' failure mode caused by the operator's null space, with a
   sparsity-based remedy.
