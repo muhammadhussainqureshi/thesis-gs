@@ -1,0 +1,96 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task scatter3d --physics born3d --skip_direct --volumes /tmp/cytopacq --crop 0.5 --receivers 60 --l1 0.3 --grid_l1 0.3 --noise_rel 0.02 --samples 10 --vol_start 2 --bounded --init_from_grid --seeds 0 --gmamba mlp --skip_grid --data_dir /kaggle/working/data --out /kaggle/working/thesis1_3d_a/s34_gm_mlp
+
+[12:42:38] device=cuda  task=scatter3d  out=/kaggle/working/thesis1_3d_a/s34_gm_mlp
+[12:42:39]   found 30 image files in /tmp/cytopacq, e.g. ['BBBC024_v1_c00_highSNR_foreground/image-labels_0000.ics', 'BBBC024_v1_c00_highSNR_foreground/image-labels_0001.ics', 'BBBC024_v1_c00_highSNR_foreground/image-labels_0002.ics']
+[12:42:39]   first file shape (129, 565, 807), dtype uint16
+[12:42:41]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0000.ics -> (32, 128, 128), foreground 9.3%
+[12:42:42]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0001.ics -> (32, 128, 128), foreground 7.3%
+[12:42:44]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0002.ics -> (32, 128, 128), foreground 8.0%
+[12:42:45]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0003.ics -> (32, 128, 128), foreground 6.6%
+[12:42:47]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0004.ics -> (32, 128, 128), foreground 8.8%
+[12:42:48]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0005.ics -> (32, 128, 128), foreground 7.3%
+[12:42:50]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0006.ics -> (32, 128, 128), foreground 7.3%
+[12:42:51]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0007.ics -> (32, 128, 128), foreground 8.8%
+[12:42:53]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0008.ics -> (32, 128, 128), foreground 7.6%
+[12:42:54]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0009.ics -> (32, 128, 128), foreground 7.1%
+[12:42:56]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0010.ics -> (32, 128, 128), foreground 10.1%
+[12:42:57]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0011.ics -> (32, 128, 128), foreground 9.3%
+[12:42:57] [scatter3d] 10 samples, shape (32, 128, 128), source: CytoPacq volumes 2..11 from /tmp/cytopacq, physics: true 3D Born, 60 transmitters, kernel beta=1.0, bounded=True, PointMamba=mlp
+[12:43:01] [scatter3d] B physics, 60 receivers, 3600 measurements for 524288 voxels (adjoint check: 6.1e-08)
+[12:43:02] [scatter3d]   volume 2: grid (sparsity 0.3)
+[12:44:14] [scatter3d]   volume 2, seed 0: Gaussians
+[12:45:45]     iter   750  loss 2.379e-02  PSNR  27.05 dB  #G 3481
+[12:48:00]     iter  1500  loss 2.372e-02  PSNR  26.64 dB  #G 4956
+[12:50:53]     iter  2250  loss 2.370e-02  PSNR  26.53 dB  #G 5447
+[12:53:51]     iter  3000  loss 2.370e-02  PSNR  26.46 dB  #G 5447
+[12:53:51] [scatter3d]   -> Gaussians 26.46 dB / SSIM 0.907   grid 25.23 dB
+[12:53:51] [scatter3d]   volume 3: grid (sparsity 0.3)
+[12:55:00] [scatter3d]   volume 3, seed 0: Gaussians
+[12:56:31]     iter   750  loss 1.985e-02  PSNR  28.72 dB  #G 3472
+[12:58:45]     iter  1500  loss 1.977e-02  PSNR  29.33 dB  #G 4863
+[13:01:34]     iter  2250  loss 1.976e-02  PSNR  29.20 dB  #G 5312
+[13:04:27]     iter  3000  loss 1.976e-02  PSNR  29.15 dB  #G 5312
+[13:04:27] [scatter3d]   -> Gaussians 29.15 dB / SSIM 0.932   grid 28.46 dB
+[13:04:27] [scatter3d]   volume 4: grid (sparsity 0.3)
+[13:05:37] [scatter3d]   volume 4, seed 0: Gaussians
+[13:07:08]     iter   750  loss 2.610e-02  PSNR  25.35 dB  #G 3470
+[13:09:20]     iter  1500  loss 2.601e-02  PSNR  25.90 dB  #G 4734
+[13:12:04]     iter  2250  loss 2.600e-02  PSNR  25.56 dB  #G 5129
+[13:14:52]     iter  3000  loss 2.599e-02  PSNR  25.42 dB  #G 5129
+[13:14:52] [scatter3d]   -> Gaussians 25.42 dB / SSIM 0.890   grid 24.64 dB
+[13:14:52] [scatter3d]   volume 5: grid (sparsity 0.3)
+[13:16:01] [scatter3d]   volume 5, seed 0: Gaussians
+[13:17:32]     iter   750  loss 2.196e-02  PSNR  28.71 dB  #G 3470
+[13:19:46]     iter  1500  loss 2.189e-02  PSNR  28.87 dB  #G 4945
+[13:22:38]     iter  2250  loss 2.187e-02  PSNR  28.86 dB  #G 5426
+[13:25:35]     iter  3000  loss 2.187e-02  PSNR  28.80 dB  #G 5426
+[13:25:35] [scatter3d]   -> Gaussians 28.80 dB / SSIM 0.930   grid 28.10 dB
+[13:25:35] [scatter3d]   volume 6: grid (sparsity 0.3)
+[13:26:44] [scatter3d]   volume 6, seed 0: Gaussians
+[13:28:15]     iter   750  loss 2.182e-02  PSNR  26.58 dB  #G 3469
+[13:30:28]     iter  1500  loss 2.172e-02  PSNR  28.44 dB  #G 4569
+[13:33:07]     iter  2250  loss 2.171e-02  PSNR  28.27 dB  #G 4940
+[13:35:49]     iter  3000  loss 2.170e-02  PSNR  28.22 dB  #G 4940
+[13:35:49] [scatter3d]   -> Gaussians 28.22 dB / SSIM 0.910   grid 27.24 dB
+[13:35:49] [scatter3d]   volume 7: grid (sparsity 0.3)
+[13:36:58] [scatter3d]   volume 7, seed 0: Gaussians
+[13:38:29]     iter   750  loss 2.608e-02  PSNR  25.76 dB  #G 3469
+[13:40:43]     iter  1500  loss 2.599e-02  PSNR  25.19 dB  #G 4937
+[13:43:35]     iter  2250  loss 2.596e-02  PSNR  25.02 dB  #G 5385
+[13:46:30]     iter  3000  loss 2.596e-02  PSNR  24.88 dB  #G 5385
+[13:46:30] [scatter3d]   -> Gaussians 24.88 dB / SSIM 0.885   grid 23.58 dB
+[13:46:30] [scatter3d]   volume 8: grid (sparsity 0.3)
+[13:47:40] [scatter3d]   volume 8, seed 0: Gaussians
+[13:49:11]     iter   750  loss 2.255e-02  PSNR  26.90 dB  #G 3472
+[13:51:24]     iter  1500  loss 2.247e-02  PSNR  27.03 dB  #G 4941
+[13:54:17]     iter  2250  loss 2.245e-02  PSNR  26.99 dB  #G 5425
+[13:57:14]     iter  3000  loss 2.245e-02  PSNR  26.90 dB  #G 5425
+[13:57:14] [scatter3d]   -> Gaussians 26.90 dB / SSIM 0.887   grid 25.68 dB
+[13:57:14] [scatter3d]   volume 9: grid (sparsity 0.3)
+[13:58:23] [scatter3d]   volume 9, seed 0: Gaussians
+[13:59:54]     iter   750  loss 2.131e-02  PSNR  28.17 dB  #G 3462
+[14:02:08]     iter  1500  loss 2.123e-02  PSNR  28.09 dB  #G 4943
+[14:05:00]     iter  2250  loss 2.122e-02  PSNR  28.19 dB  #G 5425
+[14:07:57]     iter  3000  loss 2.121e-02  PSNR  28.13 dB  #G 5425
+[14:07:57] [scatter3d]   -> Gaussians 28.13 dB / SSIM 0.928   grid 27.41 dB
+[14:07:57] [scatter3d]   volume 10: grid (sparsity 0.3)
+[14:09:07] [scatter3d]   volume 10, seed 0: Gaussians
+[14:10:38]     iter   750  loss 2.992e-02  PSNR  24.46 dB  #G 3473
+[14:12:50]     iter  1500  loss 2.986e-02  PSNR  24.05 dB  #G 4827
+[14:15:39]     iter  2250  loss 2.984e-02  PSNR  23.89 dB  #G 5297
+[14:18:32]     iter  3000  loss 2.984e-02  PSNR  23.79 dB  #G 5297
+[14:18:32] [scatter3d]   -> Gaussians 23.79 dB / SSIM 0.867   grid 23.09 dB
+[14:18:32] [scatter3d]   volume 11: grid (sparsity 0.3)
+[14:19:41] [scatter3d]   volume 11, seed 0: Gaussians
+[14:21:12]     iter   750  loss 2.773e-02  PSNR  25.02 dB  #G 3483
+[14:23:26]     iter  1500  loss 2.765e-02  PSNR  24.81 dB  #G 4884
+[14:26:17]     iter  2250  loss 2.764e-02  PSNR  24.49 dB  #G 5361
+[14:29:11]     iter  3000  loss 2.763e-02  PSNR  24.35 dB  #G 5361
+[14:29:12] [scatter3d]   -> Gaussians 24.35 dB / SSIM 0.859   grid 23.53 dB
+[14:29:12] [scatter3d] summary
+                                  psnr  ssim  rel_l2  n_gauss  n_params  net_params  time_s  psnr_std  ssim_std  n_samples
+experiment receivers method                                                                                               
+B_physics  60        gaussians  26.611   0.9   0.169   5314.7   58461.7     15243.0  636.86     1.936     0.026         10
+[14:29:12] ===== scatter3d finished in 106.6 min. Results in /kaggle/working/thesis1_3d_a/s34_gm_mlp/scatter3d
+
+EXIT CODE 0

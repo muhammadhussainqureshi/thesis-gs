@@ -1,0 +1,39 @@
+/usr/bin/python3 /kaggle/working/thesis-gs/bin/thesis-gs --task scatter3d --physics born3d --skip_direct --volumes /tmp/cytopacq --crop 0.5 --receivers 60 --l1 0.3 --grid_l1 0.3 --noise_rel 0.02 --samples 2 --skip_gauss --grid_tv 0.01 0.03 0.1 0.3 1 3 --data_dir /kaggle/working/data --out /kaggle/working/thesis1_3d_a/s34_tune_tv
+
+[05:10:26] device=cuda  task=scatter3d  out=/kaggle/working/thesis1_3d_a/s34_tune_tv
+[05:10:28] Cloning InverseBench -> /tmp/InverseBench
+[05:10:28]   found 30 image files in /tmp/cytopacq, e.g. ['BBBC024_v1_c00_highSNR_foreground/image-labels_0000.ics', 'BBBC024_v1_c00_highSNR_foreground/image-labels_0001.ics', 'BBBC024_v1_c00_highSNR_foreground/image-labels_0002.ics']
+[05:10:28]   first file shape (129, 565, 807), dtype uint16
+[05:10:31]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0000.ics -> (32, 128, 128), foreground 9.3%
+[05:10:32]   loaded BBBC024_v1_c00_highSNR_foreground/image-labels_0001.ics -> (32, 128, 128), foreground 7.3%
+[05:10:32] [scatter3d] 2 samples, shape (32, 128, 128), source: CytoPacq volumes 0..1 from /tmp/cytopacq, physics: true 3D Born, 60 transmitters, kernel beta=1.0, bounded=False, PointMamba=none
+[05:10:37] [scatter3d] B physics, 60 receivers, 3600 measurements for 524288 voxels (adjoint check: 3.0e-06)
+[05:10:38] [scatter3d]   volume 0: grid (sparsity 0.3)
+[05:11:49] [scatter3d]   -> grid 24.41 dB / SSIM 0.867
+[05:13:00] [scatter3d]   -> grid + TV 0.01: 26.13 dB / SSIM 0.917
+[05:14:10] [scatter3d]   -> grid + TV 0.03: 26.97 dB / SSIM 0.948
+[05:15:22] [scatter3d]   -> grid + TV 0.1: 27.29 dB / SSIM 0.970
+[05:16:34] [scatter3d]   -> grid + TV 0.3: 26.50 dB / SSIM 0.961
+[05:17:47] [scatter3d]   -> grid + TV 1: 24.07 dB / SSIM 0.894
+[05:19:01] [scatter3d]   -> grid + TV 3: 20.46 dB / SSIM 0.698
+[05:19:01] [scatter3d]   volume 1: grid (sparsity 0.3)
+[05:20:11] [scatter3d]   -> grid 27.07 dB / SSIM 0.892
+[05:21:22] [scatter3d]   -> grid + TV 0.01: 28.60 dB / SSIM 0.939
+[05:22:33] [scatter3d]   -> grid + TV 0.03: 29.26 dB / SSIM 0.966
+[05:23:44] [scatter3d]   -> grid + TV 0.1: 29.48 dB / SSIM 0.982
+[05:24:55] [scatter3d]   -> grid + TV 0.3: 28.68 dB / SSIM 0.979
+[05:26:08] [scatter3d]   -> grid + TV 1: 26.60 dB / SSIM 0.939
+[05:27:21] [scatter3d]   -> grid + TV 3: 22.96 dB / SSIM 0.792
+[05:27:22] [scatter3d] summary
+                                      psnr   ssim  rel_l2  n_gauss  n_params  time_s  psnr_std  ssim_std  n_samples
+experiment receivers method                                                                                        
+B_physics  60        grid_baseline  25.743  0.880   0.182      0.0  524288.0   67.45     1.881     0.018          2
+                     grid_tv0.01    27.365  0.928   0.151      0.0  524288.0   70.45     1.743     0.015          2
+                     grid_tv0.03    28.117  0.957   0.139      0.0  524288.0   70.95     1.618     0.013          2
+                     grid_tv0.1     28.385  0.976   0.134      0.0  524288.0   71.10     1.544     0.009          2
+                     grid_tv0.3     27.590  0.970   0.147      0.0  524288.0   71.95     1.541     0.013          2
+                     grid_tv1       25.331  0.916   0.191      0.0  524288.0   72.95     1.788     0.032          2
+                     grid_tv3       21.709  0.745   0.290      0.0  524288.0   73.80     1.764     0.066          2
+[05:27:22] ===== scatter3d finished in 16.9 min. Results in /kaggle/working/thesis1_3d_a/s34_tune_tv/scatter3d
+
+EXIT CODE 0

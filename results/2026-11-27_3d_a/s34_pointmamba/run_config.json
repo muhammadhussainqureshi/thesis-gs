@@ -1,0 +1,64 @@
+{
+ "task": "scatter3d",
+ "out": "/kaggle/working/thesis1_3d_a/s34_pointmamba",
+ "data_dir": "/kaggle/working/data",
+ "local_dir": "/tmp/thesis_data",
+ "ib_dir": "/tmp/InverseBench",
+ "device": "cuda",
+ "samples": 10,
+ "iters": 3000,
+ "n_gauss": null,
+ "window": null,
+ "receivers": [
+  60
+ ],
+ "noise": 0.0001,
+ "volumes": "/tmp/cytopacq",
+ "depth": 32,
+ "skip_direct": true,
+ "crop": 0.5,
+ "n_init": null,
+ "densify_add": null,
+ "densify_until": 0.6,
+ "l1": 0.3,
+ "physics": "born3d",
+ "transmitters": 60,
+ "noise_rel": 0.02,
+ "gauss_beta": 1.0,
+ "bounded": true,
+ "init_from_grid": true,
+ "gmamba": "pointmamba",
+ "gm_residual": false,
+ "skip_grid": true,
+ "grid_l1": 0.3,
+ "grid_tv": [],
+ "grid_tv_from": null,
+ "skip_gauss": false,
+ "vol_start": 2,
+ "frames": 21,
+ "frame_dt": 0.05,
+ "obs_ratios": [
+  1.0,
+  0.1
+ ],
+ "ns_noise": 0.0,
+ "deform": [
+  "mlp",
+  "mamba"
+ ],
+ "batch_frames": 4,
+ "temporal_reg": [
+  0.0
+ ],
+ "lambda_from": null,
+ "val_frames": [],
+ "seeds": [
+  0,
+  1
+ ],
+ "mlp_width": 128,
+ "gru_hidden": 103,
+ "lr_gauss": 0.01,
+ "lr_net": 0.001,
+ "quick": false
+}

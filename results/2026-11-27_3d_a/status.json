@@ -1,0 +1,18 @@
+{
+ "s34_tune_tv": {
+  "ok": true,
+  "minutes": 17.1
+ },
+ "s34_nonet": {
+  "ok": true,
+  "minutes": 214.9
+ },
+ "s34_pointmamba": {
+  "ok": true,
+  "minutes": 220.3
+ },
+ "s34_gm_mlp": {
+  "ok": true,
+  "minutes": 106.6
+ }
+}

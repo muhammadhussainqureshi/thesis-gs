@@ -1,0 +1,6 @@
+method,volumes,seeds,PSNR,PSNR SD (volumes),SSIM
++ per-Gaussian MLP,10,1,26.611,1.936,0.9
+"Gaussians (B+G), no network",10,2,26.849,1.768,0.899
++ PointMamba,10,2,26.486,1.859,0.897
+Voxel grid + sparsity,10,1,25.694,2.002,0.867
+Voxel grid + sparsity + TV (0.1),10,1,28.819,1.316,0.974
