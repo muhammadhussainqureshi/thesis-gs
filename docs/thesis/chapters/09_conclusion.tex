@@ -9,8 +9,10 @@ not (fine texture, abundant data). The most instructive finding is the ghost fai
 strength of Gaussian splatting with cameras, becomes a liability when the measurements are blind to part of the
 domain, and must be balanced by an explicit prior. The final runs add a second lesson: a Gaussian sum is unbounded, and on physical quantities with a known range
 this matters more than the shape of the kernel. Unbounded Gaussians lost to a clipped grid almost everywhere;
-the bounded density $1-e^{-f}$, the same saturation as opacity in 3DGS, turned the true 3D results into a consistent
-win with nine times fewer parameters, while sharper kernels did not help. For dynamics, a deformation model is essential, but the controlled comparison shows that
+the bounded density $1-e^{-f}$, the same saturation as opacity in 3DGS, made them beat a sparsity-regularised grid on
+every volume with nine times fewer parameters, while sharper kernels did not help. A grid with a tuned total-variation
+prior, however, is more accurate than the Gaussians on every volume: on these piecewise-constant nuclei an edge prior
+matters more than the representation, and the Gaussians' remaining advantage is compactness. For dynamics, a deformation model is essential, but the controlled comparison shows that
 the choice of sequence network is not: a GRU of the same size matches Mamba, both gain mainly from the temporal
 smoothness term, and a non-learned interpolation in space and time is better still on PSNR. Mamba's advantages are
 limited to secondary measures (energy spectrum, filling unobserved pixels of observed frames), and it overfits the
@@ -23,8 +25,9 @@ Gaussians or by being trained across scenes, not when it is one more set of free
   \item The 3D objects are synthetic: BBBC024 and our nuclei are simulated phantoms, not microscope data.
   \item The same forward model generates and inverts the measurements (``inverse crime''): the true 3D model is the
   linear first Born approximation in both, so model error is not tested; multiple scattering is not modelled.
-  \item The 3D results in this chapter use three volumes; the larger 3D controls (10 volumes, 2 seeds, TV-regularised
-  grid, two noise levels) are reported separately.
+  \item Most 3D comparisons use three volumes; the controls of Section~\ref{sec:3dcontrols} use ten volumes at 60
+  receivers and one noise level. Only the grid received a tuned edge (TV) prior; an equivalent prior for Gaussians was
+  not tested.
   \item Most results use three to ten samples per setting; differences of a few tenths of a dB are not significant.
   The flow comparison uses 5 flows $\times$ 3 seeds of one flow configuration.
   \item The 4D problem reconstructs a field from observations of itself; InverseBench's harder task of recovering the
@@ -45,6 +48,8 @@ Gaussians or by being trained across scenes, not when it is one more set of free
   from a back-projection or grid solution, bounded densities).
   \item Systematic evaluation on the full InverseBench test sets with confidence intervals, and comparison with the
   benchmark's diffusion-prior methods.
+  \item An edge-preserving (TV-like) prior on the rendered Gaussian field, to compare the representations under
+  equally strong priors.
   \item Physics-aware density control (densify only within the support indicated by the data; null-space-aware
   regularisers) instead of a global sparsity term.
   \item Bounded Gaussians on the full test sets with confidence intervals, and learned or adaptive saturation for

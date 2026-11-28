@@ -192,6 +192,8 @@ initialised from the grid solution they beat it on \emph{every} volume at every 
 $+0.26\pm0.07$, $+0.97\pm0.09$ and $+1.12\pm0.10$\,dB at 360, 180 and 60 receivers) with higher SSIM, while using
 about 60k parameters instead of 524k. On synthetic nuclei the gain is larger: $+4.3$, $+3.7$ and $+0.9$\,dB over the
 voxel grid, again better on every volume. The rims and under-filled interiors of Figure~\ref{fig:born3d} disappear.
+These comparisons are against a grid with a sparsity prior only; Section~\ref{sec:3dcontrols} shows that a grid with
+a tuned total-variation prior is more accurate than the Gaussians.
 
 The gain is smaller where the grid is already well conditioned. With the slice-wise model (ten times more
 measurements) bounded, grid-initialised Gaussians improve from 28.4 to 35.8\,dB on BBBC024 but remain below the
@@ -396,8 +398,8 @@ order indicator, processed by Mamba blocks, and each Gaussian receives a correct
 Gaussians in every frame.
 
 Neither added accuracy. Under the true 3D model, PointMamba over Gaussians changes PSNR by $+0.13$, $-0.17$ and
-$-0.31$\,dB at 360, 180 and 60 receivers relative to the same Gaussians without a network (still beating the voxel
-grid on every volume, by 0.4--0.8\,dB). On ten 2D cells all network variants, including the controls (a per-Gaussian
+$-0.31$\,dB at 360, 180 and 60 receivers relative to the same Gaussians without a network (still beating the
+sparsity-regularised voxel grid on every volume, by 0.4--0.8\,dB). On ten 2D cells all network variants, including the controls (a per-Gaussian
 MLP without any coupling and Mamba over a random order), stay within $\pm0.1$\,dB of the network-free result.
 Both variants were trained for the same 3000 iterations from the same grid initialisation, so the comparison is not
 confounded by extra optimisation. This is a null result for Mamba, and the likely reason is structural: the network only adds an offset to Gaussian parameters that are themselves free, so anything it
@@ -435,11 +437,65 @@ flows), consistent with the 3D finding.
 \end{table}
 
 \FloatBarrier
+\section{3D controls: more volumes, a TV-regularised grid and network controls}
+\label{sec:3dcontrols}
+The 3D comparisons above use three volumes and a grid regularised only by sparsity. To test them, the true 3D model was
+run on ten further BBBC024 volumes (volumes 2--11; volumes 0--1 were used only to tune the new prior) at 60 receivers,
+with complex Gaussian noise on the measured field at 2\% of its rms value (SNR 34\,dB). Bounded, grid-initialised
+Gaussians were fitted with two seeds, alone and with a PointMamba or per-Gaussian MLP correction network, all for 3000
+iterations from the same grid initialisation. A second baseline adds a total-variation (TV) term to the sparsity-regularised
+grid; its weight $\lambda_{\mathrm{TV}}\in\{0.01, 0.03, 0.1, 0.3, 1, 3\}$ was chosen on the tuning volumes
+($\lambda_{\mathrm{TV}}=0.1$: 28.4\,dB there, against 25.7\,dB without TV). The choice of seed changes the Gaussian
+results by only 0.04\,dB on average.
+
+\begin{table}[htbp]
+  \centering
+  \caption{3D controls: true 3D model, 10 BBBC024 test volumes, 60 receivers, SNR 34\,dB (PSNR dB / SSIM).
+  Gaussians: bounded and grid-initialised; seeds averaged.}
+  \label{tab:3dcontrols}
+  \begin{tabular}{lccc}
+    \toprule
+    Method & Seeds & PSNR & SSIM \\
+    \midrule
+    Voxel grid + sparsity + TV ($\lambda_{\mathrm{TV}}=0.1$) & -- & \textbf{28.82} & \textbf{0.974} \\
+    Gaussians, no network & 2 & 26.85 & 0.899 \\
+    \quad + per-Gaussian MLP & 1 & 26.61 & 0.900 \\
+    \quad + PointMamba & 2 & 26.49 & 0.897 \\
+    Voxel grid + sparsity & -- & 25.69 & 0.867 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{6pt}
+  \begin{tabular}{lccc}
+    \toprule
+    Paired difference (per volume) & Mean (dB) & 95\% CI & Volumes where the first is better \\
+    \midrule
+    PointMamba $-$ no network & $-0.36$ & $[-0.45, -0.28]$ & 0/10 \\
+    Per-Gaussian MLP $-$ no network & $-0.24$ & $[-0.42, -0.06]$ & 1/10 \\
+    Gaussians $-$ grid + sparsity & $+1.16$ & $[+0.94, +1.37]$ & 10/10 \\
+    Gaussians $-$ grid + sparsity + TV & $-1.97$ & $[-2.35, -1.59]$ & 0/10 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Two results follow (Table~\ref{tab:3dcontrols}). First, the correction networks do not help: PointMamba lowers PSNR
+on every volume ($-0.36$\,dB), and the per-Gaussian MLP behaves alike, which confirms the null result of
+Section~\ref{sec:mamba_more} with more volumes and seeds. Second, the advantage of bounded Gaussians over the grid holds
+only against the sparsity-regularised grid ($+1.16$\,dB, every volume). A grid with a tuned TV term, an edge-preserving
+prior well matched to these piecewise-constant nuclei, is better than the Gaussians on every volume ($+1.97$\,dB), and is
+also about nine times faster to fit (70\,s against 640\,s per volume). The Gaussians keep their compactness (about 60k
+parameters against 524k voxels), but the claim that they are more \emph{accurate} than a grid is limited to a grid
+without a structural prior. The comparison is fair to the grid, not yet to the Gaussians: only the grid received a
+tuned edge prior, and a TV-like term on the rendered Gaussian field was not tested.
+
+\FloatBarrier
 \section{Answers to the research questions}
 \begin{description}
-  \item[RQ1] Yes in the most under-determined setting, once the density is bounded. Under the true 3D model,
-  bounded Gaussians beat a voxel grid with the same sparsity prior on every volume (up to +1.1\,dB on BBBC024
-  nuclei and +4.3\,dB on synthetic nuclei) with about nine times fewer parameters. With better-conditioned
+  \item[RQ1] Partly. Once the density is bounded, Gaussians recover the fields under the true 3D model and beat a
+  voxel grid with the same sparsity prior on every volume (+1.2\,dB on ten BBBC024 volumes, up to +4.3\,dB on
+  synthetic nuclei) with about nine times fewer parameters. A grid with a tuned total-variation prior is better
+  still ($+2.0$\,dB over the Gaussians on every volume), so the Gaussians' advantage is compactness, not accuracy
+  against the best regularised grid. With better-conditioned
   measurements (slice-wise 3D, 2D at 360 and 180 receivers) the regularised grid remains slightly better.
   Unbounded Gaussians lose in almost every setting: bounding the density is essential.
   \item[RQ2] Adaptive densification can populate the operator's null space with ghost structures; a sparsity term on
@@ -451,5 +507,5 @@ flows), consistent with the 3D finding.
   the same size ($-0.5$\,dB, 95\% CI $[-1.7, 0.8]$), and a non-learned interpolation baseline is better than both. The
   gain comes from temporal regularisation with a recurrent reading of each trajectory, not from the Mamba
   architecture. Bidirectional and spatial (PointMamba) scans add cost without benefit, and a per-scene PointMamba
-  network over 3D Gaussians does not improve scattering reconstructions.
+  network over 3D Gaussians does not improve scattering reconstructions (it lowers PSNR by 0.36\,dB on ten volumes).
 \end{description}

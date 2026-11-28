@@ -79,8 +79,9 @@ local-window evaluation, and train end-to-end by gradient descent with 3DGS-styl
 
 The proof of concept, which includes a true 3D Born scattering model with sensors on a sphere, shows that (1)
 unbounded Gaussians lose to a regularised voxel grid in most settings, but rendering a bounded density
-$1-e^{-f}$ (the opacity saturation of 3DGS) makes them beat the voxel grid under the true 3D model on every volume
-(up to +1.1\,dB on BBBC024 phantom nuclei and +4.3\,dB on our synthetic nuclei) with about nine times fewer parameters; (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
+$1-e^{-f}$ (the opacity saturation of 3DGS) makes them beat a sparsity-regularised voxel grid under the true 3D model
+on every volume (+1.2\,dB on ten BBBC024 phantom volumes, up to +4.3\,dB on our synthetic nuclei) with about nine
+times fewer parameters, although a grid with a tuned total-variation prior is more accurate still (+2.0\,dB); (2) adaptive densification can grow ``ghost'' copies of the object in regions the measurements cannot see
 (the operator's null space), which a simple sparsity term removes; and (3) for flow, a deformation model is
 essential (+10\,dB over static Gaussians). In a controlled comparison with matched network size, a smoothness weight
 tuned per network, and 5 flows $\times$ 3 seeds, Mamba beats the MLP of 4D Gaussian Splatting on unseen frames
