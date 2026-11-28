@@ -1,32 +1,80 @@
 # Gaussian Splatting for Physical Inverse Problems
 
-MS Thesis I (Faculty of Sciences, ITU) — 3D and 4D Gaussian Splatting applied to scientific inverse problems from
-[InverseBench](https://github.com/devzhk/InverseBench) (Zheng et al., ICLR 2025).
+MS Thesis I, Faculty of Sciences, Information Technology University, Lahore.
+Muhammad Hussain Qureshi (MSDS25010); advisor Dr. Ali Murtaza.
 
-- **3D Gaussians for linear inverse scattering:** recover a cell's permittivity from scattered-field measurements
-  (20 transmitters; 360 / 180 / 60 receivers), in 2D (InverseBench cells) and 3D (CytoPacq / BBBC024 nuclei).
-- **4D Gaussians for Navier-Stokes:** canonical Gaussians plus a deformation network over time reconstruct an evolving
-  vorticity field from dense or sparse (10%) observations; deformation by an MLP (4DGS-style) or a **Mamba**
-  selective state-space model (causal or bidirectional).
+3D and 4D Gaussian representations for scientific inverse problems from
+[InverseBench](https://github.com/devzhk/InverseBench) (Zheng et al., ICLR 2025):
 
-The thesis document (LaTeX) is in [`docs/thesis/`](docs/thesis/).
+- **Inverse scattering (2D and 3D):** recover a cell's permittivity from scattered-field measurements with Gaussians
+  rendered on a grid and the physics operator in place of a camera. 2D: InverseBench cells. 3D: synthetic nuclei and
+  BBBC024 phantom nuclei, with a slice-wise model and a true 3D Born model (sensors on a sphere).
+- **Flow reconstruction from sparse observations:** 2D vorticity fields over time (generated with the Navier-Stokes
+  solver, Re = 200) reconstructed from all or 10% of the pixels with canonical Gaussians and a 4DGS-style deformation
+  model (MLP, GRU or Mamba), compared with a non-learned interpolation baseline.
+
+## Thesis I deliverables
+| Item | Where |
+|---|---|
+| Thesis document (LaTeX + PDF) | [`docs/thesis/`](docs/thesis/) (`main.pdf`) |
+| Step-1 report: Mamba vs MLP vs GRU (flow) | [`docs/step1_report/`](docs/step1_report/) (`report.pdf`) |
+| Progress report and meeting briefs | [`docs/progress_report/`](docs/progress_report/), [`docs/meeting_brief/`](docs/meeting_brief/), [`docs/mamba_brief/`](docs/mamba_brief/), [`docs/mamba3d_plan/`](docs/mamba3d_plan/) |
+| Code | [`src/thesis_gs/`](src/thesis_gs/), [`bin/`](bin/) |
+| Experiment configs and Kaggle notebooks | [`configs/`](configs/), [`notebooks/`](notebooks/) |
+| Every result (per sample, logs, figures) | [`results/`](results/) (index in [`results/README.md`](results/README.md)) |
+| Tests | [`tests/`](tests/) |
+
+## Main findings
+**Inverse scattering.** Unbounded Gaussians lose to a regularised voxel grid almost everywhere. Rendering a bounded
+density 1 − exp(−Σ) and initialising from the grid makes them beat a *sparsity-regularised* grid under the true 3D model
+on every volume with about 9× fewer parameters. A grid with a tuned *total-variation* prior is more accurate still:
+
+| True 3D Born, 10 BBBC024 test volumes, 60 receivers, SNR 34 dB | PSNR | SSIM |
+|---|---|---|
+| Voxel grid + sparsity + TV (λ_TV = 0.1, tuned on separate volumes) | **28.82** | **0.974** |
+| Bounded grid-initialised Gaussians (≈60k params, 2 seeds) | 26.85 | 0.899 |
+| + per-Gaussian MLP correction | 26.61 | 0.900 |
+| + PointMamba correction | 26.49 | 0.897 |
+| Voxel grid + sparsity (524k params) | 25.69 | 0.867 |
+
+Paired over volumes: Gaussians − sparsity grid +1.16 dB (10/10); Gaussians − TV grid −1.97 dB (0/10);
+PointMamba − no network −0.36 dB (0/10). A per-scene correction network on free Gaussians adds no constraint.
+Adaptive densification grows "ghost" objects in the operator's null space unless a sparsity term is used.
+
+**Flow reconstruction.** A deformation model adds about 10 dB over static Gaussians. Controlled comparison
+(10% observed, 5 flows × 3 seeds, ≈69k parameters each, smoothness weight tuned per model on validation frames):
+
+| Unseen frames, 10% observed | PSNR |
+|---|---|
+| Interpolation (cubic in space, linear in time) | **27.36** |
+| GRU | 26.38 |
+| Mamba | 25.92 |
+| MLP (4DGS-style) | 23.50 |
+
+Mamba − MLP +2.42 dB [1.61, 3.23]; Mamba − GRU −0.46 dB [−1.73, 0.80]. The pre-registered criterion for Mamba
+(≥ 1 dB over both, CI above 0) is **not met**: the gain comes from temporal regularisation with a recurrent reading of
+each trajectory, not from Mamba. Mamba reproduces the energy spectrum best but overfits the observed pixels.
+
+Full numbers: [`results/README.md`](results/README.md) and the thesis.
 
 ## Repository structure
 ```
 src/thesis_gs/     Python package
-  gaussians.py       2D/3D anisotropic Gaussian field, local-window rendering
-  physics.py         inverse-scattering forward operator (InverseBench Born model), per slice
+  gaussians.py       2D/3D anisotropic Gaussian field, local-window rendering, bounded density
+  physics.py         scattering operators: InverseBench 2D (per slice) and true 3D Born, noise
   volumes.py         synthetic nuclei + CytoPacq/BBBC024 loaders (.ics/.tif/.npy)
-  scatter.py         direct fit, physics fit (densify/prune, sparsity), pixel/voxel baseline
-  ns_data.py         Navier-Stokes sequences from the InverseBench solver
-  deform.py          deformation networks: MLP, Mamba, bidirectional Mamba, static
-  ns4d.py            4D training and evaluation (held-out time steps)
+  scatter.py         physics fit (densify/prune, sparsity), voxel grid with sparsity / TV, seeds, tuning splits
+  gmamba.py ssm.py   PointMamba over Gaussians; Mamba block with parallel scan, Hilbert serialisation
+  ns_data.py         flow sequences from the InverseBench Navier-Stokes solver
+  deform.py          deformation networks: MLP, GRU, Mamba (causal / bidirectional / space-time), static
+  ns4d.py            flow training and evaluation (validation split, seeds, error split, spectra, interpolation)
   metrics.py utils.py cli.py
-bin/               thesis-gs (CLI from a checkout), run_experiments.py (runs a config, one log per run)
-configs/           experiment configs (first run, final part A/B)
-notebooks/         Kaggle/Colab notebooks; archive/ holds the notebooks of earlier rounds
-results/           summaries, per-sample results and figures of every run so far (see results/README.md)
-docs/thesis/       thesis document (LaTeX)
+bin/               thesis-gs (CLI), run_experiments.py (runs a config, one log per run),
+                   ns4d_step1_report.py, scatter3d_report.py (reports with paired CIs)
+configs/           experiment configs (one JSON per Kaggle session)
+notebooks/         Kaggle notebooks; archive/ holds earlier rounds
+results/           all runs (see results/README.md)
+docs/              thesis, reports and briefs (LaTeX + PDF)
 lib/               third-party code and data notes (InverseBench is cloned at run time)
 tests/             unit tests (pytest)
 ```
@@ -34,60 +82,13 @@ tests/             unit tests (pytest)
 ## Quick start
 ```bash
 pip install -r requirements.txt
-python bin/thesis-gs --task all --quick --data_dir data --out outputs/smoke   # 2-minute smoke test
-python bin/thesis-gs --task scatter2d --l1 0.3 --data_dir data --out outputs/scatter2d
-python bin/run_experiments.py configs/final_part_a.json --out outputs/final_a --volumes /path/to/bbbc024
-pytest -q                                                                      # unit tests
+python bin/thesis-gs --task all --quick --data_dir data --out outputs/smoke     # smoke test
+python bin/run_experiments.py configs/thesis1_step1_a.json --out outputs/step1_a --data_dir data
+python bin/ns4d_step1_report.py outputs/step1_a --out outputs/step1_report
+pytest -q
 ```
-InverseBench and its test data are downloaded automatically. On Kaggle use
-[`notebooks/kaggle_final_experiments.ipynb`](notebooks/kaggle_final_experiments.ipynb) (GPU, Internet on, *Save & Run All*).
-
-## Main results (PSNR dB / SSIM; final runs Nov 7, 2026)
-| Inverse scattering, 2D real cells (5 samples) | 360 receivers | 180 | 60 |
-|---|---|---|---|
-| Gaussians + sparsity (0.3) | 30.8 / 0.980 | 30.6 / 0.979 | 27.1 / 0.924 |
-| Pixel grid | **36.1 / 0.984** | **34.7** / 0.974 | **28.6** / 0.886 |
-| Pixel grid + same sparsity | 33.2 / **0.985** | 32.5 / **0.983** | 27.7 / **0.933** |
-
-| Inverse scattering, 3D (3 volumes) | 360 | 180 | 60 |
-|---|---|---|---|
-| Synthetic nuclei: Gaussians | 40.8 / **0.994** | 40.6 / **0.994** | **40.9 / 0.988** |
-| Synthetic nuclei: voxel grid | **44.1** / 0.987 | **41.5** / 0.977 | 37.3 / 0.932 |
-| BBBC024 nuclei: Gaussians | 27.9 / 0.967 | 27.6 / 0.965 | 27.0 / 0.943 |
-| BBBC024 nuclei: voxel grid | **41.8** / 0.989 | **40.3** / 0.980 | **35.3** / 0.936 |
-| BBBC024 nuclei: Gaussians + sparsity (0.3) | 28.4 / 0.974 | 28.4 / 0.974 | 27.4 / 0.955 |
-| BBBC024 nuclei: voxel grid + same sparsity | 38.5 / **0.996** | 38.0 / **0.995** | 34.4 / **0.971** |
-
-| True 3D scattering (3D Born, sensors on a sphere), sparsity 0.3 both | 360 | 180 | 60 |
-|---|---|---|---|
-| Synthetic: Gaussians (≈42k params) | 37.6 / 0.977 | 36.6 / 0.955 | 32.1 / 0.852 |
-| Synthetic: voxel grid (524k params) | **42.1 / 0.985** | **39.9 / 0.976** | **38.2 / 0.966** |
-| BBBC024: Gaussians (≈47k params) | 25.6 / 0.960 | 24.9 / 0.940 | 20.9 / 0.772 |
-| BBBC024: voxel grid (524k params) | **32.5 / 0.983** | **30.5 / 0.956** | **25.6 / 0.875** |
-
-**Bounded Gaussians** (`--bounded`: render 1 − exp(−Σ), in [0, 1) like the clipped grid; `--init_from_grid`), true 3D, same sparsity for both:
-
-| True 3D, bounded + grid-initialised Gaussians vs voxel grid | 360 | 180 | 60 |
-|---|---|---|---|
-| BBBC024: Gaussians (≈60k params) | **32.8** / 0.990 | **31.4** / 0.980 | **26.7** / 0.909 |
-| BBBC024: voxel grid (524k params) | 32.5 / 0.983 | 30.5 / 0.956 | 25.6 / 0.875 |
-| Synthetic: Gaussians (≈54k params) | **46.4 / 0.993** | **43.6 / 0.986** | **39.1** / 0.963 |
-| Synthetic: voxel grid (524k params) | 42.1 / 0.985 | 39.9 / 0.976 | 38.2 / 0.966 |
-
-Bounded Gaussians win on every volume at every receiver count in true 3D. Slice-wise 3D and 2D (more measurements): the regularised grid is still slightly ahead (see `results/README.md`).
-
-**Mamba (Nov 15).** PointMamba over Gaussians (per scene, `--gmamba pointmamba`): no gain over the same Gaussians without a network (true 3D BBBC024: 32.9 / 31.3 / 26.4 vs 32.8 / 31.4 / 26.7 dB; 2D: all variants within ±0.1 dB), still above the voxel grid. 4D on 5 flows, 10% observed: **Mamba 25.9 ± 1.1 dB vs MLP 23.1 ± 1.4 dB on unseen frames (better on all 5 flows)**; space-time Mamba 25.8 (no gain).
-
-2D on 10 cells (paired, unbounded Gaussians): the pixel grid with the same sparsity beats Gaussians on every cell (by 0.6 / 2.3 / 2.9 dB at 60 / 180 / 360 receivers). Generalised Gaussians (β = 2, 4) did not help under the physics loss.
-
-| Navier-Stokes 4D, held-out frames (PSNR, 3 sequences) | static | MLP | Mamba | bidir. Mamba |
-|---|---|---|---|---|
-| 100% observed | 17.0 | 27.6 | 27.9 | – |
-| 100% observed + temporal smoothness | – | **27.4** | 27.2 | 26.4 |
-| 10% observed | 16.0 | 23.2 | 23.1 | – |
-| 10% observed + temporal smoothness | – | 23.0 | **25.4** | 25.1 |
-
-Details, per-sample numbers and figures: [`results/README.md`](results/README.md).
+InverseBench and its test data are downloaded automatically; BBBC024 volumes are downloaded by the 3D notebooks.
+On Kaggle: open a notebook from [`notebooks/`](notebooks/) (GPU T4, Internet on) and use *Save & Run All*.
 
 ## License
 MIT (see `LICENSE`). Third-party code and data: see [`lib/README.md`](lib/README.md).
